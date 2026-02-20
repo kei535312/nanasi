@@ -163,13 +163,18 @@ body::after {
 .orient-group { display: flex; gap: 4px; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
 .orient-group.visible { opacity: 1; pointer-events: auto; }
 .orient-btn {
-  padding: 8px 12px; border: 1px solid var(--panel-border); border-radius: 4px;
+  padding: 6px 10px; border: 1px solid var(--panel-border); border-radius: 4px;
   background: var(--panel-bg); color: var(--text-dim); font-family: inherit;
   font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 40px;
+  display: flex; align-items: center; justify-content: center; gap: 2px;
 }
 .orient-btn:active { transform: scale(0.95); }
-.orient-btn.active { border-color: var(--wall-ui-color); color: var(--wall-ui-color); background: var(--wall-ui-bg); }
+.orient-btn.active { border-color: var(--wall-ui-color); color: var(--wall-ui-color); background: var(--wall-ui-bg); box-shadow: 0 0 10px var(--wall-ui-glow), inset 0 0 8px var(--wall-ui-glow); }
+.orient-icon { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.orient-icon .wall-bar { border-radius: 1px; transition: background 0.2s; }
+.orient-btn .orient-icon .wall-bar { background: var(--text-dim); }
+.orient-btn.active .orient-icon .wall-bar { background: var(--wall-ui-color); }
 .controls.inactive { opacity: 0.25; pointer-events: none; }
 
 #board-container {
@@ -285,8 +290,8 @@ canvas#board {
       <button class="ctrl-btn" id="btn-wall-p2" onclick="setMode('wall')">WALL<span class="kbd">W</span></button>
       <div class="ctrl-divider"></div>
       <div class="orient-group" id="orient-group-p2">
-        <button class="orient-btn active" id="btn-h-p2" onclick="setOrientation('h')">H</button>
-        <button class="orient-btn" id="btn-v-p2" onclick="setOrientation('v')">V</button>
+        <button class="orient-btn active" id="btn-h-p2" onclick="setOrientation('h')"><span class="orient-icon"><span class="wall-bar" style="width:22px;height:4px"></span></span></button>
+        <button class="orient-btn" id="btn-v-p2" onclick="setOrientation('v')"><span class="orient-icon"><span class="wall-bar" style="width:4px;height:22px"></span></span></button>
       </div>
     </div>
     <div class="player-panel p2" id="p2-panel">
@@ -329,8 +334,8 @@ canvas#board {
       <button class="ctrl-btn" id="btn-wall-p1" onclick="setMode('wall')">WALL<span class="kbd">W</span></button>
       <div class="ctrl-divider"></div>
       <div class="orient-group" id="orient-group-p1">
-        <button class="orient-btn active" id="btn-h-p1" onclick="setOrientation('h')">H</button>
-        <button class="orient-btn" id="btn-v-p1" onclick="setOrientation('v')">V</button>
+        <button class="orient-btn active" id="btn-h-p1" onclick="setOrientation('h')"><span class="orient-icon"><span class="wall-bar" style="width:22px;height:4px"></span></span></button>
+        <button class="orient-btn" id="btn-v-p1" onclick="setOrientation('v')"><span class="orient-icon"><span class="wall-bar" style="width:4px;height:22px"></span></span></button>
       </div>
     </div>
   </div>
@@ -358,7 +363,18 @@ var THEMES = [
     wallColor: [0,255,100], boardBg1: '#0a0014', boardBg2: '#0c0020', boardBg3: '#06000e',
     cellFill: 'rgba(40,0,60,0.3)', cellStroke: 'rgba(100,0,200,0.1)',
     moveColor: 'rgba(0,255,150,', validDot: 'rgba(0,255,150,0.5)',
-    title: '#00ff88', confetti: ['#7b2d8e','#c466ff','#cc3300','#ff6644','#00ff88','#ff00ff','#ffcc00','#ffffff']
+    title: '#00ff88', confetti: ['#7b2d8e','#c466ff','#cc3300','#ff6644','#00ff88','#ff00ff','#ffcc00','#ffffff'],
+    bgm: {
+      melody: [
+        {n:'A3',d:1},{n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:1},{n:'B3',d:0.5},{n:'C4',d:0.5},
+        {n:'A3',d:1.5},{n:'A3',d:0.5},{n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:0.5},{n:'B3',d:0.5},
+        {n:'A3',d:0.75},{n:'G3',d:0.75},{n:'A3',d:1.5}
+      ],
+      bass: [
+        {n:'A2',d:2},{n:'C3',d:2},{n:'A2',d:2},{n:'A2',d:2},{n:'C3',d:1},{n:'D3',d:1},{n:'A2',d:2}
+      ],
+      tempo: 0.42, type: 'sawtooth'
+    }
   },
   { // Monday - DORAEMON
     name: 'DORAEMON', subtitle: '\u3072\u307f\u3064\u9053\u5177\u3067\u52dd\u8ca0\uff01', p1name: '\u30c9\u30e9\u3048\u3082\u3093', p2name: '\u306e\u3073\u592a', winMsg: '\u672a\u6765\u304b\u3089\u6765\u305f\u52dd\u5229\uff01',
@@ -369,7 +385,19 @@ var THEMES = [
     wallColor: [255,220,0], boardBg1: '#001830', boardBg2: '#002040', boardBg3: '#001020',
     cellFill: 'rgba(0,30,80,0.3)', cellStroke: 'rgba(0,80,200,0.1)',
     moveColor: 'rgba(255,220,50,', validDot: 'rgba(255,220,50,0.5)',
-    title: '#44aaff', confetti: ['#0066cc','#44aaff','#cc2200','#ff5533','#ffdd00','#ffffff','#ff8800','#88ddff']
+    title: '#44aaff', confetti: ['#0066cc','#44aaff','#cc2200','#ff5533','#ffdd00','#ffffff','#ff8800','#88ddff'],
+    bgm: {
+      melody: [
+        {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.75},{n:'E4',d:0.25},
+        {n:'F4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:1},
+        {n:'C4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:0.75},{n:'G4',d:0.25},
+        {n:'F4',d:0.5},{n:'E4',d:0.5},{n:'C4',d:1}
+      ],
+      bass: [
+        {n:'C3',d:2},{n:'F3',d:2},{n:'C3',d:2},{n:'G2',d:1},{n:'C3',d:1}
+      ],
+      tempo: 0.38, type: 'triangle'
+    }
   },
   { // Tuesday - ANPANMAN
     name: 'ANPANMAN', subtitle: '\u52c7\u6c17\u3068\u3084\u3055\u3057\u3055\u306e\u6226\u3044', p1name: '\u30a2\u30f3\u30d1\u30f3\u30de\u30f3', p2name: '\u30d0\u30a4\u30ad\u30f3\u30de\u30f3', winMsg: '\u611b\u3068\u52c7\u6c17\u306e\u52dd\u5229\uff01',
@@ -380,7 +408,19 @@ var THEMES = [
     wallColor: [255,180,60], boardBg1: '#1a0c04', boardBg2: '#201008', boardBg3: '#140a02',
     cellFill: 'rgba(60,30,10,0.3)', cellStroke: 'rgba(150,60,20,0.1)',
     moveColor: 'rgba(255,200,100,', validDot: 'rgba(255,200,100,0.5)',
-    title: '#ff8833', confetti: ['#cc4400','#ff7733','#6622aa','#9955dd','#ffcc00','#ffffff','#ff4400','#88ff44']
+    title: '#ff8833', confetti: ['#cc4400','#ff7733','#6622aa','#9955dd','#ffcc00','#ffffff','#ff4400','#88ff44'],
+    bgm: {
+      melody: [
+        {n:'F4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:1},{n:'G4',d:0.5},{n:'F4',d:0.5},
+        {n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:1},
+        {n:'D4',d:0.5},{n:'E4',d:0.5},{n:'F4',d:0.75},{n:'E4',d:0.25},{n:'D4',d:0.5},{n:'E4',d:0.5},
+        {n:'C4',d:1.5}
+      ],
+      bass: [
+        {n:'F2',d:2},{n:'C3',d:2},{n:'D3',d:2},{n:'C3',d:2}
+      ],
+      tempo: 0.35, type: 'triangle'
+    }
   },
   { // Wednesday - STAR WARS
     name: 'GALACTIC EMPIRE', subtitle: 'A GALACTIC STRATEGY GAME', p1name: 'SITH', p2name: 'JEDI', winMsg: 'THE FORCE IS STRONG',
@@ -391,7 +431,26 @@ var THEMES = [
     wallColor: [255,200,0], boardBg1: '#080c18', boardBg2: '#0a1020', boardBg3: '#060a14',
     cellFill: 'rgba(30,50,80,0.25)', cellStroke: 'rgba(60,100,180,0.08)',
     moveColor: 'rgba(0,255,100,', validDot: 'rgba(0,255,100,0.4)',
-    title: '#ffcc00', confetti: ['#ff0000','#ff4444','#0066ff','#44aaff','#ffcc00','#ffffff','#ff6600','#00ff88']
+    title: '#ffcc00', confetti: ['#ff0000','#ff4444','#0066ff','#44aaff','#ffcc00','#ffffff','#ff6600','#00ff88'],
+    bgm: {
+      melody: [
+        {n:'G3',d:0.75},{n:'G3',d:0.75},{n:'G3',d:0.75},
+        {n:'Eb3',d:0.5},{n:'Bb3',d:0.25},
+        {n:'G3',d:0.75},{n:'Eb3',d:0.5},{n:'Bb3',d:0.25},
+        {n:'G3',d:1.5},
+        {n:'D4',d:0.75},{n:'D4',d:0.75},{n:'D4',d:0.75},
+        {n:'Eb4',d:0.5},{n:'Bb3',d:0.25},
+        {n:'F#3',d:0.75},{n:'Eb3',d:0.5},{n:'Bb3',d:0.25},
+        {n:'G3',d:1.5}
+      ],
+      bass: [
+        {n:'G2',d:3},{n:'Eb2',d:1.5},{n:'G2',d:1.5},
+        {n:'G2',d:3},
+        {n:'D3',d:3},{n:'Eb3',d:1.5},{n:'Bb2',d:1.5},
+        {n:'G2',d:3}
+      ],
+      tempo: 0.45, type: 'sawtooth'
+    }
   },
   { // Thursday - DRAGON BALL
     name: 'DRAGON BALL', subtitle: '\u30aa\u30e9\u306b\u5143\u6c17\u3092\u308f\u3051\u3066\u304f\u308c\uff01', p1name: '\u609f\u7a7a', p2name: '\u30d9\u30b8\u30fc\u30bf', winMsg: '\u30ab\u30e1\u30cf\u30e1\u6ce2\uff01\uff01\uff01',
@@ -402,7 +461,19 @@ var THEMES = [
     wallColor: [255,100,0], boardBg1: '#100800', boardBg2: '#180c04', boardBg3: '#0c0600',
     cellFill: 'rgba(60,30,0,0.3)', cellStroke: 'rgba(150,80,0,0.1)',
     moveColor: 'rgba(255,220,50,', validDot: 'rgba(255,220,50,0.5)',
-    title: '#ffaa00', confetti: ['#dd8800','#ffbb33','#0055bb','#3399ee','#ff4400','#ffff00','#ff6600','#ffffff']
+    title: '#ffaa00', confetti: ['#dd8800','#ffbb33','#0055bb','#3399ee','#ff4400','#ffff00','#ff6600','#ffffff'],
+    bgm: {
+      melody: [
+        {n:'E4',d:0.5},{n:'E4',d:0.25},{n:'E4',d:0.25},{n:'G4',d:0.5},{n:'E4',d:0.5},
+        {n:'D4',d:0.5},{n:'C4',d:0.5},{n:'D4',d:1},
+        {n:'E4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:0.5},{n:'G4',d:0.25},{n:'E4',d:0.25},
+        {n:'D4',d:0.5},{n:'E4',d:0.5},{n:'C4',d:1}
+      ],
+      bass: [
+        {n:'C3',d:1},{n:'C3',d:1},{n:'G2',d:2},{n:'C3',d:1},{n:'E3',d:1},{n:'G2',d:1},{n:'C3',d:1}
+      ],
+      tempo: 0.32, type: 'sawtooth'
+    }
   },
   { // Friday - MARIO
     name: 'SUPER MARIO', subtitle: "IT'S-A ME, QUORIDOR!", p1name: 'MARIO', p2name: 'LUIGI', winMsg: 'HERE WE GO!!',
@@ -413,7 +484,22 @@ var THEMES = [
     wallColor: [255,200,0], boardBg1: '#001030', boardBg2: '#001840', boardBg3: '#000820',
     cellFill: 'rgba(0,20,60,0.3)', cellStroke: 'rgba(50,100,200,0.1)',
     moveColor: 'rgba(255,255,0,', validDot: 'rgba(255,255,0,0.5)',
-    title: '#ff4444', confetti: ['#cc0000','#ff4444','#008800','#44cc44','#ffcc00','#ffffff','#ff8800','#00aaff']
+    title: '#ff4444', confetti: ['#cc0000','#ff4444','#008800','#44cc44','#ffcc00','#ffffff','#ff8800','#00aaff'],
+    bgm: {
+      melody: [
+        {n:'E5',d:0.25},{n:'E5',d:0.25},{n:'E5',d:0.5},{n:'C5',d:0.25},{n:'E5',d:0.25},
+        {n:'G5',d:0.5},{n:'G4',d:0.5},
+        {n:'C5',d:0.5},{n:'G4',d:0.5},{n:'E4',d:0.5},
+        {n:'A4',d:0.5},{n:'B4',d:0.5},{n:'Bb4',d:0.25},{n:'A4',d:0.75},
+        {n:'G4',d:0.33},{n:'E5',d:0.33},{n:'G5',d:0.34},{n:'A5',d:0.5},{n:'F5',d:0.25},{n:'G5',d:0.25},
+        {n:'E5',d:0.5},{n:'C5',d:0.25},{n:'D5',d:0.25},{n:'B4',d:0.5}
+      ],
+      bass: [
+        {n:'C3',d:1},{n:'G3',d:0.5},{n:'E3',d:0.5},{n:'C3',d:1},{n:'G2',d:1},
+        {n:'C3',d:1},{n:'F3',d:1},{n:'G3',d:1},{n:'C3',d:1}
+      ],
+      tempo: 0.28, type: 'square'
+    }
   },
   { // Saturday - JUJUTSU KAISEN
     name: 'JUJUTSU KAISEN', subtitle: '\u9818\u57df\u5c55\u958b', p1name: '\u864e\u6756', p2name: '\u5bbf\u5102', winMsg: '\u7121\u91cf\u7a7a\u51e6\uff01\uff01',
@@ -424,7 +510,19 @@ var THEMES = [
     wallColor: [180,80,255], boardBg1: '#0a0018', boardBg2: '#0e0024', boardBg3: '#060010',
     cellFill: 'rgba(30,0,50,0.3)', cellStroke: 'rgba(80,0,150,0.1)',
     moveColor: 'rgba(180,100,255,', validDot: 'rgba(180,100,255,0.5)',
-    title: '#bb66ff', confetti: ['#1a1aff','#6666ff','#cc0044','#ff4477','#bb66ff','#ffffff','#ff0066','#00ccff']
+    title: '#bb66ff', confetti: ['#1a1aff','#6666ff','#cc0044','#ff4477','#bb66ff','#ffffff','#ff0066','#00ccff'],
+    bgm: {
+      melody: [
+        {n:'E3',d:0.5},{n:'G3',d:0.25},{n:'A3',d:0.25},{n:'B3',d:0.5},{n:'D4',d:0.5},
+        {n:'C4',d:0.5},{n:'B3',d:0.25},{n:'A3',d:0.25},{n:'G3',d:1},
+        {n:'A3',d:0.5},{n:'B3',d:0.5},{n:'C4',d:0.5},{n:'E4',d:0.5},
+        {n:'D4',d:0.5},{n:'C4',d:0.25},{n:'B3',d:0.25},{n:'A3',d:0.5},{n:'E3',d:0.5}
+      ],
+      bass: [
+        {n:'E2',d:2},{n:'A2',d:2},{n:'E2',d:1},{n:'G2',d:1},{n:'A2',d:1},{n:'E2',d:1}
+      ],
+      tempo: 0.38, type: 'sawtooth'
+    }
   }
 ];
 
@@ -549,22 +647,6 @@ function playNote(freq, startTime, duration, gain, dest, type) {
   osc.start(startTime); osc.stop(startTime + duration);
 }
 
-var BGM_MELODY = [
-  { n: 'G3', d: 0.75 }, { n: 'G3', d: 0.75 }, { n: 'G3', d: 0.75 },
-  { n: 'Eb3', d: 0.5 }, { n: 'Bb3', d: 0.25 },
-  { n: 'G3', d: 0.75 }, { n: 'Eb3', d: 0.5 }, { n: 'Bb3', d: 0.25 },
-  { n: 'G3', d: 1.5 },
-  { n: 'D4', d: 0.75 }, { n: 'D4', d: 0.75 }, { n: 'D4', d: 0.75 },
-  { n: 'Eb4', d: 0.5 }, { n: 'Bb3', d: 0.25 },
-  { n: 'F#3', d: 0.75 }, { n: 'Eb3', d: 0.5 }, { n: 'Bb3', d: 0.25 },
-  { n: 'G3', d: 1.5 }
-];
-var BGM_BASS = [
-  { n: 'G2', d: 3 }, { n: 'Eb2', d: 1.5 }, { n: 'G2', d: 1.5 },
-  { n: 'G2', d: 3 },
-  { n: 'D3', d: 3 }, { n: 'Eb3', d: 1.5 }, { n: 'Bb2', d: 1.5 },
-  { n: 'G2', d: 3 }
-];
 var NF = {
   'C2':65.41,'D2':73.42,'Eb2':77.78,'E2':82.41,'F2':87.31,'F#2':92.50,'G2':98.00,'A2':110.0,'Bb2':116.54,'B2':123.5,
   'C3':130.8,'D3':146.8,'Eb3':155.56,'E3':164.8,'F3':174.6,'F#3':185.0,'G3':196.0,'A3':220.0,'Bb3':233.08,'B3':246.9,
@@ -573,18 +655,19 @@ var NF = {
 };
 
 function scheduleBGMLoop() {
-  if (!audioCtx || bgmMuted) return;
-  var tempo = 0.45, now = audioCtx.currentTime + 0.1, t = now;
-  for (var i = 0; i < BGM_MELODY.length; i++) {
-    var dur = BGM_MELODY[i].d * tempo;
-    playNote(NF[BGM_MELODY[i].n], t, dur * 0.9, 0.10, bgmGain, 'sawtooth');
-    playNote(NF[BGM_MELODY[i].n] * 2, t, dur * 0.6, 0.02, bgmGain, 'sine');
+  if (!audioCtx || bgmMuted || !T || !T.bgm) return;
+  var bgm = T.bgm, tempo = bgm.tempo, oscType = bgm.type || 'sawtooth';
+  var now = audioCtx.currentTime + 0.1, t = now;
+  for (var i = 0; i < bgm.melody.length; i++) {
+    var dur = bgm.melody[i].d * tempo;
+    playNote(NF[bgm.melody[i].n], t, dur * 0.9, 0.10, bgmGain, oscType);
+    playNote(NF[bgm.melody[i].n] * 2, t, dur * 0.6, 0.02, bgmGain, 'sine');
     t += dur;
   }
   var melodyLen = t - now, tb = now;
-  for (var j = 0; j < BGM_BASS.length; j++) {
-    var bd = BGM_BASS[j].d * tempo;
-    if (tb < now + melodyLen) playNote(NF[BGM_BASS[j].n], tb, bd * 0.85, 0.08, bgmGain, 'sine');
+  for (var j = 0; j < bgm.bass.length; j++) {
+    var bd = bgm.bass[j].d * tempo;
+    if (tb < now + melodyLen) playNote(NF[bgm.bass[j].n], tb, bd * 0.85, 0.08, bgmGain, 'sine');
     tb += bd;
   }
   bgmTimeout = setTimeout(function() { if (bgmPlaying && !bgmMuted) scheduleBGMLoop(); }, melodyLen * 1000 - 100);
@@ -921,7 +1004,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v10';
+  var CURRENT = 'quoridor-v11';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
