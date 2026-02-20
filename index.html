@@ -192,15 +192,6 @@ canvas#board {
 .sound-btn:active { transform: scale(0.9); }
 .sound-btn.muted { color: #ff2222; }
 
-/* Snap indicator (small, subtle) */
-.snap-indicator {
-  font-size: 10px; color: var(--text-dim); opacity: 0.5; display: flex; align-items: center; gap: 3px;
-}
-.snap-indicator.active { opacity: 1; color: var(--move-color); }
-.snap-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); }
-.snap-indicator.active .snap-dot { background: var(--move-color); animation: snap-pulse 1s ease-in-out infinite; }
-@keyframes snap-pulse { 0%,100% { box-shadow: none; opacity: 0.6; } 50% { box-shadow: 0 0 6px var(--move-color); opacity: 1; } }
-
 #reset-btn {
   padding: 8px 20px; border: 1px solid var(--panel-border); border-radius: 4px;
   background: var(--panel-bg); color: var(--text-dim); font-family: inherit;
@@ -317,7 +308,6 @@ canvas#board {
 
   <div class="center-controls">
     <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="BGM ON/OFF">&#9835;</button>
-    <div class="snap-indicator" id="snap-indicator"><div class="snap-dot"></div><span>SNAP</span></div>
     <button id="reset-btn" onclick="resetGame()">RESET</button>
   </div>
 
@@ -358,9 +348,6 @@ canvas#board {
 
 <script>
 // ============ THEME SYSTEM ============
-// >>>>>>> SNAP_ENABLED: set to false to disable finger-snap feature <<<<<<<
-var SNAP_ENABLED = true;
-
 var THEMES = [
   { // Sunday - EVANGELION
     name: 'EVANGELION', subtitle: '\u4f7f\u5f92\u3001\u8972\u6765', p1name: '\u521d\u53f7\u6a5f', p2name: '\u5f10\u53f7\u6a5f', winMsg: '\u30d1\u30bf\u30fc\u30f3\u9752\uff01\u5168\u54e1\u64a4\u9000\uff01',
@@ -428,16 +415,16 @@ var THEMES = [
     moveColor: 'rgba(255,255,0,', validDot: 'rgba(255,255,0,0.5)',
     title: '#ff4444', confetti: ['#cc0000','#ff4444','#008800','#44cc44','#ffcc00','#ffffff','#ff8800','#00aaff']
   },
-  { // Saturday - GHIBLI (Totoro / Mononoke)
-    name: 'GHIBLI FOREST', subtitle: '\u68ee\u306e\u5965\u306e\u6226\u7565', p1name: '\u30c8\u30c8\u30ed', p2name: '\u30e2\u30ce\u30ce\u30b1', winMsg: '\u98a8\u306e\u901a\u308a\u9053\u3001\u958b\u304b\u308c\u308a',
-    font: "'Zen Maru Gothic', 'Inter', sans-serif",
-    bg: '#020c04', star1: 'rgba(150,255,150,0.7)', star2: 'rgba(200,255,200,0.6)', star3: 'rgba(255,255,200,0.5)',
-    nebula1: 'rgba(0,100,50,0.05)', nebula2: 'rgba(50,150,50,0.04)',
-    p1: '#336622', p1Light: '#66bb44', p2: '#664400', p2Light: '#aa8844',
-    wallColor: [180,220,100], boardBg1: '#061008', boardBg2: '#081610', boardBg3: '#040c06',
-    cellFill: 'rgba(20,50,20,0.3)', cellStroke: 'rgba(60,120,40,0.1)',
-    moveColor: 'rgba(200,255,150,', validDot: 'rgba(200,255,150,0.5)',
-    title: '#88cc44', confetti: ['#336622','#66bb44','#664400','#aa8844','#88cc44','#ffffff','#ccff88','#ffdd88']
+  { // Saturday - JUJUTSU KAISEN
+    name: 'JUJUTSU KAISEN', subtitle: '\u9818\u57df\u5c55\u958b', p1name: '\u864e\u6756', p2name: '\u5bbf\u5102', winMsg: '\u7121\u91cf\u7a7a\u51e6\uff01\uff01',
+    font: "'Orbitron', 'Inter', sans-serif",
+    bg: '#080010', star1: 'rgba(200,100,255,0.8)', star2: 'rgba(255,50,100,0.7)', star3: 'rgba(100,50,200,0.6)',
+    nebula1: 'rgba(100,0,200,0.06)', nebula2: 'rgba(200,0,50,0.04)',
+    p1: '#1a1aff', p1Light: '#6666ff', p2: '#cc0044', p2Light: '#ff4477',
+    wallColor: [180,80,255], boardBg1: '#0a0018', boardBg2: '#0e0024', boardBg3: '#060010',
+    cellFill: 'rgba(30,0,50,0.3)', cellStroke: 'rgba(80,0,150,0.1)',
+    moveColor: 'rgba(180,100,255,', validDot: 'rgba(180,100,255,0.5)',
+    title: '#bb66ff', confetti: ['#1a1aff','#6666ff','#cc0044','#ff4477','#bb66ff','#ffffff','#ff0066','#00ccff']
   }
 ];
 
@@ -632,96 +619,6 @@ function playWallSFX() {
 function playTimerWarnSFX() { if (!audioCtx) return; var now = audioCtx.currentTime; var o = audioCtx.createOscillator(); var e = audioCtx.createGain(); o.type = 'square'; o.frequency.value = 440; e.gain.setValueAtTime(0.08, now); e.gain.exponentialRampToValueAtTime(0.001, now + 0.1); o.connect(e); e.connect(audioCtx.destination); o.start(now); o.stop(now + 0.1); }
 function playTimeoutSFX() { if (!audioCtx) return; var now = audioCtx.currentTime; for (var i = 0; i < 3; i++) { var o = audioCtx.createOscillator(); var e = audioCtx.createGain(); o.type = 'sawtooth'; o.frequency.value = 300 - i * 80; e.gain.setValueAtTime(0.12, now + i * 0.15); e.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.14); o.connect(e); e.connect(audioCtx.destination); o.start(now + i * 0.15); o.stop(now + i * 0.15 + 0.15); } }
 function playWinSFX() { if (!audioCtx) return; var now = audioCtx.currentTime; [196.0,261.6,329.6,392.0,523.3].forEach(function(freq, i) { var o = audioCtx.createOscillator(); var e = audioCtx.createGain(); o.type = 'sawtooth'; o.frequency.value = freq; var t = now + i * 0.18; e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(0.15, t + 0.05); e.gain.exponentialRampToValueAtTime(0.01, t + 0.6); o.connect(e); e.connect(audioCtx.destination); o.start(t); o.stop(t + 0.6); var o2 = audioCtx.createOscillator(); var e2 = audioCtx.createGain(); o2.type = 'sine'; o2.frequency.value = freq * 2; e2.gain.setValueAtTime(0, t); e2.gain.linearRampToValueAtTime(0.05, t + 0.05); e2.gain.exponentialRampToValueAtTime(0.001, t + 0.5); o2.connect(e2); e2.connect(audioCtx.destination); o2.start(t); o2.stop(t + 0.5); }); }
-
-// ============ FINGER SNAP DETECTION (auto-start) ============
-var snapActive = false, snapStream = null, snapAnalyser = null, snapCtx = null, snapRafId = null;
-var snapCooldown = false;
-
-function startSnap() {
-  if (!SNAP_ENABLED || snapActive) return;
-  navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
-    snapStream = stream;
-    snapCtx = new (window.AudioContext || window.webkitAudioContext)();
-    var src = snapCtx.createMediaStreamSource(stream);
-    snapAnalyser = snapCtx.createAnalyser();
-    snapAnalyser.fftSize = 2048;
-    src.connect(snapAnalyser);
-    snapActive = true;
-    updateSnapIndicator();
-    detectSnap();
-  }).catch(function() {
-    snapActive = false;
-    updateSnapIndicator();
-  });
-}
-
-function stopSnap() {
-  snapActive = false;
-  if (snapRafId) cancelAnimationFrame(snapRafId);
-  if (snapStream) { snapStream.getTracks().forEach(function(t) { t.stop(); }); snapStream = null; }
-  if (snapCtx) { snapCtx.close().catch(function(){}); snapCtx = null; }
-  snapAnalyser = null;
-  updateSnapIndicator();
-}
-
-function detectSnap() {
-  if (!snapActive || !snapAnalyser) return;
-  var bufLen = snapAnalyser.frequencyBinCount;
-  var dataArray = new Uint8Array(bufLen);
-  var timeData = new Uint8Array(snapAnalyser.fftSize);
-
-  function loop() {
-    if (!snapActive) return;
-    snapRafId = requestAnimationFrame(loop);
-    snapAnalyser.getByteFrequencyData(dataArray);
-    snapAnalyser.getByteTimeDomainData(timeData);
-
-    // Detect snap: short burst of high-frequency energy (2-8kHz)
-    var sampleRate = snapCtx.sampleRate;
-    var binSize = sampleRate / snapAnalyser.fftSize;
-    var hiStart = Math.floor(2000 / binSize);
-    var hiEnd = Math.min(Math.floor(8000 / binSize), bufLen);
-    var loStart = Math.floor(100 / binSize);
-    var loEnd = Math.floor(800 / binSize);
-
-    var hiEnergy = 0, loEnergy = 0;
-    for (var i = hiStart; i < hiEnd; i++) hiEnergy += dataArray[i];
-    for (var j = loStart; j < loEnd; j++) loEnergy += dataArray[j];
-    hiEnergy /= (hiEnd - hiStart);
-    loEnergy /= (loEnd - loStart);
-
-    // Also check peak amplitude in time domain
-    var peak = 0;
-    for (var k = 0; k < timeData.length; k++) {
-      var v = Math.abs(timeData[k] - 128);
-      if (v > peak) peak = v;
-    }
-
-    // Snap = high freq burst with sharp peak, not sustained like voice
-    if (hiEnergy > 60 && peak > 40 && hiEnergy > loEnergy * 1.2 && !snapCooldown) {
-      snapCooldown = true;
-      onSnapDetected();
-      setTimeout(function() { snapCooldown = false; }, 500);
-    }
-  }
-  loop();
-}
-
-function onSnapDetected() {
-  if (!gameStarted || gameOver) return;
-  // Toggle between move and wall mode
-  if (mode === 'move') {
-    setMode('wall');
-  } else {
-    setMode('move');
-  }
-}
-
-function updateSnapIndicator() {
-  var el = document.getElementById('snap-indicator');
-  if (!SNAP_ENABLED) { el.style.display = 'none'; return; }
-  el.classList.toggle('active', snapActive);
-}
 
 // ============ STATE ============
 var players, walls, wallCounts, currentPlayer, mode, orientation, gameOver, hoverWall;
@@ -960,8 +857,6 @@ function startGame() {
   document.getElementById('start-overlay').classList.add('hidden');
   initAudio(); initState(); gameStarted = true;
   resizeBoard(); showMsg(''); updateUI(); draw(); startBGM(); startTurnTimer();
-  // Auto-start snap detection
-  if (SNAP_ENABLED) startSnap();
 }
 
 function resetGame() {
@@ -970,8 +865,6 @@ function resetGame() {
   clearInterval(timerInterval); if (bgmTimeout) clearTimeout(bgmTimeout); bgmPlaying = false;
   if (audioCtx) { audioCtx.close().catch(function(){}); audioCtx = null; }
   initState(); gameStarted = true; showMsg(''); updateUI(); draw(); initAudio(); startBGM(); startTurnTimer();
-  // Re-start snap if not already active
-  if (SNAP_ENABLED && !snapActive) startSnap();
 }
 
 // ============ TOUCH & POINTER ============
@@ -1023,7 +916,7 @@ window.addEventListener('resize', function() { clearTimeout(resizeTimer); resize
 window.addEventListener('orientationchange', function() { setTimeout(function() { if (gameStarted) resizeBoard(); }, 300); });
 
 // ============ INIT ============
-initState(); resizeBoard(); updateUI(); draw(); updateSnapIndicator();
+initState(); resizeBoard(); updateUI(); draw();
 
 // ============ SERVICE WORKER ============
 if ('serviceWorker' in navigator) {
