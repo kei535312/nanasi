@@ -6,14 +6,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="コリドール">
-<meta name="theme-color" content="#0c0c1d">
+<meta name="theme-color" content="#020810">
 <meta name="description" content="2人で遊べる戦略ボードゲーム コリドール">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>コリドール - 2人対戦</title>
+<title>コリドール - GALACTIC DUEL</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@400;600;700;900&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -25,12 +25,9 @@ html, body {
 }
 
 body {
-  background: #0c0c1d;
-  background-image:
-    radial-gradient(ellipse at 20% 50%, rgba(88, 28, 135, 0.15) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 50%, rgba(15, 82, 186, 0.12) 0%, transparent 60%);
-  color: #e0e0e0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #020810;
+  color: #c0d0e8;
+  font-family: 'Orbitron', 'Inter', -apple-system, sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -41,6 +38,52 @@ body {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Star field */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 25% 45%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 40% 15%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 55% 70%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 70% 35%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 85% 80%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 90% 10%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 5% 60%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 48% 90%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 62% 52%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 78% 65%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 33% 33%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 95% 50%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(2px 2px at 20% 72%, rgba(150,180,255,0.8), transparent),
+    radial-gradient(2px 2px at 75% 22%, rgba(255,200,150,0.7), transparent),
+    radial-gradient(2px 2px at 50% 50%, rgba(200,150,255,0.6), transparent);
+  animation: twinkle 4s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes twinkle {
+  0% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Nebula glow */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 15% 50%, rgba(255, 0, 0, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 50%, rgba(0, 100, 255, 0.04) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 #app {
@@ -55,6 +98,8 @@ body {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 /* ---- Player Zone ---- */
@@ -73,9 +118,9 @@ body {
 .player-panel {
   width: 100%;
   padding: 6px 10px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.03);
-  border: 2px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  background: rgba(10,20,40,0.7);
+  border: 1px solid rgba(100,150,255,0.1);
   transition: all 0.4s cubic-bezier(.4,0,.2,1);
   position: relative;
   overflow: hidden;
@@ -84,21 +129,20 @@ body {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 3px;
-  border-radius: 10px 10px 0 0;
+  height: 2px;
   opacity: 0;
   transition: opacity 0.4s;
 }
-.player-panel.p1::before { background: linear-gradient(90deg, #ff6b6b, #ee5a24); }
-.player-panel.p2::before { background: linear-gradient(90deg, #54a0ff, #2e86de); }
+.player-panel.p1::before { background: linear-gradient(90deg, #ff0000, #ff4444, #ff0000); box-shadow: 0 0 10px #ff0000; }
+.player-panel.p2::before { background: linear-gradient(90deg, #0066ff, #44aaff, #0066ff); box-shadow: 0 0 10px #0066ff; }
 .player-panel.active::before { opacity: 1; }
 .player-panel.active.p1 {
-  border-color: rgba(238, 90, 36, 0.4);
-  box-shadow: 0 0 20px rgba(238, 90, 36, 0.1), inset 0 0 20px rgba(238, 90, 36, 0.03);
+  border-color: rgba(255, 0, 0, 0.3);
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.08), inset 0 0 20px rgba(255, 0, 0, 0.03);
 }
 .player-panel.active.p2 {
-  border-color: rgba(46, 134, 222, 0.4);
-  box-shadow: 0 0 20px rgba(46, 134, 222, 0.1), inset 0 0 20px rgba(46, 134, 222, 0.03);
+  border-color: rgba(0, 100, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 100, 255, 0.08), inset 0 0 20px rgba(0, 100, 255, 0.03);
 }
 .panel-row {
   display: flex;
@@ -107,38 +151,41 @@ body {
 }
 .player-icon {
   width: 24px; height: 24px;
-  border-radius: 7px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
   color: white;
   flex-shrink: 0;
+  letter-spacing: 0;
 }
-.player-icon.p1 { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
-.player-icon.p2 { background: linear-gradient(135deg, #54a0ff, #2e86de); }
+.player-icon.p1 { background: linear-gradient(135deg, #cc0000, #ff2222); box-shadow: 0 0 8px rgba(255,0,0,0.3); }
+.player-icon.p2 { background: linear-gradient(135deg, #0044cc, #2288ff); box-shadow: 0 0 8px rgba(0,100,255,0.3); }
 .player-name {
-  font-size: clamp(11px, 2.5vw, 14px);
+  font-size: clamp(10px, 2.2vw, 12px);
   font-weight: 700;
-  color: #ccc;
+  color: #8899bb;
   white-space: nowrap;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 .turn-badge {
   display: inline-block;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 700;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: 3px;
   margin-left: 4px;
   opacity: 0;
   transition: opacity 0.3s;
-  letter-spacing: 0.5px;
+  letter-spacing: 2px;
   flex-shrink: 0;
 }
 .player-panel.active .turn-badge { opacity: 1; }
-.player-panel.p1 .turn-badge { background: rgba(238,90,36,0.3); color: #ff8c5a; }
-.player-panel.p2 .turn-badge { background: rgba(46,134,222,0.3); color: #74b9ff; }
+.player-panel.p1 .turn-badge { background: rgba(255,0,0,0.2); color: #ff6666; border: 1px solid rgba(255,0,0,0.3); }
+.player-panel.p2 .turn-badge { background: rgba(0,100,255,0.2); color: #66aaff; border: 1px solid rgba(0,100,255,0.3); }
 .wall-indicators {
   display: flex;
   gap: 3px;
@@ -147,16 +194,16 @@ body {
   margin-left: auto;
 }
 .wall-pip {
-  width: 10px; height: 4px;
-  border-radius: 2px;
+  width: 10px; height: 3px;
+  border-radius: 1px;
   transition: all 0.3s;
 }
-.player-panel.p1 .wall-pip { background: rgba(238,90,36,0.5); }
-.player-panel.p2 .wall-pip { background: rgba(46,134,222,0.5); }
-.wall-pip.used { background: rgba(255,255,255,0.06) !important; }
+.player-panel.p1 .wall-pip { background: rgba(255,0,0,0.5); box-shadow: 0 0 4px rgba(255,0,0,0.2); }
+.player-panel.p2 .wall-pip { background: rgba(0,100,255,0.5); box-shadow: 0 0 4px rgba(0,100,255,0.2); }
+.wall-pip.used { background: rgba(255,255,255,0.04) !important; box-shadow: none !important; }
 .wall-label {
   font-size: 9px;
-  color: #555;
+  color: #445;
   margin-left: 3px;
 }
 
@@ -169,30 +216,32 @@ body {
 }
 .timer-bar-bg {
   flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(255,255,255,0.06);
+  height: 3px;
+  border-radius: 1px;
+  background: rgba(255,255,255,0.04);
   overflow: hidden;
 }
 .timer-bar-fill {
   height: 100%;
-  border-radius: 2px;
+  border-radius: 1px;
   transition: width 0.25s linear, background 0.5s;
   width: 100%;
 }
-.player-panel.p1 .timer-bar-fill { background: linear-gradient(90deg, #ee5a24, #ff6b6b); }
-.player-panel.p2 .timer-bar-fill { background: linear-gradient(90deg, #2e86de, #54a0ff); }
-.timer-bar-fill.urgent { background: linear-gradient(90deg, #e74c3c, #ff4757) !important; }
+.player-panel.p1 .timer-bar-fill { background: linear-gradient(90deg, #cc0000, #ff4444); box-shadow: 0 0 6px rgba(255,0,0,0.3); }
+.player-panel.p2 .timer-bar-fill { background: linear-gradient(90deg, #0044cc, #44aaff); box-shadow: 0 0 6px rgba(0,100,255,0.3); }
+.timer-bar-fill.urgent { background: linear-gradient(90deg, #ff0000, #ff4444) !important; animation: pulse-urgent 0.5s ease-in-out infinite; }
+@keyframes pulse-urgent { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
 .timer-text {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   min-width: 22px;
   text-align: right;
-  color: #888;
+  color: #556;
   transition: color 0.3s;
+  letter-spacing: 1px;
 }
-.timer-text.urgent { color: #e74c3c; }
+.timer-text.urgent { color: #ff2222; }
 .player-panel:not(.active) .timer-area { opacity: 0.3; }
 
 /* ---- Controls ---- */
@@ -206,40 +255,41 @@ body {
 .ctrl-btn {
   position: relative;
   padding: 8px 14px;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 8px;
-  background: rgba(255,255,255,0.04);
-  color: #999;
-  font-family: inherit;
-  font-size: 12px;
+  border: 1px solid rgba(100,150,255,0.12);
+  border-radius: 4px;
+  background: rgba(10,20,40,0.6);
+  color: #556688;
+  font-family: 'Orbitron', inherit;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   min-height: 40px;
+  text-transform: uppercase;
 }
 .ctrl-btn:active { transform: scale(0.95); }
 .ctrl-btn.active-move {
-  border-color: rgba(46,204,113,0.5);
-  color: #2ecc71;
-  background: rgba(46,204,113,0.08);
-  box-shadow: 0 0 12px rgba(46,204,113,0.1);
+  border-color: rgba(0,255,100,0.4);
+  color: #00ff66;
+  background: rgba(0,255,100,0.06);
+  box-shadow: 0 0 12px rgba(0,255,100,0.08);
 }
 .ctrl-btn.active-wall {
-  border-color: rgba(243,156,18,0.5);
-  color: #f39c12;
-  background: rgba(243,156,18,0.08);
-  box-shadow: 0 0 12px rgba(243,156,18,0.1);
+  border-color: rgba(255,200,0,0.4);
+  color: #ffcc00;
+  background: rgba(255,200,0,0.06);
+  box-shadow: 0 0 12px rgba(255,200,0,0.08);
 }
 .ctrl-btn .kbd {
   display: inline-block;
-  font-size: 9px;
+  font-size: 8px;
   padding: 1px 4px;
-  border-radius: 3px;
-  background: rgba(255,255,255,0.06);
-  color: #666;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.05);
+  color: #445;
   margin-left: 4px;
   font-weight: 400;
   vertical-align: 1px;
@@ -250,7 +300,7 @@ body {
 .ctrl-divider {
   width: 1px;
   height: 24px;
-  background: rgba(255,255,255,0.08);
+  background: rgba(100,150,255,0.08);
   margin: 0 1px;
 }
 .orient-group {
@@ -266,12 +316,12 @@ body {
 }
 .orient-btn {
   padding: 8px 12px;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 7px;
-  background: rgba(255,255,255,0.03);
-  color: #777;
-  font-family: inherit;
-  font-size: 12px;
+  border: 1px solid rgba(100,150,255,0.08);
+  border-radius: 4px;
+  background: rgba(10,20,40,0.5);
+  color: #445566;
+  font-family: 'Orbitron', inherit;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -281,9 +331,9 @@ body {
 }
 .orient-btn:active { transform: scale(0.95); }
 .orient-btn.active {
-  border-color: rgba(243,156,18,0.4);
-  color: #f39c12;
-  background: rgba(243,156,18,0.06);
+  border-color: rgba(255,200,0,0.3);
+  color: #ffcc00;
+  background: rgba(255,200,0,0.05);
 }
 
 /* Inactive player controls */
@@ -307,11 +357,12 @@ body {
 }
 canvas#board {
   display: block;
-  border-radius: 10px;
+  border-radius: 6px;
   cursor: pointer;
   box-shadow:
-    0 4px 30px rgba(0,0,0,0.4),
-    0 0 60px rgba(88, 28, 135, 0.06);
+    0 4px 30px rgba(0,0,0,0.6),
+    0 0 40px rgba(0, 50, 150, 0.06),
+    inset 0 0 60px rgba(0, 50, 150, 0.02);
   max-width: 100%;
   max-height: 100%;
   touch-action: none;
@@ -327,10 +378,10 @@ canvas#board {
 }
 .sound-btn {
   width: 38px; height: 38px;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 8px;
-  background: rgba(255,255,255,0.04);
-  color: #888;
+  border: 1px solid rgba(100,150,255,0.1);
+  border-radius: 4px;
+  background: rgba(10,20,40,0.6);
+  color: #556688;
   font-size: 16px;
   cursor: pointer;
   transition: all 0.2s;
@@ -342,32 +393,34 @@ canvas#board {
   position: relative;
 }
 .sound-btn:active { transform: scale(0.9); }
-.sound-btn.muted { color: #e74c3c; }
+.sound-btn.muted { color: #ff2222; }
 #reset-btn {
   padding: 8px 20px;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 8px;
-  background: rgba(255,255,255,0.04);
-  color: #888;
-  font-family: inherit;
-  font-size: 12px;
+  border: 1px solid rgba(100,150,255,0.1);
+  border-radius: 4px;
+  background: rgba(10,20,40,0.6);
+  color: #556688;
+  font-family: 'Orbitron', inherit;
+  font-size: 10px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   min-height: 38px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
-#reset-btn:active { transform: scale(0.95); background: rgba(231,76,60,0.15); }
+#reset-btn:active { transform: scale(0.95); background: rgba(255,0,0,0.1); }
 
 /* ---- Message ---- */
 #message {
-  font-size: 11px;
+  font-size: 10px;
   min-height: 16px;
   text-align: center;
-  color: #e17055;
+  color: #ff6644;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   flex-shrink: 0;
 }
 
@@ -381,22 +434,22 @@ canvas#board {
   align-items: center;
   z-index: 100;
   pointer-events: none;
-  transition: background 0.6s;
+  transition: background 0.8s;
   overflow: hidden;
 }
 .winner-overlay.show {
-  background: rgba(0,0,0,0.75);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  background: rgba(0,4,12,0.85);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   pointer-events: auto;
 }
 .winner-box {
-  background: linear-gradient(145deg, #12122a, #1a1a3a);
-  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(10,20,40,0.95), rgba(5,10,25,0.95));
+  border-radius: 12px;
   padding: 40px 44px;
   text-align: center;
-  border: 2px solid rgba(255,255,255,0.1);
-  box-shadow: 0 20px 80px rgba(0,0,0,0.6), 0 0 40px rgba(108,92,231,0.15);
+  border: 1px solid rgba(100,150,255,0.15);
+  box-shadow: 0 20px 80px rgba(0,0,0,0.8), 0 0 60px rgba(0,80,200,0.1);
   transform: scale(0.5) rotate(-5deg);
   opacity: 0;
   transition: all 0.6s cubic-bezier(.2,.8,.3,1.2);
@@ -412,6 +465,7 @@ canvas#board {
   font-size: 64px;
   margin-bottom: 12px;
   animation: trophy-bounce 0.8s ease-out 0.5s both;
+  filter: drop-shadow(0 0 20px rgba(255,200,0,0.4));
 }
 @keyframes trophy-bounce {
   0% { transform: scale(0) rotate(-30deg); }
@@ -420,43 +474,56 @@ canvas#board {
   100% { transform: scale(1) rotate(0deg); }
 }
 .winner-box h2 {
-  font-size: clamp(28px, 7vw, 36px);
+  font-size: clamp(24px, 6vw, 32px);
   font-weight: 900;
   margin-bottom: 6px;
-  letter-spacing: 4px;
-  animation: text-glow 1.5s ease-in-out infinite alternate;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  font-family: 'Orbitron', sans-serif;
 }
-@keyframes text-glow {
-  0% { text-shadow: 0 0 10px currentColor; }
-  100% { text-shadow: 0 0 30px currentColor, 0 0 60px currentColor; }
+.winner-box h2.win-p1 {
+  color: #ff4444;
+  text-shadow: 0 0 20px rgba(255,0,0,0.5), 0 0 40px rgba(255,0,0,0.3);
+  animation: saber-glow-red 1.5s ease-in-out infinite alternate;
+}
+.winner-box h2.win-p2 {
+  color: #44aaff;
+  text-shadow: 0 0 20px rgba(0,100,255,0.5), 0 0 40px rgba(0,100,255,0.3);
+  animation: saber-glow-blue 1.5s ease-in-out infinite alternate;
+}
+@keyframes saber-glow-red {
+  0% { text-shadow: 0 0 10px rgba(255,0,0,0.4); }
+  100% { text-shadow: 0 0 30px rgba(255,0,0,0.6), 0 0 60px rgba(255,0,0,0.3); }
+}
+@keyframes saber-glow-blue {
+  0% { text-shadow: 0 0 10px rgba(0,100,255,0.4); }
+  100% { text-shadow: 0 0 30px rgba(0,100,255,0.6), 0 0 60px rgba(0,100,255,0.3); }
 }
 .winner-box .win-label {
-  font-size: clamp(14px, 3.5vw, 18px);
+  font-size: clamp(12px, 3vw, 16px);
   font-weight: 700;
   margin-bottom: 16px;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
 }
-.winner-box .win-p1 { color: #ff6b6b; }
-.winner-box .win-p2 { color: #54a0ff; }
-.winner-box .win-p1 + .win-label { color: #ff9e9e; }
-.winner-box .win-p2 + .win-label { color: #8ec5ff; }
-.winner-box p { color: #666; font-size: 13px; margin-bottom: 24px; }
+.winner-box p { color: #445566; font-size: 12px; margin-bottom: 24px; letter-spacing: 1px; }
 .winner-box button {
   padding: 16px 44px;
-  border: none;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-  color: white;
-  font-family: inherit;
-  font-size: 16px;
+  border: 1px solid rgba(100,150,255,0.2);
+  border-radius: 6px;
+  background: linear-gradient(135deg, rgba(0,50,150,0.4), rgba(0,80,200,0.3));
+  color: #88bbff;
+  font-family: 'Orbitron', inherit;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   min-height: 52px;
-  transition: transform 0.2s;
+  transition: all 0.2s;
+  text-transform: uppercase;
 }
+.winner-box button:hover { background: linear-gradient(135deg, rgba(0,60,180,0.5), rgba(0,100,255,0.4)); border-color: rgba(100,150,255,0.4); }
 .winner-box button:active { transform: scale(0.93); }
 .confetti {
   position: absolute;
@@ -474,40 +541,65 @@ canvas#board {
 .start-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.85);
+  background: #000;
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 200;
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  flex-direction: column;
 }
-.start-box { text-align: center; padding: 20px; }
+.start-box {
+  text-align: center;
+  padding: 20px;
+  animation: fadeInUp 1.5s ease-out;
+}
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.start-subtitle {
+  font-size: clamp(10px, 2.5vw, 13px);
+  color: #3366aa;
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+  font-weight: 400;
+}
 .start-box h2 {
-  font-size: clamp(30px, 8vw, 42px);
+  font-size: clamp(28px, 8vw, 44px);
   font-weight: 900;
-  letter-spacing: clamp(6px, 2vw, 12px);
-  background: linear-gradient(135deg, #f8cdda, #a0b4f8, #d4fc79);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 16px;
+  letter-spacing: clamp(6px, 2vw, 14px);
+  color: #ffcc00;
+  text-shadow: 0 0 30px rgba(255,200,0,0.3), 0 0 60px rgba(255,200,0,0.1);
+  margin-bottom: 8px;
+  font-family: 'Orbitron', sans-serif;
 }
-.start-box p { color: #666; font-size: 14px; margin-bottom: 32px; }
+.start-box .tagline {
+  color: #334466;
+  font-size: clamp(10px, 2.5vw, 12px);
+  margin-bottom: 40px;
+  letter-spacing: 3px;
+}
 .start-box button {
   padding: 16px 48px;
-  border: none;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-  color: white;
-  font-family: inherit;
-  font-size: 18px;
+  border: 1px solid rgba(255,200,0,0.3);
+  border-radius: 6px;
+  background: linear-gradient(135deg, rgba(255,200,0,0.15), rgba(255,150,0,0.1));
+  color: #ffcc00;
+  font-family: 'Orbitron', inherit;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   min-height: 52px;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  box-shadow: 0 0 20px rgba(255,200,0,0.08);
+}
+.start-box button:hover {
+  background: linear-gradient(135deg, rgba(255,200,0,0.25), rgba(255,150,0,0.15));
+  box-shadow: 0 0 30px rgba(255,200,0,0.15);
 }
 .start-box button:active { transform: scale(0.95); }
 
@@ -519,9 +611,10 @@ canvas#board {
 <!-- Start screen -->
 <div class="start-overlay" id="start-overlay">
   <div class="start-box">
+    <div class="start-subtitle">A GALACTIC STRATEGY GAME</div>
     <h2>QUORIDOR</h2>
-    <p>2 PLAYER STRATEGY GAME</p>
-    <button onclick="startGame()">ゲームスタート</button>
+    <p class="tagline">2 PLAYER DUEL</p>
+    <button onclick="startGame()">START</button>
   </div>
 </div>
 
@@ -530,21 +623,21 @@ canvas#board {
   <div class="player-zone p2-zone">
     <div class="controls inactive" id="controls-p2">
       <button class="ctrl-btn active-move" id="btn-move-p2" onclick="setMode('move')">
-        移動<span class="kbd">M</span>
+        MOVE<span class="kbd">M</span>
       </button>
       <button class="ctrl-btn" id="btn-wall-p2" onclick="setMode('wall')">
-        壁<span class="kbd">W</span>
+        WALL<span class="kbd">W</span>
       </button>
       <div class="ctrl-divider"></div>
       <div class="orient-group" id="orient-group-p2">
-        <button class="orient-btn active" id="btn-h-p2" onclick="setOrientation('h')">横</button>
-        <button class="orient-btn" id="btn-v-p2" onclick="setOrientation('v')">縦</button>
+        <button class="orient-btn active" id="btn-h-p2" onclick="setOrientation('h')">H</button>
+        <button class="orient-btn" id="btn-v-p2" onclick="setOrientation('v')">V</button>
       </div>
     </div>
     <div class="player-panel p2" id="p2-panel">
       <div class="panel-row">
-        <div class="player-icon p2">2</div>
-        <span class="player-name">P2</span>
+        <div class="player-icon p2">II</div>
+        <span class="player-name">JEDI</span>
         <span class="turn-badge">TURN</span>
         <div class="wall-indicators" id="p2-walls"></div>
       </div>
@@ -565,15 +658,15 @@ canvas#board {
   <!-- Center controls -->
   <div class="center-controls">
     <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="BGM ON/OFF">&#9835;</button>
-    <button id="reset-btn" onclick="resetGame()">リセット</button>
+    <button id="reset-btn" onclick="resetGame()">RESET</button>
   </div>
 
   <!-- P1 zone (bottom, normal orientation) -->
   <div class="player-zone p1-zone">
     <div class="player-panel p1 active" id="p1-panel">
       <div class="panel-row">
-        <div class="player-icon p1">1</div>
-        <span class="player-name">P1</span>
+        <div class="player-icon p1">I</div>
+        <span class="player-name">SITH</span>
         <span class="turn-badge">TURN</span>
         <div class="wall-indicators" id="p1-walls"></div>
       </div>
@@ -584,15 +677,15 @@ canvas#board {
     </div>
     <div class="controls" id="controls-p1">
       <button class="ctrl-btn active-move" id="btn-move-p1" onclick="setMode('move')">
-        移動<span class="kbd">M</span>
+        MOVE<span class="kbd">M</span>
       </button>
       <button class="ctrl-btn" id="btn-wall-p1" onclick="setMode('wall')">
-        壁<span class="kbd">W</span>
+        WALL<span class="kbd">W</span>
       </button>
       <div class="ctrl-divider"></div>
       <div class="orient-group" id="orient-group-p1">
-        <button class="orient-btn active" id="btn-h-p1" onclick="setOrientation('h')">横</button>
-        <button class="orient-btn" id="btn-v-p1" onclick="setOrientation('v')">縦</button>
+        <button class="orient-btn active" id="btn-h-p1" onclick="setOrientation('h')">H</button>
+        <button class="orient-btn" id="btn-v-p1" onclick="setOrientation('v')">V</button>
       </div>
     </div>
   </div>
@@ -600,11 +693,11 @@ canvas#board {
 
 <div class="winner-overlay" id="winner-overlay">
   <div class="winner-box">
-    <div class="trophy">&#127942;</div>
-    <h2 id="winner-text">勝利！</h2>
+    <div class="trophy">&#9876;</div>
+    <h2 id="winner-text">VICTORY</h2>
     <div class="win-label" id="winner-player"></div>
-    <p>おめでとうございます！</p>
-    <button onclick="resetGame()">もう一度遊ぶ</button>
+    <p>THE FORCE IS STRONG WITH YOU</p>
+    <button onclick="resetGame()">REMATCH</button>
   </div>
 </div>
 
@@ -708,29 +801,30 @@ function playNote(freq, startTime, duration, gain, dest, type) {
   osc.stop(startTime + duration);
 }
 
+// Imperial-style dark, cinematic melody
 const BGM_MELODY = [
-  { n: 'E5', d: 0.5 }, { n: 'D5', d: 0.5 }, { n: 'C5', d: 0.5 }, { n: 'B4', d: 0.5 },
-  { n: 'A4', d: 0.5 }, { n: 'G4', d: 0.5 }, { n: 'A4', d: 0.5 }, { n: 'B4', d: 0.5 },
-  { n: 'C5', d: 0.5 }, { n: 'G4', d: 0.5 }, { n: 'A4', d: 0.5 }, { n: 'E4', d: 0.5 },
-  { n: 'F4', d: 0.5 }, { n: 'C4', d: 0.5 }, { n: 'F4', d: 0.5 }, { n: 'G4', d: 0.5 },
-  { n: 'A4', d: 0.5 }, { n: 'B4', d: 0.25 }, { n: 'C5', d: 0.25 }, { n: 'D5', d: 0.5 }, { n: 'E5', d: 0.5 },
-  { n: 'F5', d: 0.5 }, { n: 'E5', d: 0.25 }, { n: 'D5', d: 0.25 }, { n: 'C5', d: 0.5 }, { n: 'B4', d: 0.5 },
-  { n: 'C5', d: 0.75 }, { n: 'D5', d: 0.25 }, { n: 'E5', d: 0.5 }, { n: 'D5', d: 0.25 }, { n: 'C5', d: 0.25 },
-  { n: 'B4', d: 0.5 }, { n: 'A4', d: 0.5 }, { n: 'G4', d: 1.0 },
+  { n: 'G3', d: 0.75 }, { n: 'G3', d: 0.75 }, { n: 'G3', d: 0.75 },
+  { n: 'Eb3', d: 0.5 }, { n: 'Bb3', d: 0.25 },
+  { n: 'G3', d: 0.75 }, { n: 'Eb3', d: 0.5 }, { n: 'Bb3', d: 0.25 },
+  { n: 'G3', d: 1.5 },
+  { n: 'D4', d: 0.75 }, { n: 'D4', d: 0.75 }, { n: 'D4', d: 0.75 },
+  { n: 'Eb4', d: 0.5 }, { n: 'Bb3', d: 0.25 },
+  { n: 'F#3', d: 0.75 }, { n: 'Eb3', d: 0.5 }, { n: 'Bb3', d: 0.25 },
+  { n: 'G3', d: 1.5 },
 ];
 
 const BGM_BASS = [
-  { n: 'C3', d: 2 }, { n: 'G2', d: 2 }, { n: 'A2', d: 2 }, { n: 'E2', d: 2 },
-  { n: 'F2', d: 2 }, { n: 'C3', d: 2 }, { n: 'F2', d: 2 }, { n: 'G2', d: 2 },
-  { n: 'A2', d: 2 }, { n: 'G2', d: 2 }, { n: 'F2', d: 2 }, { n: 'E2', d: 2 },
-  { n: 'F2', d: 2 }, { n: 'G2', d: 2 }, { n: 'A2', d: 1 }, { n: 'G2', d: 1 }, { n: 'C3', d: 2 },
+  { n: 'G2', d: 3 }, { n: 'Eb2', d: 1.5 }, { n: 'G2', d: 1.5 },
+  { n: 'G2', d: 3 },
+  { n: 'D3', d: 3 }, { n: 'Eb3', d: 1.5 }, { n: 'Bb2', d: 1.5 },
+  { n: 'G2', d: 3 },
 ];
 
 const NF = {
-  'C2': 65.41, 'D2': 73.42, 'E2': 82.41, 'F2': 87.31, 'G2': 98.00, 'A2': 110.0, 'B2': 123.5,
-  'C3': 130.8, 'D3': 146.8, 'E3': 164.8, 'F3': 174.6, 'G3': 196.0, 'A3': 220.0, 'B3': 246.9,
-  'C4': 261.6, 'D4': 293.7, 'E4': 329.6, 'F4': 349.2, 'G4': 392.0, 'A4': 440.0, 'B4': 493.9,
-  'C5': 523.3, 'D5': 587.3, 'E5': 659.3, 'F5': 698.5, 'G5': 784.0, 'A5': 880.0, 'B5': 987.8,
+  'C2': 65.41, 'D2': 73.42, 'Eb2': 77.78, 'E2': 82.41, 'F2': 87.31, 'F#2': 92.50, 'G2': 98.00, 'A2': 110.0, 'Bb2': 116.54, 'B2': 123.5,
+  'C3': 130.8, 'D3': 146.8, 'Eb3': 155.56, 'E3': 164.8, 'F3': 174.6, 'F#3': 185.0, 'G3': 196.0, 'A3': 220.0, 'Bb3': 233.08, 'B3': 246.9,
+  'C4': 261.6, 'D4': 293.7, 'Eb4': 311.13, 'E4': 329.6, 'F4': 349.2, 'F#4': 370.0, 'G4': 392.0, 'A4': 440.0, 'Bb4': 466.16, 'B4': 493.9,
+  'C5': 523.3, 'D5': 587.3, 'Eb5': 622.25, 'E5': 659.3, 'F5': 698.5, 'G5': 784.0, 'A5': 880.0, 'B5': 987.8,
 };
 
 function scheduleBGMLoop() {
@@ -740,8 +834,8 @@ function scheduleBGMLoop() {
   let t = now;
   for (const note of BGM_MELODY) {
     const dur = note.d * tempo;
-    playNote(NF[note.n], t, dur * 0.9, 0.12, bgmGain, 'triangle');
-    playNote(NF[note.n] * 2, t, dur * 0.6, 0.03, bgmGain, 'sine');
+    playNote(NF[note.n], t, dur * 0.9, 0.10, bgmGain, 'sawtooth');
+    playNote(NF[note.n] * 2, t, dur * 0.6, 0.02, bgmGain, 'sine');
     t += dur;
   }
   const melodyLen = t - now;
@@ -788,7 +882,7 @@ function toggleSound() {
 function updateSoundBtn() {
   const btn = document.getElementById('sound-btn');
   btn.classList.toggle('muted', bgmMuted);
-  btn.innerHTML = bgmMuted ? '&#9834;<span style="font-size:10px;position:absolute;color:#e74c3c">&#10005;</span>' : '&#9835;';
+  btn.innerHTML = bgmMuted ? '&#9834;<span style="font-size:10px;position:absolute;color:#ff2222">&#10005;</span>' : '&#9835;';
 }
 
 // --- Sound Effects ---
@@ -805,89 +899,54 @@ function playMoveSFX() {
   if (!audioCtx) return;
   ensureAudioResumed();
   const now = audioCtx.currentTime;
-  const noiseSrc = audioCtx.createBufferSource();
-  noiseSrc.buffer = createNoiseBuffer(0.12);
-  const bp1 = audioCtx.createBiquadFilter();
-  bp1.type = 'bandpass';
-  bp1.frequency.setValueAtTime(1800, now);
-  bp1.frequency.exponentialRampToValueAtTime(600, now + 0.08);
-  bp1.Q.value = 2.5;
-  const noiseEnv = audioCtx.createGain();
-  noiseEnv.gain.setValueAtTime(0.4, now);
-  noiseEnv.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-  noiseSrc.connect(bp1); bp1.connect(noiseEnv); noiseEnv.connect(audioCtx.destination);
-  noiseSrc.start(now); noiseSrc.stop(now + 0.12);
-
+  // Lightsaber-like hum
   const osc = audioCtx.createOscillator();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(420, now);
-  osc.frequency.exponentialRampToValueAtTime(280, now + 0.06);
-  const oscEnv = audioCtx.createGain();
-  oscEnv.gain.setValueAtTime(0.18, now);
-  oscEnv.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-  osc.connect(oscEnv); oscEnv.connect(audioCtx.destination);
-  osc.start(now); osc.stop(now + 0.1);
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(180, now);
+  osc.frequency.exponentialRampToValueAtTime(120, now + 0.15);
+  const env = audioCtx.createGain();
+  env.gain.setValueAtTime(0.15, now);
+  env.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+  osc.connect(env); env.connect(audioCtx.destination);
+  osc.start(now); osc.stop(now + 0.15);
 
-  const click = audioCtx.createOscillator();
-  click.type = 'triangle';
-  click.frequency.setValueAtTime(2400, now);
-  click.frequency.exponentialRampToValueAtTime(800, now + 0.02);
-  const clickEnv = audioCtx.createGain();
-  clickEnv.gain.setValueAtTime(0.12, now);
-  clickEnv.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
-  click.connect(clickEnv); clickEnv.connect(audioCtx.destination);
-  click.start(now); click.stop(now + 0.04);
+  const osc2 = audioCtx.createOscillator();
+  osc2.type = 'sine';
+  osc2.frequency.setValueAtTime(600, now);
+  osc2.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+  const env2 = audioCtx.createGain();
+  env2.gain.setValueAtTime(0.08, now);
+  env2.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+  osc2.connect(env2); env2.connect(audioCtx.destination);
+  osc2.start(now); osc2.stop(now + 0.1);
 }
 
 function playWallSFX() {
   if (!audioCtx) return;
   ensureAudioResumed();
   const now = audioCtx.currentTime;
+  // Force push effect
   const noiseSrc = audioCtx.createBufferSource();
-  noiseSrc.buffer = createNoiseBuffer(0.25);
+  noiseSrc.buffer = createNoiseBuffer(0.3);
   const lp = audioCtx.createBiquadFilter();
   lp.type = 'lowpass';
-  lp.frequency.setValueAtTime(2200, now);
-  lp.frequency.exponentialRampToValueAtTime(300, now + 0.15);
-  lp.Q.value = 1.5;
-  const bp = audioCtx.createBiquadFilter();
-  bp.type = 'peaking'; bp.frequency.value = 800; bp.Q.value = 3; bp.gain.value = 6;
+  lp.frequency.setValueAtTime(3000, now);
+  lp.frequency.exponentialRampToValueAtTime(200, now + 0.2);
   const noiseEnv = audioCtx.createGain();
-  noiseEnv.gain.setValueAtTime(0.45, now);
-  noiseEnv.gain.linearRampToValueAtTime(0.3, now + 0.02);
-  noiseEnv.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-  noiseSrc.connect(lp); lp.connect(bp); bp.connect(noiseEnv); noiseEnv.connect(audioCtx.destination);
-  noiseSrc.start(now); noiseSrc.stop(now + 0.25);
+  noiseEnv.gain.setValueAtTime(0.35, now);
+  noiseEnv.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+  noiseSrc.connect(lp); lp.connect(noiseEnv); noiseEnv.connect(audioCtx.destination);
+  noiseSrc.start(now); noiseSrc.stop(now + 0.3);
 
   const osc = audioCtx.createOscillator();
   osc.type = 'sine';
-  osc.frequency.setValueAtTime(220, now);
-  osc.frequency.exponentialRampToValueAtTime(80, now + 0.12);
+  osc.frequency.setValueAtTime(150, now);
+  osc.frequency.exponentialRampToValueAtTime(60, now + 0.2);
   const oscEnv = audioCtx.createGain();
-  oscEnv.gain.setValueAtTime(0.25, now);
-  oscEnv.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+  oscEnv.gain.setValueAtTime(0.2, now);
+  oscEnv.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
   osc.connect(oscEnv); oscEnv.connect(audioCtx.destination);
   osc.start(now); osc.stop(now + 0.2);
-
-  const res = audioCtx.createOscillator();
-  res.type = 'triangle';
-  res.frequency.setValueAtTime(580, now);
-  res.frequency.exponentialRampToValueAtTime(350, now + 0.08);
-  const resEnv = audioCtx.createGain();
-  resEnv.gain.setValueAtTime(0.12, now);
-  resEnv.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-  res.connect(resEnv); resEnv.connect(audioCtx.destination);
-  res.start(now); res.stop(now + 0.14);
-
-  const crack = audioCtx.createBufferSource();
-  crack.buffer = createNoiseBuffer(0.03);
-  const hp = audioCtx.createBiquadFilter();
-  hp.type = 'highpass'; hp.frequency.value = 3000; hp.Q.value = 0.5;
-  const crackEnv = audioCtx.createGain();
-  crackEnv.gain.setValueAtTime(0.2, now);
-  crackEnv.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
-  crack.connect(hp); hp.connect(crackEnv); crackEnv.connect(audioCtx.destination);
-  crack.start(now); crack.stop(now + 0.03);
 }
 
 function playTimerWarnSFX() {
@@ -895,11 +954,11 @@ function playTimerWarnSFX() {
   const now = audioCtx.currentTime;
   const osc = audioCtx.createOscillator();
   const env = audioCtx.createGain();
-  osc.type = 'sine'; osc.frequency.value = 880;
-  env.gain.setValueAtTime(0.15, now);
-  env.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+  osc.type = 'square'; osc.frequency.value = 440;
+  env.gain.setValueAtTime(0.08, now);
+  env.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
   osc.connect(env); env.connect(audioCtx.destination);
-  osc.start(now); osc.stop(now + 0.12);
+  osc.start(now); osc.stop(now + 0.1);
 }
 
 function playTimeoutSFX() {
@@ -908,8 +967,8 @@ function playTimeoutSFX() {
   for (let i = 0; i < 3; i++) {
     const osc = audioCtx.createOscillator();
     const env = audioCtx.createGain();
-    osc.type = 'triangle'; osc.frequency.value = 600 - i * 150;
-    env.gain.setValueAtTime(0.18, now + i * 0.15);
+    osc.type = 'sawtooth'; osc.frequency.value = 300 - i * 80;
+    env.gain.setValueAtTime(0.12, now + i * 0.15);
     env.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.14);
     osc.connect(env); env.connect(audioCtx.destination);
     osc.start(now + i * 0.15); osc.stop(now + i * 0.15 + 0.15);
@@ -919,24 +978,25 @@ function playTimeoutSFX() {
 function playWinSFX() {
   if (!audioCtx) return;
   const now = audioCtx.currentTime;
-  [523.3, 659.3, 784.0, 1047].forEach((freq, i) => {
+  // Triumphant fanfare
+  [196.0, 261.6, 329.6, 392.0, 523.3].forEach((freq, i) => {
     const osc = audioCtx.createOscillator();
     const env = audioCtx.createGain();
-    osc.type = 'triangle'; osc.frequency.value = freq;
-    const t = now + i * 0.15;
+    osc.type = 'sawtooth'; osc.frequency.value = freq;
+    const t = now + i * 0.18;
     env.gain.setValueAtTime(0, t);
-    env.gain.linearRampToValueAtTime(0.2, t + 0.04);
-    env.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+    env.gain.linearRampToValueAtTime(0.15, t + 0.05);
+    env.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
     osc.connect(env); env.connect(audioCtx.destination);
-    osc.start(t); osc.stop(t + 0.5);
+    osc.start(t); osc.stop(t + 0.6);
     const osc2 = audioCtx.createOscillator();
     const env2 = audioCtx.createGain();
-    osc2.type = 'sine'; osc2.frequency.value = freq * 1.5;
+    osc2.type = 'sine'; osc2.frequency.value = freq * 2;
     env2.gain.setValueAtTime(0, t);
-    env2.gain.linearRampToValueAtTime(0.07, t + 0.04);
-    env2.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+    env2.gain.linearRampToValueAtTime(0.05, t + 0.05);
+    env2.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
     osc2.connect(env2); env2.connect(audioCtx.destination);
-    osc2.start(t); osc2.stop(t + 0.4);
+    osc2.start(t); osc2.stop(t + 0.5);
   });
 }
 
@@ -981,7 +1041,7 @@ function startTurnTimer() {
 
 function onTimeout() {
   playTimeoutSFX();
-  showMsg('時間切れ！ターンをスキップしました');
+  showMsg('TIME OUT - TURN SKIPPED');
   currentPlayer = 1 - currentPlayer;
   mode = 'move';
   hoverWall = null;
@@ -1129,88 +1189,116 @@ function getValidMoves(p) {
 function draw() {
   ctx.clearRect(0, 0, BOARD_PX, BOARD_PX);
 
+  // Dark metallic background
   const bg = ctx.createLinearGradient(0, 0, BOARD_PX, BOARD_PX);
-  bg.addColorStop(0, '#111128');
-  bg.addColorStop(1, '#0d1b2a');
+  bg.addColorStop(0, '#080c18');
+  bg.addColorStop(0.5, '#0a1020');
+  bg.addColorStop(1, '#060a14');
   ctx.fillStyle = bg;
   ctx.beginPath();
-  ctx.roundRect(0, 0, BOARD_PX, BOARD_PX, 12);
+  ctx.roundRect(0, 0, BOARD_PX, BOARD_PX, 8);
   ctx.fill();
 
-  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  // Grid border
+  ctx.strokeStyle = 'rgba(60,100,180,0.12)';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.roundRect(0.5, 0.5, BOARD_PX - 1, BOARD_PX - 1, 12);
+  ctx.roundRect(0.5, 0.5, BOARD_PX - 1, BOARD_PX - 1, 8);
   ctx.stroke();
 
-  const cr = Math.max(3, CELL * 0.12);
+  // Cells - metallic grid panels
+  const cr = Math.max(2, CELL * 0.08);
   for (let r = 0; r < GRID; r++) {
     for (let c = 0; c < GRID; c++) {
-      ctx.fillStyle = 'rgba(255,255,255,0.03)';
+      const x = cellX(c), y = cellY(r);
+      // Subtle metallic panel
+      ctx.fillStyle = 'rgba(30,50,80,0.25)';
       ctx.beginPath();
-      ctx.roundRect(cellX(c), cellY(r), CELL, CELL, cr);
+      ctx.roundRect(x, y, CELL, CELL, cr);
       ctx.fill();
+      // Panel edge highlight
+      ctx.strokeStyle = 'rgba(60,100,180,0.08)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.roundRect(x, y, CELL, CELL, cr);
+      ctx.stroke();
     }
   }
 
-  // Goal rows
+  // Goal rows - red glow for P1 (Sith side, row 0) and blue glow for P2 (Jedi side, row 8)
   for (let c = 0; c < GRID; c++) {
     const g1 = ctx.createLinearGradient(0, cellY(0), 0, cellY(0) + CELL);
-    g1.addColorStop(0, 'rgba(238, 90, 36, 0.12)');
-    g1.addColorStop(1, 'rgba(238, 90, 36, 0.04)');
+    g1.addColorStop(0, 'rgba(255, 0, 0, 0.12)');
+    g1.addColorStop(1, 'rgba(255, 0, 0, 0.03)');
     ctx.fillStyle = g1;
     ctx.beginPath(); ctx.roundRect(cellX(c), cellY(0), CELL, CELL, cr); ctx.fill();
 
     const g2 = ctx.createLinearGradient(0, cellY(8), 0, cellY(8) + CELL);
-    g2.addColorStop(0, 'rgba(46, 134, 222, 0.04)');
-    g2.addColorStop(1, 'rgba(46, 134, 222, 0.12)');
+    g2.addColorStop(0, 'rgba(0, 100, 255, 0.03)');
+    g2.addColorStop(1, 'rgba(0, 100, 255, 0.12)');
     ctx.fillStyle = g2;
     ctx.beginPath(); ctx.roundRect(cellX(c), cellY(8), CELL, CELL, cr); ctx.fill();
   }
 
-  // Valid moves
+  // Valid moves - holographic green indicators
   if (!gameOver && mode === 'move') {
     const moves = getValidMoves(currentPlayer);
     for (const m of moves) {
       const x = cellX(m.col), y = cellY(m.row);
-      ctx.fillStyle = 'rgba(46, 204, 113, 0.15)';
+      ctx.fillStyle = 'rgba(0, 255, 100, 0.08)';
       ctx.beginPath(); ctx.roundRect(x, y, CELL, CELL, cr); ctx.fill();
-      ctx.strokeStyle = 'rgba(46, 204, 113, 0.45)';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([4, 3]);
+      ctx.strokeStyle = 'rgba(0, 255, 100, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 3]);
       ctx.beginPath(); ctx.roundRect(x + 1, y + 1, CELL - 2, CELL - 2, cr); ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = 'rgba(46, 204, 113, 0.5)';
-      ctx.beginPath(); ctx.arc(x + CELL / 2, y + CELL / 2, Math.max(3, CELL * 0.08), 0, Math.PI * 2); ctx.fill();
+      // Holographic dot
+      ctx.fillStyle = 'rgba(0, 255, 100, 0.4)';
+      ctx.beginPath(); ctx.arc(x + CELL / 2, y + CELL / 2, Math.max(2, CELL * 0.06), 0, Math.PI * 2); ctx.fill();
     }
   }
 
+  // Walls - energy barriers
   for (const w of walls) drawWall(w.row, w.col, w.orient);
   if (hoverWall && !gameOver) {
     drawWallPreview(hoverWall.row, hoverWall.col, hoverWall.orient, canPlaceWall(hoverWall.row, hoverWall.col, hoverWall.orient));
   }
 
+  // Players - lightsaber-powered orbs
   drawPlayer(players[0], 0);
   drawPlayer(players[1], 1);
 }
 
 function drawWall(r, c, orient) {
   ctx.save();
-  const wr = Math.max(2, GAP * 0.4);
+  const wr = Math.max(2, GAP * 0.3);
   if (orient === 'h') {
     const x = cellX(c), y = cellY(r) + CELL, w = CELL * 2 + GAP, h = GAP;
     const grad = ctx.createLinearGradient(x, y, x + w, y);
-    grad.addColorStop(0, '#f0c040'); grad.addColorStop(0.5, '#e2b714'); grad.addColorStop(1, '#d4a010');
+    grad.addColorStop(0, 'rgba(255,200,0,0.3)');
+    grad.addColorStop(0.5, 'rgba(255,220,50,0.8)');
+    grad.addColorStop(1, 'rgba(255,200,0,0.3)');
     ctx.fillStyle = grad;
-    ctx.shadowColor = 'rgba(226, 183, 20, 0.35)'; ctx.shadowBlur = 8;
+    ctx.shadowColor = 'rgba(255, 200, 0, 0.5)';
+    ctx.shadowBlur = 12;
     ctx.beginPath(); ctx.roundRect(x, y, w, h, wr); ctx.fill();
+    // Core glow
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,255,200,0.4)';
+    ctx.beginPath(); ctx.roundRect(x + w*0.1, y + h*0.25, w*0.8, h*0.5, 1); ctx.fill();
   } else {
     const x = cellX(c) + CELL, y = cellY(r), w = GAP, h = CELL * 2 + GAP;
     const grad = ctx.createLinearGradient(x, y, x, y + h);
-    grad.addColorStop(0, '#f0c040'); grad.addColorStop(0.5, '#e2b714'); grad.addColorStop(1, '#d4a010');
+    grad.addColorStop(0, 'rgba(255,200,0,0.3)');
+    grad.addColorStop(0.5, 'rgba(255,220,50,0.8)');
+    grad.addColorStop(1, 'rgba(255,200,0,0.3)');
     ctx.fillStyle = grad;
-    ctx.shadowColor = 'rgba(226, 183, 20, 0.35)'; ctx.shadowBlur = 8;
+    ctx.shadowColor = 'rgba(255, 200, 0, 0.5)';
+    ctx.shadowBlur = 12;
     ctx.beginPath(); ctx.roundRect(x, y, w, h, wr); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,255,200,0.4)';
+    ctx.beginPath(); ctx.roundRect(x + w*0.25, y + h*0.1, w*0.5, h*0.8, 1); ctx.fill();
   }
   ctx.restore();
 }
@@ -1218,9 +1306,9 @@ function drawWall(r, c, orient) {
 function drawWallPreview(r, c, orient, valid) {
   ctx.save();
   ctx.globalAlpha = 0.6;
-  const color = valid ? 'rgba(46, 204, 113, 0.8)' : 'rgba(231, 76, 60, 0.8)';
-  ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 10;
-  const wr = Math.max(2, GAP * 0.4);
+  const color = valid ? 'rgba(0, 255, 100, 0.7)' : 'rgba(255, 0, 0, 0.7)';
+  ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 14;
+  const wr = Math.max(2, GAP * 0.3);
   if (orient === 'h') {
     ctx.beginPath(); ctx.roundRect(cellX(c), cellY(r) + CELL, CELL * 2 + GAP, GAP, wr); ctx.fill();
   } else {
@@ -1233,32 +1321,47 @@ function drawPlayer(p, idx) {
   const cx = cellX(p.col) + CELL / 2;
   const cy = cellY(p.row) + CELL / 2;
   const isActive = currentPlayer === idx && !gameOver;
-  const pr = CELL * 0.36;
+  const pr = CELL * 0.34;
+
+  // Sith (red) vs Jedi (blue)
   const colors = idx === 0
-    ? { main: '#ee5a24', light: '#ff6b6b', glow: 'rgba(238,90,36,' }
-    : { main: '#2e86de', light: '#54a0ff', glow: 'rgba(46,134,222,' };
+    ? { core: '#ff2222', light: '#ff6666', glow: 'rgba(255,0,0,', saber: '#ff0000' }
+    : { core: '#2288ff', light: '#66bbff', glow: 'rgba(0,100,255,', saber: '#0066ff' };
 
   ctx.save();
+
+  // Outer force aura
   if (isActive) {
-    const gg = ctx.createRadialGradient(cx, cy, pr * 0.4, cx, cy, pr * 1.8);
-    gg.addColorStop(0, colors.glow + '0.25)');
+    const gg = ctx.createRadialGradient(cx, cy, pr * 0.3, cx, cy, pr * 2.2);
+    gg.addColorStop(0, colors.glow + '0.2)');
+    gg.addColorStop(0.5, colors.glow + '0.05)');
     gg.addColorStop(1, colors.glow + '0)');
     ctx.fillStyle = gg;
-    ctx.beginPath(); ctx.arc(cx, cy, pr * 1.8, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy, pr * 2.2, 0, Math.PI * 2); ctx.fill();
   }
-  ctx.shadowColor = colors.glow + '0.4)';
-  ctx.shadowBlur = isActive ? pr * 0.9 : pr * 0.35;
-  const grad = ctx.createRadialGradient(cx - pr * 0.2, cy - pr * 0.2, pr * 0.1, cx, cy, pr);
-  grad.addColorStop(0, colors.light);
-  grad.addColorStop(1, colors.main);
+
+  // Lightsaber glow
+  ctx.shadowColor = colors.saber;
+  ctx.shadowBlur = isActive ? pr * 1.2 : pr * 0.5;
+
+  // Main orb
+  const grad = ctx.createRadialGradient(cx - pr * 0.2, cy - pr * 0.2, pr * 0.05, cx, cy, pr);
+  grad.addColorStop(0, '#ffffff');
+  grad.addColorStop(0.3, colors.light);
+  grad.addColorStop(1, colors.core);
   ctx.fillStyle = grad;
   ctx.beginPath(); ctx.arc(cx, cy, pr, 0, Math.PI * 2); ctx.fill();
+
+  // Inner white core
   ctx.shadowColor = 'transparent';
-  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-  ctx.lineWidth = 1.5;
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.beginPath(); ctx.arc(cx - pr * 0.2, cy - pr * 0.2, pr * 0.35, 0, Math.PI * 2); ctx.fill();
+
+  // Edge ring
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 1;
   ctx.beginPath(); ctx.arc(cx, cy, pr, 0, Math.PI * 2); ctx.stroke();
-  ctx.fillStyle = 'rgba(255,255,255,0.15)';
-  ctx.beginPath(); ctx.arc(cx - pr * 0.28, cy - pr * 0.28, pr * 0.38, 0, Math.PI * 2); ctx.fill();
+
   ctx.restore();
 }
 
@@ -1322,10 +1425,10 @@ function showWinner(p) {
   var text = document.getElementById('winner-text');
   var playerLabel = document.getElementById('winner-player');
   text.className = p === 0 ? 'win-p1' : 'win-p2';
-  text.textContent = '勝利！';
+  text.textContent = 'VICTORY';
   playerLabel.className = 'win-label';
-  playerLabel.textContent = 'プレイヤー ' + (p + 1);
-  playerLabel.style.color = p === 0 ? '#ff9e9e' : '#8ec5ff';
+  playerLabel.textContent = p === 0 ? 'DARK SIDE' : 'LIGHT SIDE';
+  playerLabel.style.color = p === 0 ? '#ff6666' : '#66aaff';
   requestAnimationFrame(function() {
     overlay.classList.add('show');
     spawnConfetti(overlay);
@@ -1333,7 +1436,7 @@ function showWinner(p) {
 }
 
 function spawnConfetti(container) {
-  var colors = ['#ff6b6b','#54a0ff','#f0b429','#00e676','#a29bfe','#ff9ff3','#feca57','#ff5252'];
+  var colors = ['#ff0000','#ff4444','#0066ff','#44aaff','#ffcc00','#ffffff','#ff6600','#00ff88'];
   var existing = container.querySelectorAll('.confetti');
   for (var i = 0; i < existing.length; i++) existing[i].remove();
   for (var i = 0; i < 60; i++) {
@@ -1369,7 +1472,6 @@ function resetGame() {
   var confetti = overlay.querySelectorAll('.confetti');
   for (var i = 0; i < confetti.length; i++) confetti[i].remove();
   clearInterval(timerInterval);
-  // AudioContextごとリセットして音の重なりを防止
   if (bgmTimeout) clearTimeout(bgmTimeout);
   bgmPlaying = false;
   if (audioCtx) {
@@ -1417,7 +1519,7 @@ function handleBoardAction(px, py) {
     if (!cell) return;
     const moves = getValidMoves(currentPlayer);
     const match = moves.find(function(m) { return m.row === cell.row && m.col === cell.col; });
-    if (!match) { showMsg('そこには移動できません'); return; }
+    if (!match) { showMsg('INVALID MOVE'); return; }
     players[currentPlayer].row = match.row;
     players[currentPlayer].col = match.col;
     playMoveSFX();
@@ -1428,9 +1530,9 @@ function handleBoardAction(px, py) {
     updateUI(); draw(); startTurnTimer();
   } else {
     const slot = pixelToWallSlot(px, py);
-    if (!slot) { showMsg('壁の交差点付近をタップしてください'); return; }
-    if (wallCounts[currentPlayer] <= 0) { showMsg('壁を使い切りました'); return; }
-    if (!canPlaceWall(slot.row, slot.col, orientation)) { showMsg('そこには壁を置けません'); return; }
+    if (!slot) { showMsg('TAP NEAR AN INTERSECTION'); return; }
+    if (wallCounts[currentPlayer] <= 0) { showMsg('NO WALLS REMAINING'); return; }
+    if (!canPlaceWall(slot.row, slot.col, orientation)) { showMsg('CANNOT PLACE WALL HERE'); return; }
     walls.push({ row: slot.row, col: slot.col, orient: orientation });
     wallCounts[currentPlayer]--;
     playWallSFX();
