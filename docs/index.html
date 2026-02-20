@@ -2053,19 +2053,21 @@ body {
 </div>
 
 <script>
-var K = [110,101,120,117,115,50,48,50,54];
+var S = [77,70,91,86,80,17,19,17,21];
+var X = 35;
+
+function ck(p) {
+  if (p.length !== S.length) return false;
+  for (var i = 0; i < S.length; i++) {
+    if ((p.charCodeAt(i) ^ X) !== S[i]) return false;
+  }
+  return true;
+}
 
 document.getElementById("lockForm").addEventListener("submit", function(e) {
   e.preventDefault();
   var p = document.getElementById("pw").value;
-  var ok = true;
-  if (p.length !== K.length) { ok = false; }
-  else {
-    for (var i = 0; i < K.length; i++) {
-      if (p.charCodeAt(i) !== K[i]) { ok = false; break; }
-    }
-  }
-  if (ok) {
+  if (ck(p)) {
     document.getElementById("lockScreen").style.display = "none";
     document.getElementById("mainContent").style.display = "block";
   } else {
