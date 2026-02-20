@@ -2053,29 +2053,26 @@ body {
 </div>
 
 <script>
-var HASH = "ff0a5f39b703f6d02441f3b42aa02af28bc400cd8193ffd8fb1f4c4d245444c5";
-
-async function sha256(msg) {
-  var data = new TextEncoder().encode(msg);
-  var buf = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(buf)).map(function(b) {
-    return b.toString(16).padStart(2, "0");
-  }).join("");
-}
+var K = [110,101,120,117,115,50,48,50,54];
 
 document.getElementById("lockForm").addEventListener("submit", function(e) {
   e.preventDefault();
   var p = document.getElementById("pw").value;
-  sha256(p).then(function(h) {
-    if (h === HASH) {
-      document.getElementById("lockScreen").style.display = "none";
-      document.getElementById("mainContent").style.display = "block";
-    } else {
-      document.getElementById("err").classList.add("show");
-      document.getElementById("pw").value = "";
-      document.getElementById("pw").focus();
+  var ok = true;
+  if (p.length !== K.length) { ok = false; }
+  else {
+    for (var i = 0; i < K.length; i++) {
+      if (p.charCodeAt(i) !== K[i]) { ok = false; break; }
     }
-  });
+  }
+  if (ok) {
+    document.getElementById("lockScreen").style.display = "none";
+    document.getElementById("mainContent").style.display = "block";
+  } else {
+    document.getElementById("err").classList.add("show");
+    document.getElementById("pw").value = "";
+    document.getElementById("pw").focus();
+  }
 });
 
 function switchTab(tab) {
