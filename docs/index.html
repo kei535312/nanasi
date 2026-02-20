@@ -1,0 +1,2099 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS - Confidential Documents</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap');
+
+/* ===== LOCK SCREEN ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Noto Sans JP', -apple-system, sans-serif;
+  background: #0a0a1a;
+  color: #e8e8f0;
+  line-height: 1.7;
+}
+#lockScreen {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; padding: 20px;
+}
+.lock-inner {
+  text-align: center; max-width: 400px; width: 100%;
+}
+.lock-logo {
+  font-size: 48px; font-weight: 900; letter-spacing: -2px;
+  background: linear-gradient(135deg, #a29bfe, #f7931a);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+.lock-sub { font-size: 14px; color: #9090b0; margin-bottom: 40px; }
+.lock-icon { font-size: 48px; margin-bottom: 24px; }
+.lock-input {
+  width: 100%; padding: 16px 20px;
+  background: #12122a; border: 1px solid #2a2a4a;
+  border-radius: 12px; color: #e8e8f0; font-size: 16px;
+  font-family: inherit; outline: none;
+  transition: border-color 0.3s; margin-bottom: 16px;
+}
+.lock-input:focus { border-color: #6c5ce7; }
+.lock-input::placeholder { color: #5a5a7a; }
+.lock-btn {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  border: none; border-radius: 12px;
+  color: white; font-size: 16px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.lock-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.lock-btn:active { transform: translateY(0); }
+.lock-error {
+  color: #ff5252; font-size: 13px; margin-top: 12px; display: none;
+}
+.lock-error.show { display: block; }
+.lock-note { font-size: 11px; color: #5a5a7a; margin-top: 24px; }
+
+/* ===== TAB NAV (sticky top) ===== */
+#mainContent { display: none; }
+.tab-nav {
+  position: sticky; top: 0; z-index: 9999;
+  display: flex; gap: 0;
+  background: #0a0a1a;
+  border-bottom: 1px solid #2a2a4a;
+  padding: 0;
+}
+.tab-btn {
+  flex: 1; padding: 16px 20px;
+  background: transparent; border: none; border-bottom: 3px solid transparent;
+  color: #9090b0; font-size: 15px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
+  transition: all 0.3s;
+}
+.tab-btn.active {
+  color: #a29bfe; border-bottom-color: #6c5ce7;
+  background: rgba(108, 92, 231, 0.08);
+}
+.tab-btn:hover:not(.active) {
+  color: #e8e8f0; background: rgba(255,255,255,0.03);
+}
+.tab-page { display: none; }
+.tab-page.active { display: block; }
+
+/* ===== PITCH DECK STYLES ===== */
+#pitchPage {}
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a1a;
+  --surface: #12122a;
+  --surface2: #1a1a3a;
+  --accent: #6c5ce7;
+  --accent2: #a29bfe;
+  --gold: #f0b429;
+  --btc: #f7931a;
+  --green: #00e676;
+  --red: #ff5252;
+  --text: #e8e8f0;
+  --text2: #9090b0;
+  --border: #2a2a4a;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Noto Sans JP', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ===== COVER SLIDE ===== */
+.cover {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  padding: 40px 20px;
+}
+
+.cover::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(108,92,231,0.15) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 50%, rgba(247,147,26,0.1) 0%, transparent 50%);
+  animation: pulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.1); opacity: 1; }
+}
+
+.cover-content {
+  position: relative;
+  z-index: 1;
+}
+
+.logo-mark {
+  font-size: 80px;
+  font-weight: 900;
+  letter-spacing: -3px;
+  background: linear-gradient(135deg, var(--accent2), var(--btc));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+
+.logo-sub {
+  font-size: 18px;
+  color: var(--text2);
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+}
+
+.cover-tagline {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.cover-desc {
+  font-size: 16px;
+  color: var(--text2);
+  max-width: 500px;
+  margin: 0 auto 48px;
+}
+
+.cover-stats {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cover-stat {
+  text-align: center;
+}
+
+.cover-stat .num {
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--gold);
+}
+
+.cover-stat .label {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+
+/* ===== SECTION LAYOUT ===== */
+.section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 80px 24px;
+}
+
+.section-num {
+  font-size: 12px;
+  color: var(--accent2);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.section-title {
+  font-size: 32px;
+  font-weight: 900;
+  margin-bottom: 32px;
+  background: linear-gradient(135deg, var(--text), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.section-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 0 auto;
+}
+
+/* ===== PROBLEM SECTION ===== */
+.problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.problem-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+}
+
+.problem-card .icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.problem-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.problem-card p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+/* ===== SOLUTION ===== */
+.solution-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 40px 0;
+  flex-wrap: wrap;
+}
+
+.flow-node {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 20px;
+  text-align: center;
+  min-width: 140px;
+  flex: 1;
+  max-width: 200px;
+}
+
+.flow-node .icon { font-size: 28px; margin-bottom: 8px; }
+.flow-node .title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.flow-node .desc { font-size: 11px; color: var(--text2); }
+
+.flow-arrow {
+  font-size: 24px;
+  color: var(--accent2);
+}
+
+.flow-node.highlight {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, var(--surface), rgba(108,92,231,0.15));
+}
+
+/* ===== ARCHITECTURE ===== */
+.arch-diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px;
+  margin: 32px 0;
+}
+
+.arch-layer {
+  margin-bottom: 24px;
+}
+
+.arch-layer:last-child {
+  margin-bottom: 0;
+}
+
+.arch-layer-label {
+  font-size: 11px;
+  color: var(--accent2);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+
+.arch-boxes {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.arch-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 18px;
+  flex: 1;
+  min-width: 120px;
+  text-align: center;
+}
+
+.arch-box .name {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.arch-box .tech {
+  font-size: 11px;
+  color: var(--text2);
+}
+
+.arch-box.core {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, var(--surface2), rgba(108,92,231,0.1));
+}
+
+.arch-box.btc {
+  border-color: var(--btc);
+  background: linear-gradient(135deg, var(--surface2), rgba(247,147,26,0.1));
+}
+
+.arch-connector {
+  text-align: center;
+  padding: 8px 0;
+  color: var(--text2);
+  font-size: 18px;
+}
+
+/* ===== DATA TABLE ===== */
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 24px 0;
+  font-size: 14px;
+}
+
+.data-table thead th {
+  background: var(--surface2);
+  color: var(--accent2);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table thead th:first-child { border-radius: 12px 0 0 0; }
+.data-table thead th:last-child { border-radius: 0 12px 0 0; }
+
+.data-table tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+  background: rgba(108,92,231,0.05);
+}
+
+.tier-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.tier-s { background: rgba(240,180,41,0.2); color: var(--gold); }
+.tier-a { background: rgba(108,92,231,0.2); color: var(--accent2); }
+.tier-b { background: rgba(144,144,176,0.2); color: var(--text2); }
+
+.price-tag {
+  font-weight: 700;
+  color: var(--green);
+}
+
+/* ===== MARKET SIZE ===== */
+.market-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 32px 0;
+}
+
+.market-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 20px;
+  text-align: center;
+}
+
+.market-card .value {
+  font-size: 32px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.market-card .value.gold { color: var(--gold); }
+.market-card .value.accent { color: var(--accent2); }
+.market-card .value.green { color: var(--green); }
+
+.market-card .metric {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 8px;
+}
+
+.market-card .source {
+  font-size: 11px;
+  color: var(--text2);
+  opacity: 0.6;
+}
+
+/* ===== REVENUE MODEL ===== */
+.revenue-example {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  margin: 24px 0;
+}
+
+.revenue-example h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--accent2);
+}
+
+.revenue-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.revenue-row:last-child {
+  border-bottom: none;
+  padding-top: 16px;
+  margin-top: 4px;
+}
+
+.revenue-row .label {
+  font-size: 14px;
+}
+
+.revenue-row .amount {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.revenue-row .amount.positive { color: var(--green); }
+.revenue-row .amount.negative { color: var(--red); }
+.revenue-row .amount.highlight { color: var(--btc); font-size: 20px; }
+
+/* ===== COMPETITIVE ===== */
+.comp-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 24px 0;
+  font-size: 13px;
+}
+
+.comp-table thead th {
+  background: var(--surface2);
+  padding: 12px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent2);
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.comp-table thead th:first-child {
+  text-align: left;
+  border-radius: 12px 0 0 0;
+}
+
+.comp-table thead th:last-child {
+  border-radius: 0 12px 0 0;
+}
+
+.comp-table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+.comp-table tbody td:first-child {
+  text-align: left;
+  font-weight: 600;
+}
+
+.comp-table .ours {
+  background: rgba(108,92,231,0.08);
+}
+
+.comp-table .ours td {
+  color: var(--accent2);
+  font-weight: 600;
+}
+
+.check { color: var(--green); }
+.cross { color: var(--red); opacity: 0.5; }
+
+/* ===== BUYER LIST ===== */
+.buyer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.buyer-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.buyer-card .company {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.buyer-card .valuation {
+  font-size: 12px;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+.buyer-card .needs {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+/* ===== ROADMAP ===== */
+.roadmap {
+  position: relative;
+  padding-left: 40px;
+  margin: 32px 0;
+}
+
+.roadmap::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent), var(--btc), var(--green));
+}
+
+.roadmap-item {
+  position: relative;
+  margin-bottom: 32px;
+  padding: 20px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.roadmap-item::before {
+  content: '';
+  position: absolute;
+  left: -33px;
+  top: 24px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--bg);
+}
+
+.roadmap-item .phase {
+  font-size: 11px;
+  color: var(--accent2);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.roadmap-item h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.roadmap-item p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+.roadmap-item .timeline {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 4px 12px;
+  background: var(--surface2);
+  border-radius: 20px;
+  font-size: 11px;
+  color: var(--text2);
+}
+
+/* ===== TEAM / ASK ===== */
+.ask-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 32px 0;
+}
+
+.ask-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  text-align: center;
+}
+
+.ask-card .amount {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.ask-card .purpose {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.ask-card .detail {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+/* ===== FOOTER ===== */
+.pitch-footer {
+  text-align: center;
+  padding: 60px 24px 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.pitch-footer .logo {
+  font-size: 48px;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--accent2), var(--btc));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+
+.pitch-footer .tagline {
+  font-size: 16px;
+  color: var(--text2);
+  margin-bottom: 24px;
+}
+
+.pitch-footer .confidential {
+  font-size: 11px;
+  color: var(--text2);
+  opacity: 0.4;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 700px) {
+  .problem-grid, .market-cards, .buyer-grid, .ask-grid {
+    grid-template-columns: 1fr;
+  }
+  .solution-flow {
+    flex-direction: column;
+  }
+  .flow-arrow {
+    transform: rotate(90deg);
+  }
+  .comp-table {
+    font-size: 11px;
+  }
+  .comp-table thead th, .comp-table tbody td {
+    padding: 8px 6px;
+  }
+  .logo-mark {
+    font-size: 56px;
+  }
+  .section-title {
+    font-size: 24px;
+  }
+  .arch-boxes {
+    flex-direction: column;
+  }
+}
+
+
+/* ===== ROADMAP STYLES ===== */
+#roadmapPage .header {
+  text-align: center; padding: 60px 24px 40px;
+  background: linear-gradient(180deg, rgba(108,92,231,0.08) 0%, transparent 100%);
+}
+#roadmapPage .header .logo { font-size: 48px; font-weight: 900; background: linear-gradient(135deg, #a29bfe, #f7931a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+#roadmapPage .header h1 { font-size: 28px; font-weight: 700; margin: 12px 0 8px; }
+#roadmapPage .header p { font-size: 15px; color: #9090b0; max-width: 600px; margin: 0 auto; }
+#roadmapPage .content { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+#roadmapPage .staircase {
+  display: flex; gap: 6px; margin: 48px 0 60px; align-items: flex-end; height: 280px;
+}
+#roadmapPage .stair {
+  flex: 1; border-radius: 12px 12px 0 0; display: flex; flex-direction: column;
+  justify-content: flex-end; padding: 16px 10px; text-align: center;
+  position: relative; transition: transform 0.2s;
+}
+#roadmapPage .stair:hover { transform: translateY(-4px); }
+#roadmapPage .stair .step-num { font-size: 11px; letter-spacing: 2px; opacity: 0.7; margin-bottom: 4px; }
+#roadmapPage .stair .step-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+#roadmapPage .stair .step-rev { font-size: 11px; opacity: 0.8; }
+#roadmapPage .s1 { height: 30%; background: linear-gradient(180deg, #2d2d5a, #1a1a3a); border: 1px solid #2a2a4a; }
+#roadmapPage .s2 { height: 45%; background: linear-gradient(180deg, #2d3a5a, #1a2a3a); border: 1px solid #2a3a5a; }
+#roadmapPage .s3 { height: 60%; background: linear-gradient(180deg, #3a2d5a, #2a1a3a); border: 1px solid #3a2a5a; }
+#roadmapPage .s4 { height: 78%; background: linear-gradient(180deg, #4a3a2a, #2a2a1a); border: 1px solid #f7931a; }
+#roadmapPage .s5 { height: 100%; background: linear-gradient(180deg, rgba(108,92,231,0.3), rgba(247,147,26,0.2)); border: 1px solid #f0b429; }
+#roadmapPage .stage {
+  margin-bottom: 48px; padding: 36px; background: #12122a;
+  border: 1px solid #2a2a4a; border-radius: 20px;
+  position: relative; overflow: hidden;
+}
+#roadmapPage .stage::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+}
+#roadmapPage .stage.st1::before { background: #9090b0; }
+#roadmapPage .stage.st2::before { background: #4fc3f7; }
+#roadmapPage .stage.st3::before { background: #ce93d8; }
+#roadmapPage .stage.st4::before { background: #f7931a; }
+#roadmapPage .stage.st5::before { background: #f0b429; }
+#roadmapPage .stage-header {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+}
+#roadmapPage .stage-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;
+}
+#roadmapPage .st1 .stage-badge { background: rgba(144,144,176,0.2); color: #9090b0; }
+#roadmapPage .st2 .stage-badge { background: rgba(79,195,247,0.2); color: #4fc3f7; }
+#roadmapPage .st3 .stage-badge { background: rgba(206,147,216,0.2); color: #ce93d8; }
+#roadmapPage .st4 .stage-badge { background: rgba(247,147,26,0.2); color: #f7931a; }
+#roadmapPage .st5 .stage-badge { background: rgba(240,180,41,0.2); color: #f0b429; }
+#roadmapPage .stage-title { font-size: 22px; font-weight: 900; }
+#roadmapPage .stage-period { font-size: 13px; color: #9090b0; margin-left: auto; }
+#roadmapPage .detail-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px;
+}
+#roadmapPage .detail-card {
+  background: #1a1a3a; border: 1px solid #2a2a4a;
+  border-radius: 14px; padding: 20px;
+}
+#roadmapPage .detail-card h4 {
+  font-size: 12px; color: #a29bfe; letter-spacing: 2px;
+  text-transform: uppercase; margin-bottom: 10px;
+}
+#roadmapPage .detail-card ul {
+  list-style: none; font-size: 13px; color: #9090b0;
+}
+#roadmapPage .detail-card ul li {
+  padding: 4px 0; padding-left: 16px; position: relative;
+}
+#roadmapPage .detail-card ul li::before {
+  content: '▸'; position: absolute; left: 0; color: #a29bfe;
+}
+#roadmapPage .metrics-row {
+  display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;
+}
+#roadmapPage .metric-box {
+  flex: 1; min-width: 100px; background: #1a1a3a;
+  border: 1px solid #2a2a4a; border-radius: 12px;
+  padding: 16px; text-align: center;
+}
+#roadmapPage .metric-box .val { font-size: 22px; font-weight: 900; }
+#roadmapPage .metric-box .val.green { color: #00e676; }
+#roadmapPage .metric-box .val.gold { color: #f0b429; }
+#roadmapPage .metric-box .val.btc { color: #f7931a; }
+#roadmapPage .metric-box .val.accent { color: #a29bfe; }
+#roadmapPage .metric-box .lbl { font-size: 11px; color: #9090b0; margin-top: 4px; }
+#roadmapPage .unlock {
+  background: #1a1a3a; border: 1px solid #2a2a4a;
+  border-radius: 12px; padding: 16px 20px; margin-top: 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+#roadmapPage .unlock .arrow { font-size: 20px; color: #00e676; }
+#roadmapPage .unlock .text { font-size: 13px; color: #9090b0; }
+#roadmapPage .unlock .text strong { color: #e8e8f0; }
+#roadmapPage .transition {
+  text-align: center; padding: 32px 0; position: relative;
+}
+#roadmapPage .transition::before {
+  content: ''; position: absolute; left: 50%; top: 0; bottom: 0;
+  width: 2px; background: linear-gradient(to bottom, #2a2a4a, #6c5ce7, #2a2a4a);
+}
+#roadmapPage .transition .icon {
+  position: relative; z-index: 1; font-size: 28px;
+  background: #0a0a1a; padding: 8px;
+}
+#roadmapPage .transition .condition {
+  position: relative; z-index: 1; font-size: 12px; color: #a29bfe;
+  background: #0a0a1a; padding: 4px 12px; display: inline-block;
+  margin-top: 4px;
+}
+#roadmapPage .legal-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 32px 0;
+}
+#roadmapPage .legal-card {
+  background: #12122a; border: 1px solid #2a2a4a;
+  border-radius: 14px; padding: 24px;
+}
+#roadmapPage .legal-card .icon { font-size: 24px; margin-bottom: 8px; }
+#roadmapPage .legal-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+#roadmapPage .legal-card p { font-size: 12px; color: #9090b0; line-height: 1.6; }
+#roadmapPage .legal-card .stage-tag {
+  display: inline-block; margin-top: 8px; padding: 2px 8px;
+  border-radius: 10px; font-size: 10px; font-weight: 700;
+}
+#roadmapPage .legal-card .stage-tag.s3 { background: rgba(206,147,216,0.2); color: #ce93d8; }
+#roadmapPage .legal-card .stage-tag.s4 { background: rgba(247,147,26,0.2); color: #f7931a; }
+#roadmapPage .legal-card .stage-tag.s5 { background: rgba(240,180,41,0.2); color: #f0b429; }
+#roadmapPage .summary-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  margin: 32px 0; font-size: 13px;
+}
+#roadmapPage .summary-table thead th {
+  background: #1a1a3a; padding: 12px 14px; font-size: 11px;
+  font-weight: 600; color: #a29bfe; text-align: center;
+  border-bottom: 1px solid #2a2a4a; letter-spacing: 1px;
+}
+#roadmapPage .summary-table thead th:first-child { text-align: left; border-radius: 12px 0 0 0; }
+#roadmapPage .summary-table thead th:last-child { border-radius: 0 12px 0 0; }
+#roadmapPage .summary-table tbody td {
+  padding: 14px; border-bottom: 1px solid #2a2a4a; text-align: center;
+}
+#roadmapPage .summary-table tbody td:first-child { text-align: left; font-weight: 600; }
+#roadmapPage .summary-table tbody tr:last-child td { border-bottom: none; }
+#roadmapPage .footer {
+  text-align: center; padding: 60px 24px 40px;
+}
+#roadmapPage .footer .msg {
+  font-size: 20px; font-weight: 700; margin-bottom: 8px;
+  background: linear-gradient(135deg, #a29bfe, #f7931a);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+#roadmapPage .footer .sub { font-size: 13px; color: #9090b0; }
+
+@media (max-width: 700px) {
+  #roadmapPage .staircase { height: 200px; gap: 4px; }
+  #roadmapPage .stair .step-title { font-size: 11px; }
+  #roadmapPage .detail-grid, #roadmapPage .legal-grid { grid-template-columns: 1fr; }
+  #roadmapPage .metrics-row { flex-direction: column; }
+  #roadmapPage .stage-period { margin-left: 0; width: 100%; }
+  #roadmapPage .header h1 { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOCK SCREEN ===== -->
+<div id="lockScreen">
+  <div class="lock-inner">
+    <div class="lock-logo">NEXUS</div>
+    <div class="lock-sub">CONFIDENTIAL DOCUMENT</div>
+    <div class="lock-icon">🔒</div>
+    <form onsubmit="return doUnlock()">
+      <input type="password" id="pw" class="lock-input" placeholder="パスワードを入力" autocomplete="off" autofocus>
+      <button type="submit" class="lock-btn">閲覧する</button>
+    </form>
+    <div class="lock-error" id="err">パスワードが正しくありません</div>
+    <div class="lock-note">この資料は限定公開です</div>
+  </div>
+</div>
+
+<!-- ===== MAIN CONTENT (hidden until password) ===== -->
+<div id="mainContent">
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('pitch')">1. ピッチデック</button>
+    <button class="tab-btn" onclick="switchTab('roadmap')">2. グロース戦略</button>
+  </div>
+
+  <!-- PITCH DECK -->
+  <div id="pitchPage" class="tab-page active">
+
+
+<!-- ===== COVER ===== -->
+<div class="cover">
+  <div class="cover-content">
+    <div class="logo-mark">NEXUS</div>
+    <div class="logo-sub">AI Data Marketplace</div>
+    <div class="cover-tagline">人間のスキルをAIの燃料に。<br>報酬はビットコインで。</div>
+    <div class="cover-desc">
+      フィジカルAI時代に必要な「人間のリアルデータ」を<br>
+      専門家から直接収集し、AI企業に提供するマーケットプレイス
+    </div>
+    <div class="cover-stats">
+      <div class="cover-stat">
+        <div class="num">$250B+</div>
+        <div class="label">AI訓練データ市場規模（2030年予測）</div>
+      </div>
+      <div class="cover-stat">
+        <div class="num">$39B</div>
+        <div class="label">Figure AI 評価額</div>
+      </div>
+      <div class="cover-stat">
+        <div class="num">₿</div>
+        <div class="label">報酬はBTCで即時支払い</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ===== 1. PROBLEM ===== -->
+<div class="section">
+  <div class="section-num">01 — Problem</div>
+  <div class="section-title">フィジカルAIは「人間のデータ」に飢えている</div>
+
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="icon">🤖</div>
+      <h3>ロボットは動きを学べない</h3>
+      <p>ヒューマノイドロボットの訓練には、人間の実際の動作データが必要。テキストや画像のAIとは根本的に異なる。</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">🏥</div>
+      <h3>専門データは入手困難</h3>
+      <p>外科手術、職人技、リハビリ動作など、高価値データは閉じた世界に存在し、AI企業がアクセスできない。</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">💰</div>
+      <h3>データ提供者が報われない</h3>
+      <p>Scale AIのラベラーは時給$21〜39。専門家が持つ高価値スキルに見合った報酬体系が存在しない。</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">🔗</div>
+      <h3>仲介コストが高すぎる</h3>
+      <p>従来のデータ収集は、企業間契約・NDA・仲介業者を経由。コストの大半がデータ提供者に届かない。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ===== 2. SOLUTION ===== -->
+<div class="section">
+  <div class="section-num">02 — Solution</div>
+  <div class="section-title">NEXUSが解決する</div>
+
+  <div class="solution-flow">
+    <div class="flow-node">
+      <div class="icon">👨‍⚕️</div>
+      <div class="title">専門家</div>
+      <div class="desc">医者・職人・セラピスト等がスキルデータを撮影</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node highlight">
+      <div class="icon">⚡</div>
+      <div class="title">NEXUS</div>
+      <div class="desc">品質検証・匿名化・ライセンス管理</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="icon">🏭</div>
+      <div class="title">AI企業</div>
+      <div class="desc">Figure AI, Google, Tesla等がデータを購入</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" style="border-color: var(--btc);">
+      <div class="icon">₿</div>
+      <div class="title">BTC報酬</div>
+      <div class="desc">スマートコントラクトで自動・即時分配</div>
+    </div>
+  </div>
+
+  <p style="text-align: center; color: var(--text2); font-size: 14px; margin-top: 20px;">
+    データが売れるたびにBTCが自動分配。同じデータが複数企業に売れれば、その都度収益が発生。
+  </p>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ===== 3. ARCHITECTURE ===== -->
+<div class="section">
+  <div class="section-num">03 — Architecture</div>
+  <div class="section-title">技術アーキテクチャ</div>
+
+  <div class="arch-diagram">
+
+    <div class="arch-layer">
+      <div class="arch-layer-label">📱 フロントエンド</div>
+      <div class="arch-boxes">
+        <div class="arch-box">
+          <div class="name">モバイルアプリ</div>
+          <div class="tech">React Native / Flutter</div>
+        </div>
+        <div class="arch-box">
+          <div class="name">ダッシュボード</div>
+          <div class="tech">Next.js / React</div>
+        </div>
+        <div class="arch-box">
+          <div class="name">撮影SDK</div>
+          <div class="tech">カメラ制御 / ガイドUI</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-connector">↕</div>
+
+    <div class="arch-layer">
+      <div class="arch-layer-label">⚙️ バックエンド API</div>
+      <div class="arch-boxes">
+        <div class="arch-box core">
+          <div class="name">データ処理エンジン</div>
+          <div class="tech">品質検証 / 匿名化 / メタデータ付与</div>
+        </div>
+        <div class="arch-box core">
+          <div class="name">マッチングエンジン</div>
+          <div class="tech">AI需要 × データ供給のマッチング</div>
+        </div>
+        <div class="arch-box">
+          <div class="name">認証・KYC</div>
+          <div class="tech">資格検証 / 本人確認</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-connector">↕</div>
+
+    <div class="arch-layer">
+      <div class="arch-layer-label">🔐 データストレージ</div>
+      <div class="arch-boxes">
+        <div class="arch-box">
+          <div class="name">暗号化ストレージ</div>
+          <div class="tech">IPFS / Filecoin（分散型）</div>
+        </div>
+        <div class="arch-box">
+          <div class="name">メタデータ管理</div>
+          <div class="tech">PostgreSQL + Redis</div>
+        </div>
+        <div class="arch-box">
+          <div class="name">CDN配信</div>
+          <div class="tech">購入者への高速配信</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-connector">↕</div>
+
+    <div class="arch-layer">
+      <div class="arch-layer-label">⛓️ ブロックチェーン層</div>
+      <div class="arch-boxes">
+        <div class="arch-box btc">
+          <div class="name">BTC決済</div>
+          <div class="tech">Lightning Network / BTCPay</div>
+        </div>
+        <div class="arch-box btc">
+          <div class="name">スマートコントラクト</div>
+          <div class="tech">エスクロー / 自動分配</div>
+        </div>
+        <div class="arch-box">
+          <div class="name">IPライセンス</div>
+          <div class="tech">Story Protocol連携</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-size: 16px; margin: 32px 0 16px;">データフロー詳細</h3>
+  <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; font-size: 13px; color: var(--text2); line-height: 2;">
+    <strong style="color: var(--text);">1. 撮影</strong> — 専門家がアプリでデータを撮影（ガイド付き）<br>
+    <strong style="color: var(--text);">2. アップロード</strong> — 端末上で匿名化処理後、暗号化してIPFSに保存<br>
+    <strong style="color: var(--text);">3. 品質検証</strong> — AIによる自動品質チェック + 人間レビュー<br>
+    <strong style="color: var(--text);">4. メタデータ</strong> — Story Protocolでデータの所有権・ライセンスをオンチェーン記録<br>
+    <strong style="color: var(--text);">5. マッチング</strong> — AI企業の需要とデータを自動マッチング<br>
+    <strong style="color: var(--text);">6. 取引</strong> — スマートコントラクトでエスクロー決済<br>
+    <strong style="color: var(--text);">7. 分配</strong> — 手数料を差し引き、BTCをLightning Networkで即時送金
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ===== 4. DATA PRICING ===== -->
+<div class="section">
+  <div class="section-num">04 — Data Pricing</div>
+  <div class="section-title">データカテゴリ別の取引単価</div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Tier</th>
+        <th>データカテゴリ</th>
+        <th>推定単価（/時間）</th>
+        <th>需要元</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="tier-badge tier-s">S</span></td>
+        <td>外科手術映像</td>
+        <td class="price-tag">$500〜2,000+</td>
+        <td>手術ロボット企業</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge tier-s">S</span></td>
+        <td>リハビリ・理学療法</td>
+        <td class="price-tag">$200〜800</td>
+        <td>介護ロボット、医療AI</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge tier-a">A</span></td>
+        <td>熟練工の作業映像</td>
+        <td class="price-tag">$100〜500</td>
+        <td>建設ロボット企業</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge tier-a">A</span></td>
+        <td>料理の手順映像</td>
+        <td class="price-tag">$50〜200</td>
+        <td>食品・調理ロボット</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge tier-a">A</span></td>
+        <td>農作業映像</td>
+        <td class="price-tag">$50〜200</td>
+        <td>農業ロボット企業</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge tier-b">B</span></td>
+        <td>日常動作（掃除・洗濯等）</td>
+        <td class="price-tag">$20〜80</td>
+        <td>家庭用ロボット企業</td>
+      </tr>
+      <tr>
+        <td><span class="tier-badge tier-b">B</span></td>
+        <td>自然会話（多言語）</td>
+        <td class="price-tag">$10〜50</td>
+        <td>音声AI企業</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-size: 13px; color: var(--text2); margin-top: 8px;">
+    ※ 同一データの複数企業への販売が可能。1データあたりの累計収益は単価の3〜10倍に。
+  </p>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ===== 5. REVENUE MODEL ===== -->
+<div class="section">
+  <div class="section-num">05 — Revenue Model</div>
+  <div class="section-title">収益モデル</div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px;">
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;">
+      <h4 style="font-size: 14px; color: var(--accent2); margin-bottom: 12px;">収益源 1: 取引手数料</h4>
+      <p style="font-size: 28px; font-weight: 900; color: var(--gold); margin-bottom: 8px;">20%</p>
+      <p style="font-size: 13px; color: var(--text2);">全データ取引から手数料を徴収。データ提供者に80%、NEXUSに20%。</p>
+    </div>
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px;">
+      <h4 style="font-size: 14px; color: var(--accent2); margin-bottom: 12px;">収益源 2: サブスク（AI企業向け）</h4>
+      <p style="font-size: 28px; font-weight: 900; color: var(--gold); margin-bottom: 8px;">$5K〜50K/月</p>
+      <p style="font-size: 13px; color: var(--text2);">AI企業向けの月額サブスクリプション。優先アクセス・カスタム収集リクエスト付き。</p>
+    </div>
+  </div>
+
+  <div class="revenue-example">
+    <h4>💡 収益シミュレーション: 外科手術映像 1時間分</h4>
+    <div class="revenue-row">
+      <span class="label">AI企業への販売価格</span>
+      <span class="amount positive">$1,000</span>
+    </div>
+    <div class="revenue-row">
+      <span class="label">NEXUS 手数料（20%）</span>
+      <span class="amount">$200</span>
+    </div>
+    <div class="revenue-row">
+      <span class="label">外科医への報酬（80%）</span>
+      <span class="amount positive">$800 (BTC)</span>
+    </div>
+    <div class="revenue-row">
+      <span class="label">同データが5社に販売された場合</span>
+      <span class="amount highlight">外科医: $4,000 / NEXUS: $1,000</span>
+    </div>
+  </div>
+
+  <div class="revenue-example">
+    <h4>📊 年間収益予測（運営2年目）</h4>
+    <div class="revenue-row">
+      <span class="label">月間データ取引件数</span>
+      <span class="amount">500件</span>
+    </div>
+    <div class="revenue-row">
+      <span class="label">平均取引単価</span>
+      <span class="amount">$300</span>
+    </div>
+    <div class="revenue-row">
+      <span class="label">月間取引総額</span>
+      <span class="amount positive">$150,000</span>
+    </div>
+    <div class="revenue-row">
+      <span class="label">月間手数料収入（20%）</span>
+      <span class="amount positive">$30,000</span>
+    </div>
+    <div class="revenue-row">
+      <span class="label">サブスク収入（10社 × $10K）</span>
+      <span class="amount positive">$100,000</span>
+    </div>
+    <div class="revenue-row" style="border-top: 2px solid var(--accent);">
+      <span class="label" style="font-weight: 700;">月間総収益</span>
+      <span class="amount highlight">$130,000/月</span>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ===== 6. MARKET SIZE ===== -->
+<div class="section">
+  <div class="section-num">06 — Market</div>
+  <div class="section-title">市場規模</div>
+
+  <div class="market-cards">
+    <div class="market-card">
+      <div class="value gold">$250B+</div>
+      <div class="metric">AI訓練データ市場<br>（2030年予測）</div>
+    </div>
+    <div class="market-card">
+      <div class="value accent">$38B</div>
+      <div class="metric">ヒューマノイドロボット市場<br>（2035年予測）</div>
+    </div>
+    <div class="market-card">
+      <div class="value green">$246B</div>
+      <div class="metric">ステーブルコイン市場<br>（2025年実績）</div>
+    </div>
+  </div>
+
+  <h3 style="font-size: 16px; margin: 32px 0 16px;">主要バイヤー候補</h3>
+  <div class="buyer-grid">
+    <div class="buyer-card">
+      <div class="company">Figure AI</div>
+      <div class="valuation">評価額 $39B / Series C $1B+</div>
+      <div class="needs">人間の全身動作データ、物体操作、歩行パターン、マルチモーダルセンサーデータ</div>
+    </div>
+    <div class="buyer-card">
+      <div class="company">Apptronik</div>
+      <div class="valuation">累計調達 $935M（Google, Mercedes出資）</div>
+      <div class="needs">倉庫・工場作業の動作データ、物体のピッキングと配置</div>
+    </div>
+    <div class="buyer-card">
+      <div class="company">Tesla (Optimus)</div>
+      <div class="valuation">ロボット事業 推定評価 $10B+</div>
+      <div class="needs">家庭内の日常動作、家事作業、人間とのインタラクション</div>
+    </div>
+    <div class="buyer-card">
+      <div class="company">Google DeepMind</div>
+      <div class="valuation">Alphabet傘下 / 研究予算 $3B+</div>
+      <div class="needs">ロボティクス汎用データ、医療AI、マルチモーダル理解</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ===== 7. COMPETITIVE ===== -->
+<div class="section">
+  <div class="section-num">07 — Competitive Landscape</div>
+  <div class="section-title">競合比較</div>
+
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th>項目</th>
+        <th>NEXUS（当社）</th>
+        <th>ZenO</th>
+        <th>Scale AI</th>
+        <th>Sensei</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="ours">
+        <td>フォーカス</td>
+        <td>専門職データ</td>
+        <td>汎用フィジカルAI</td>
+        <td>テキスト/画像ラベル</td>
+        <td>ロボット操作デモ</td>
+      </tr>
+      <tr>
+        <td>報酬通貨</td>
+        <td class="ours" style="color: var(--btc);">BTC ₿</td>
+        <td>ステーブルコイン</td>
+        <td>USD</td>
+        <td>USD</td>
+      </tr>
+      <tr>
+        <td>医療データ</td>
+        <td class="ours"><span class="check">●</span></td>
+        <td><span class="cross">✕</span></td>
+        <td><span class="cross">✕</span></td>
+        <td><span class="cross">✕</span></td>
+      </tr>
+      <tr>
+        <td>職人技データ</td>
+        <td class="ours"><span class="check">●</span></td>
+        <td><span class="check">●</span></td>
+        <td><span class="cross">✕</span></td>
+        <td><span class="cross">✕</span></td>
+      </tr>
+      <tr>
+        <td>日本市場</td>
+        <td class="ours"><span class="check">●</span></td>
+        <td><span class="cross">✕</span></td>
+        <td><span class="cross">✕</span></td>
+        <td><span class="cross">✕</span></td>
+      </tr>
+      <tr>
+        <td>IPオンチェーン管理</td>
+        <td class="ours"><span class="check">●</span></td>
+        <td><span class="check">●</span></td>
+        <td><span class="cross">✕</span></td>
+        <td><span class="cross">✕</span></td>
+      </tr>
+      <tr>
+        <td>複数企業への再販</td>
+        <td class="ours"><span class="check">●</span></td>
+        <td><span class="check">●</span></td>
+        <td><span class="cross">✕</span></td>
+        <td><span class="cross">✕</span></td>
+      </tr>
+      <tr>
+        <td>資金調達額</td>
+        <td class="ours">—</td>
+        <td>$136M</td>
+        <td>$600M+</td>
+        <td>YC</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-size: 14px; color: var(--text); margin-top: 20px; line-height: 1.8;">
+    <strong>差別化のポイント:</strong><br>
+    ZenOは汎用データ、Scale AIは低スキルラベリング作業に特化。<br>
+    NEXUSは<strong style="color: var(--gold);">「専門家の高価値データ × BTC報酬 × 日本市場」</strong>という未開拓のニッチを狙う。
+  </p>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ===== 8. ROADMAP ===== -->
+<div class="section">
+  <div class="section-num">08 — Roadmap</div>
+  <div class="section-title">ロードマップ</div>
+
+  <div class="roadmap">
+    <div class="roadmap-item">
+      <div class="phase">Phase 1 — MVP</div>
+      <h4>プロトタイプ開発 & 初期データ収集</h4>
+      <p>
+        Webアプリ版MVP開発。料理動画（最もハードルが低い）から開始。<br>
+        10〜20人のコントリビューターを募集し、データ品質と収集フローを検証。<br>
+        BTC決済のプロトタイプ実装。
+      </p>
+      <span class="timeline">0〜6ヶ月</span>
+    </div>
+
+    <div class="roadmap-item">
+      <div class="phase">Phase 2 — β版</div>
+      <h4>専門職カテゴリ拡大 & AI企業パートナーシップ</h4>
+      <p>
+        熟練工・リハビリ分野に拡大。モバイルアプリ(iOS/Android)開発。<br>
+        2〜3社のAI企業とパイロット契約を締結。<br>
+        Story Protocol連携でIPライセンス管理を実装。
+      </p>
+      <span class="timeline">6〜12ヶ月</span>
+    </div>
+
+    <div class="roadmap-item">
+      <div class="phase">Phase 3 — 正式ローンチ</div>
+      <h4>日本市場本格展開 & 医療データ参入</h4>
+      <p>
+        医療機関との提携。手術映像・リハビリデータの収集開始。<br>
+        コントリビューター500人以上。AI企業10社以上と契約。<br>
+        サブスクリプションモデル開始。
+      </p>
+      <span class="timeline">12〜18ヶ月</span>
+    </div>
+
+    <div class="roadmap-item">
+      <div class="phase">Phase 4 — グローバル展開</div>
+      <h4>海外市場進出 & シリーズA</h4>
+      <p>
+        アジア → 欧米に展開。多言語対応。<br>
+        データ取引の自動化・AI品質検証の高度化。<br>
+        シリーズA資金調達。
+      </p>
+      <span class="timeline">18〜36ヶ月</span>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ===== 9. LEGAL ===== -->
+<div class="section">
+  <div class="section-num">09 — Legal & Compliance</div>
+  <div class="section-title">法的課題と対策</div>
+
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="icon">🏥</div>
+      <h3>医療データ規制</h3>
+      <p>日本: 個人情報保護法・次世代医療基盤法に準拠。匿名加工情報として取り扱い。撮影前に患者の同意を取得。</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">📋</div>
+      <h3>知的財産権</h3>
+      <p>Story Protocolでデータの所有権をオンチェーン記録。ライセンス条件（用途制限・期間・再販可否）をスマートコントラクトで自動執行。</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">💱</div>
+      <h3>暗号資産規制</h3>
+      <p>日本: 暗号資産交換業の登録（金融庁）。BTC送金のAML/KYC対応。税務処理のガイドライン提供。</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">🌍</div>
+      <h3>グローバル対応</h3>
+      <p>GDPR（欧州）・HIPAA（米国）への準拠。データの越境移転規制への対応。各国の暗号資産規制に適合。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ===== 10. ASK ===== -->
+<div class="section">
+  <div class="section-num">10 — The Ask</div>
+  <div class="section-title">資金調達</div>
+
+  <div class="ask-grid">
+    <div class="ask-card">
+      <div class="amount">$500K</div>
+      <div class="purpose">シード資金</div>
+      <div class="detail">
+        MVP開発: $200K<br>
+        初期コントリビューター獲得: $100K<br>
+        法務・コンプライアンス: $100K<br>
+        運営費（6ヶ月）: $100K
+      </div>
+    </div>
+    <div class="ask-card">
+      <div class="amount">$3M</div>
+      <div class="purpose">シリーズA（18ヶ月後目標）</div>
+      <div class="detail">
+        モバイルアプリ開発: $500K<br>
+        AI品質検証システム: $500K<br>
+        医療機関パートナーシップ: $500K<br>
+        マーケティング・採用: $1M<br>
+        グローバル展開準備: $500K
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 32px; padding: 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px;">
+    <p style="font-size: 15px; color: var(--text); font-weight: 600; margin-bottom: 8px;">
+      なぜ今なのか？
+    </p>
+    <p style="font-size: 14px; color: var(--text2); line-height: 1.8; max-width: 600px; margin: 0 auto;">
+      ZenOが$136Mを調達し、2026年2月にベータ版をローンチ。<br>
+      Figure AIは$39Bの評価額で人間データへの需要を証明。<br>
+      市場は立ち上がったばかり。<strong style="color: var(--gold);">専門職データという未開拓のニッチ</strong>に先行者利益を取る最後のチャンス。
+    </p>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ===== FOOTER ===== -->
+<div class="pitch-footer">
+  <div class="logo">NEXUS</div>
+  <div class="tagline">人間のスキルをAIの燃料に。報酬はビットコインで。</div>
+  <div class="confidential">CONFIDENTIAL — For Authorized Recipients Only</div>
+</div>
+
+
+  </div>
+
+  <!-- GROWTH ROADMAP -->
+  <div id="roadmapPage" class="tab-page">
+
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">NEXUS</div>
+  <h1>5段階グロース戦略</h1>
+  <p>個人の日常動作データ販売からスタートし、段階的に専門職データ企業へスケールアップ</p>
+</div>
+
+<div class="content">
+
+<!-- STAIRCASE OVERVIEW -->
+<div class="staircase">
+  <div class="stair s1">
+    <div class="step-num">STAGE 1</div>
+    <div class="step-title">個人で稼ぐ</div>
+    <div class="step-rev">月$0〜100</div>
+  </div>
+  <div class="stair s2">
+    <div class="step-num">STAGE 2</div>
+    <div class="step-title">仲間を集める</div>
+    <div class="step-rev">月$500〜2K</div>
+  </div>
+  <div class="stair s3">
+    <div class="step-num">STAGE 3</div>
+    <div class="step-title">自前プラットフォーム</div>
+    <div class="step-rev">月$5K〜20K</div>
+  </div>
+  <div class="stair s4">
+    <div class="step-num">STAGE 4</div>
+    <div class="step-title">専門職データ参入</div>
+    <div class="step-rev">月$50K〜200K</div>
+  </div>
+  <div class="stair s5">
+    <div class="step-num">STAGE 5</div>
+    <div class="step-title">医療・企業提携</div>
+    <div class="step-rev">月$500K+</div>
+  </div>
+</div>
+
+<!-- ========== STAGE 1 ========== -->
+<div class="stage st1">
+  <div class="stage-header">
+    <span class="stage-badge">STAGE 1</span>
+    <span class="stage-title">個人で日常動作を売って稼ぐ</span>
+    <span class="stage-period">0〜3ヶ月目</span>
+  </div>
+
+  <p style="font-size: 14px; color: var(--text2); margin-bottom: 16px;">
+    費用ゼロ。iPhoneと既存プラットフォームだけで「データが売れるか」を検証する。
+  </p>
+
+  <div class="detail-grid">
+    <div class="detail-card">
+      <h4>やること</h4>
+      <ul>
+        <li>ZenO ベータ版に登録</li>
+        <li>Versos.ai に登録</li>
+        <li>CrowdGen (Appen) に登録</li>
+        <li>日常動作を撮影（料理・掃除・洗濯）</li>
+        <li>各プラットフォームにアップロード</li>
+        <li>どのカテゴリが売れるか分析</li>
+      </ul>
+    </div>
+    <div class="detail-card">
+      <h4>撮影する動画</h4>
+      <ul>
+        <li>料理（切る・炒める・盛り付け）</li>
+        <li>掃除（掃除機・拭き掃除）</li>
+        <li>洗濯物をたたむ・干す</li>
+        <li>食器洗い</li>
+        <li>片付け・整理整頓</li>
+        <li>ドアの開閉・階段の昇降</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="metrics-row">
+    <div class="metric-box"><div class="val">¥0</div><div class="lbl">初期費用</div></div>
+    <div class="metric-box"><div class="val">1人</div><div class="lbl">必要人数</div></div>
+    <div class="metric-box"><div class="val accent">$50〜100</div><div class="lbl">月間目標収益</div></div>
+    <div class="metric-box"><div class="val">3ヶ月</div><div class="lbl">検証期間</div></div>
+  </div>
+
+  <div class="unlock">
+    <span class="arrow">→</span>
+    <span class="text"><strong>Stage 2への条件:</strong> 月$50以上の収益を安定して出せるようになったら</span>
+  </div>
+</div>
+
+<!-- TRANSITION -->
+<div class="transition">
+  <div class="icon">⬇</div>
+  <div class="condition">月$50+達成で次へ</div>
+</div>
+
+<!-- ========== STAGE 2 ========== -->
+<div class="stage st2">
+  <div class="stage-header">
+    <span class="stage-badge">STAGE 2</span>
+    <span class="stage-title">仲間を集めてデータ量を増やす</span>
+    <span class="stage-period">3〜6ヶ月目</span>
+  </div>
+
+  <p style="font-size: 14px; color: var(--text2); margin-bottom: 16px;">
+    友人・知人・SNSで5〜20人のコントリビューターを集めてデータ収集を拡大。<br>
+    あなたが「仲介者」として取りまとめ、まだ既存プラットフォーム上で販売。
+  </p>
+
+  <div class="detail-grid">
+    <div class="detail-card">
+      <h4>やること</h4>
+      <ul>
+        <li>Stage 1で売れたカテゴリに集中</li>
+        <li>友人・知人に撮影を依頼（報酬分配）</li>
+        <li>Twitter/Instagram で協力者を募集</li>
+        <li>撮影マニュアルを作成</li>
+        <li>品質チェックの基準を決める</li>
+        <li>簡易的な報酬分配の仕組みを作る</li>
+      </ul>
+    </div>
+    <div class="detail-card">
+      <h4>拡大するカテゴリ</h4>
+      <ul>
+        <li>Stage 1で反応が良かったカテゴリ</li>
+        <li>複数人の生活シーン（多様性UP）</li>
+        <li>異なる住環境（アパート・一戸建て等）</li>
+        <li>異なる年齢層の動作データ</li>
+        <li>ペットとのインタラクション</li>
+        <li>DIY・簡単な修理作業</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="metrics-row">
+    <div class="metric-box"><div class="val">¥0</div><div class="lbl">初期費用</div></div>
+    <div class="metric-box"><div class="val">5〜20人</div><div class="lbl">コントリビューター</div></div>
+    <div class="metric-box"><div class="val green">$500〜2K</div><div class="lbl">月間収益</div></div>
+    <div class="metric-box"><div class="val">70/30</div><div class="lbl">撮影者/あなた</div></div>
+  </div>
+
+  <div class="unlock">
+    <span class="arrow">→</span>
+    <span class="text"><strong>Stage 3への条件:</strong> 月$1,000+の収益 & コントリビューター10人以上</span>
+  </div>
+</div>
+
+<!-- TRANSITION -->
+<div class="transition">
+  <div class="icon">⬇</div>
+  <div class="condition">月$1K+ & 10人以上で次へ</div>
+</div>
+
+<!-- ========== STAGE 3 ========== -->
+<div class="stage st3">
+  <div class="stage-header">
+    <span class="stage-badge">STAGE 3</span>
+    <span class="stage-title">自前プラットフォームを構築</span>
+    <span class="stage-period">6〜12ヶ月目</span>
+  </div>
+
+  <p style="font-size: 14px; color: var(--text2); margin-bottom: 16px;">
+    既存プラットフォームの手数料を払う側から、自分が手数料を取る側になる。<br>
+    MVPのWebアプリを開発し、AI企業と直接取引を開始。
+  </p>
+
+  <div class="detail-grid">
+    <div class="detail-card">
+      <h4>構築するもの</h4>
+      <ul>
+        <li>Webアプリ（データアップロード・管理）</li>
+        <li>品質検証AIの初期版</li>
+        <li>自動匿名化処理（顔ぼかし等）</li>
+        <li>BTC/Lightning Network 決済</li>
+        <li>データカタログ（AI企業向け閲覧ページ）</li>
+        <li>利用規約・プライバシーポリシー</li>
+      </ul>
+    </div>
+    <div class="detail-card">
+      <h4>営業活動</h4>
+      <ul>
+        <li>AI企業にコールドメール（Stage 1-2の実績付き）</li>
+        <li>「こんなデータがあります」のサンプル提供</li>
+        <li>ロボティクス系スタートアップにDM</li>
+        <li>AI/データ系カンファレンスに参加</li>
+        <li>少額でも最初の法人契約を取る</li>
+        <li>日本の強み（職人文化）をアピール</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="detail-grid" style="margin-top: 16px;">
+    <div class="detail-card">
+      <h4>技術スタック（最小構成）</h4>
+      <ul>
+        <li>フロント: Next.js（Vercel無料枠）</li>
+        <li>DB: Supabase（無料枠）</li>
+        <li>ストレージ: Cloudflare R2（安い）</li>
+        <li>決済: BTCPay Server（OSS・無料）</li>
+        <li>認証: Supabase Auth</li>
+        <li>合計コスト: 月$50〜200程度</li>
+      </ul>
+    </div>
+    <div class="detail-card">
+      <h4>法人設立</h4>
+      <ul>
+        <li>合同会社設立（費用: 約¥60,000）</li>
+        <li>暗号資産関連は「交換業」に該当しない<br>範囲で設計（BTCの送金のみ）</li>
+        <li>個人情報保護法に準拠した規約作成</li>
+        <li>顧問弁護士（スポット相談: ¥5万/回）</li>
+        <li>税理士（暗号資産の税務処理）</li>
+        <li>会計ソフト（freee等）導入</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="metrics-row">
+    <div class="metric-box"><div class="val btc">¥30〜50万</div><div class="lbl">初期投資</div></div>
+    <div class="metric-box"><div class="val">50〜100人</div><div class="lbl">コントリビューター</div></div>
+    <div class="metric-box"><div class="val green">$5K〜20K</div><div class="lbl">月間収益</div></div>
+    <div class="metric-box"><div class="val">20%</div><div class="lbl">プラットフォーム手数料</div></div>
+  </div>
+
+  <div class="unlock">
+    <span class="arrow">→</span>
+    <span class="text"><strong>Stage 4への条件:</strong> 法人契約2社以上 & 月$10,000+の収益</span>
+  </div>
+</div>
+
+<!-- TRANSITION -->
+<div class="transition">
+  <div class="icon">⬇</div>
+  <div class="condition">法人契約2社+ & 月$10K+で次へ</div>
+</div>
+
+<!-- ========== STAGE 4 ========== -->
+<div class="stage st4">
+  <div class="stage-header">
+    <span class="stage-badge">STAGE 4</span>
+    <span class="stage-title">専門職データ市場に参入</span>
+    <span class="stage-period">12〜24ヶ月目</span>
+  </div>
+
+  <p style="font-size: 14px; color: var(--text2); margin-bottom: 16px;">
+    ここからが本番。大工・職人・調理師など専門家のデータを集め始める。<br>
+    日常動作の実績と信頼が、専門家を口説く武器になる。
+  </p>
+
+  <div class="detail-grid">
+    <div class="detail-card">
+      <h4>ターゲットとする専門職</h4>
+      <ul>
+        <li><strong>大工・建設作業員</strong> — 木材加工、釘打ち、測定</li>
+        <li><strong>電気工事士</strong> — 配線、はんだ付け</li>
+        <li><strong>溶接工</strong> — 溶接技術の動作パターン</li>
+        <li><strong>板前・シェフ</strong> — プロの包丁技術</li>
+        <li><strong>理学療法士</strong> — リハビリ指導の動作</li>
+        <li><strong>介護士</strong> — 高齢者のケア動作</li>
+      </ul>
+    </div>
+    <div class="detail-card">
+      <h4>専門家を集める方法</h4>
+      <ul>
+        <li>職人系YouTuber・TikTokerに営業</li>
+        <li>職業訓練校・専門学校と提携</li>
+        <li>業界団体（建設業協会等）への提案</li>
+        <li>「副業で月5万円」のアピール</li>
+        <li>紹介報酬プログラム（既存→新規）</li>
+        <li>地方自治体の産業振興との連携</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="detail-grid" style="margin-top: 16px;">
+    <div class="detail-card">
+      <h4>プラットフォーム強化</h4>
+      <ul>
+        <li>モバイルアプリ開発（iOS/Android）</li>
+        <li>マルチアングル撮影ガイド機能</li>
+        <li>AI品質スコアリング自動化</li>
+        <li>Story Protocol連携（IP管理）</li>
+        <li>サブスクリプションプラン導入</li>
+        <li>API提供（AI企業向け直接アクセス）</li>
+      </ul>
+    </div>
+    <div class="detail-card">
+      <h4>資金調達</h4>
+      <ul>
+        <li>シード資金: $300K〜500K</li>
+        <li>ピッチ先: AI特化VC、Web3ファンド</li>
+        <li>実績: Stage 1-3の売上データが武器</li>
+        <li>エンジニア2〜3名を採用</li>
+        <li>営業1名（専門職リクルーター）</li>
+        <li>オフィス: 不要（リモート運営）</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="metrics-row">
+    <div class="metric-box"><div class="val btc">$300〜500K</div><div class="lbl">資金調達</div></div>
+    <div class="metric-box"><div class="val">500+人</div><div class="lbl">コントリビューター</div></div>
+    <div class="metric-box"><div class="val green">$50〜200K</div><div class="lbl">月間収益</div></div>
+    <div class="metric-box"><div class="val">10+社</div><div class="lbl">法人契約</div></div>
+  </div>
+
+  <div class="unlock">
+    <span class="arrow">→</span>
+    <span class="text"><strong>Stage 5への条件:</strong> 月$100K+収益 & 専門職データの安定供給体制</span>
+  </div>
+</div>
+
+<!-- TRANSITION -->
+<div class="transition">
+  <div class="icon">⬇</div>
+  <div class="condition">月$100K+ & 専門職体制確立で次へ</div>
+</div>
+
+<!-- ========== STAGE 5 ========== -->
+<div class="stage st5">
+  <div class="stage-header">
+    <span class="stage-badge">STAGE 5</span>
+    <span class="stage-title">医療データ参入 & 企業提携</span>
+    <span class="stage-period">24〜36ヶ月目</span>
+  </div>
+
+  <p style="font-size: 14px; color: var(--text2); margin-bottom: 16px;">
+    最高価値のデータ領域。医療機関との正式提携により、<br>
+    手術映像・リハビリデータなど$500〜2,000+/時の高価値データを取り扱う。
+  </p>
+
+  <div class="detail-grid">
+    <div class="detail-card">
+      <h4>医療データの種類</h4>
+      <ul>
+        <li><strong>手術映像</strong> — 腹腔鏡手術、内視鏡手術</li>
+        <li><strong>リハビリ動作</strong> — 理学療法の施術映像</li>
+        <li><strong>介護動作</strong> — 入浴介助、移乗介助</li>
+        <li><strong>歯科治療</strong> — インプラント、矯正</li>
+        <li><strong>看護技術</strong> — 採血、点滴、包帯法</li>
+        <li><strong>救急処置</strong> — BLS、外傷処置</li>
+      </ul>
+    </div>
+    <div class="detail-card">
+      <h4>必要な提携先</h4>
+      <ul>
+        <li>大学病院（研究利用の枠組み）</li>
+        <li>医療法人（手術映像の提供）</li>
+        <li>介護施設チェーン</li>
+        <li>医療機器メーカー（ロボット手術）</li>
+        <li>認定匿名加工医療情報作成事業者</li>
+        <li>医療系弁護士事務所</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="detail-grid" style="margin-top: 16px;">
+    <div class="detail-card">
+      <h4>法規制対応</h4>
+      <ul>
+        <li>次世代医療基盤法に基づく認定取得</li>
+        <li>匿名加工医療情報作成事業者の認定</li>
+        <li>倫理審査委員会（IRB）の設置</li>
+        <li>患者同意取得の仕組み構築</li>
+        <li>HIPAA準拠（海外展開用）</li>
+        <li>GDPR準拠（欧州展開用）</li>
+      </ul>
+    </div>
+    <div class="detail-card">
+      <h4>グローバル展開</h4>
+      <ul>
+        <li>アジア展開（韓国・台湾・シンガポール）</li>
+        <li>シリーズA資金調達: $3〜5M</li>
+        <li>チーム: 15〜30名</li>
+        <li>海外のロボット企業との直接契約</li>
+        <li>データの多国籍性が競争力に</li>
+        <li>IPO or M&Aの検討開始</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="metrics-row">
+    <div class="metric-box"><div class="val gold">$3〜5M</div><div class="lbl">シリーズA</div></div>
+    <div class="metric-box"><div class="val">5,000+人</div><div class="lbl">コントリビューター</div></div>
+    <div class="metric-box"><div class="val green">$500K+</div><div class="lbl">月間収益</div></div>
+    <div class="metric-box"><div class="val gold">$500〜2K/h</div><div class="lbl">医療データ単価</div></div>
+  </div>
+</div>
+
+<!-- ===== LEGAL REQUIREMENTS BY STAGE ===== -->
+<h2 style="font-size: 22px; font-weight: 900; margin: 48px 0 8px; background: linear-gradient(135deg, var(--text), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+  段階別の法的要件
+</h2>
+<p style="font-size: 14px; color: var(--text2); margin-bottom: 24px;">早すぎる法務コストは避ける。各ステージで必要な分だけ対応。</p>
+
+<div class="legal-grid">
+  <div class="legal-card">
+    <div class="icon">📋</div>
+    <h4>個人情報保護法</h4>
+    <p>撮影者の同意取得、プライバシーポリシー策定。映像内の顔・個人情報の匿名化処理。</p>
+    <span class="stage-tag s3">STAGE 3〜</span>
+  </div>
+  <div class="legal-card">
+    <div class="icon">💱</div>
+    <h4>暗号資産規制</h4>
+    <p>BTCの「送金」は交換業に該当しない設計。ただし税務申告のガイダンスは提供必要。</p>
+    <span class="stage-tag s3">STAGE 3〜</span>
+  </div>
+  <div class="legal-card">
+    <div class="icon">🏢</div>
+    <h4>法人設立</h4>
+    <p>合同会社で十分（費用¥6万）。VCからの調達時に株式会社への組織変更を検討。</p>
+    <span class="stage-tag s3">STAGE 3〜</span>
+  </div>
+  <div class="legal-card">
+    <div class="icon">🏥</div>
+    <h4>次世代医療基盤法</h4>
+    <p>匿名加工医療情報作成事業者の認定。2024年改正法で仮名加工にも対応。</p>
+    <span class="stage-tag s5">STAGE 5</span>
+  </div>
+  <div class="legal-card">
+    <div class="icon">🌍</div>
+    <h4>GDPR / HIPAA</h4>
+    <p>海外展開時に準拠が必要。EU向けはGDPR、米国医療データはHIPAA。</p>
+    <span class="stage-tag s5">STAGE 5</span>
+  </div>
+  <div class="legal-card">
+    <div class="icon">⛓️</div>
+    <h4>IPライセンス管理</h4>
+    <p>Story Protocol連携でデータの所有権・使用権をオンチェーン管理。自動ロイヤリティ分配。</p>
+    <span class="stage-tag s4">STAGE 4〜</span>
+  </div>
+</div>
+
+<!-- ===== SUMMARY TABLE ===== -->
+<h2 style="font-size: 22px; font-weight: 900; margin: 48px 0 8px; background: linear-gradient(135deg, var(--text), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+  全体サマリー
+</h2>
+
+<table class="summary-table">
+  <thead>
+    <tr>
+      <th>段階</th>
+      <th>期間</th>
+      <th>初期費用</th>
+      <th>月間収益</th>
+      <th>人数</th>
+      <th>キーアクション</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="color: var(--text2);">Stage 1</td>
+      <td>0〜3ヶ月</td>
+      <td>¥0</td>
+      <td style="color: var(--green);">$50〜100</td>
+      <td>1人</td>
+      <td>既存PFで日常動作を売る</td>
+    </tr>
+    <tr>
+      <td style="color: var(--blue);">Stage 2</td>
+      <td>3〜6ヶ月</td>
+      <td>¥0</td>
+      <td style="color: var(--green);">$500〜2K</td>
+      <td>5〜20人</td>
+      <td>仲間集め・データ量拡大</td>
+    </tr>
+    <tr>
+      <td style="color: var(--purple);">Stage 3</td>
+      <td>6〜12ヶ月</td>
+      <td>¥30〜50万</td>
+      <td style="color: var(--green);">$5K〜20K</td>
+      <td>50〜100人</td>
+      <td>自前PF構築・法人契約</td>
+    </tr>
+    <tr>
+      <td style="color: var(--btc);">Stage 4</td>
+      <td>12〜24ヶ月</td>
+      <td>$300〜500K</td>
+      <td style="color: var(--green);">$50K〜200K</td>
+      <td>500+人</td>
+      <td>専門職データ・資金調達</td>
+    </tr>
+    <tr>
+      <td style="color: var(--gold);">Stage 5</td>
+      <td>24〜36ヶ月</td>
+      <td>$3〜5M</td>
+      <td style="color: var(--green);">$500K+</td>
+      <td>5,000+人</td>
+      <td>医療参入・グローバル展開</td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="msg">今日の1本の動画が、3年後の$500K/月企業の第一歩。</div>
+  <div class="sub">まずはiPhoneで料理動画を1本撮影することから始めよう。</div>
+</div>
+
+
+  </div>
+</div>
+
+<script>
+var HASH = "ff0a5f39b703f6d02441f3b42aa02af28bc400cd8193ffd8fb1f4c4d245444c5";
+
+async function sha256(msg) {
+  var data = new TextEncoder().encode(msg);
+  var buf = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(buf)).map(function(b) {
+    return b.toString(16).padStart(2, "0");
+  }).join("");
+}
+
+async function doUnlock() {
+  var p = document.getElementById("pw").value;
+  var h = await sha256(p);
+  if (h === HASH) {
+    document.getElementById("lockScreen").style.display = "none";
+    document.getElementById("mainContent").style.display = "block";
+  } else {
+    document.getElementById("err").classList.add("show");
+    document.getElementById("pw").value = "";
+    document.getElementById("pw").focus();
+  }
+  return false;
+}
+
+function switchTab(tab) {
+  var pages = document.querySelectorAll(".tab-page");
+  var btns = document.querySelectorAll(".tab-btn");
+  for (var i = 0; i < pages.length; i++) {
+    pages[i].classList.remove("active");
+    btns[i].classList.remove("active");
+  }
+  if (tab === "pitch") {
+    document.getElementById("pitchPage").classList.add("active");
+    btns[0].classList.add("active");
+  } else {
+    document.getElementById("roadmapPage").classList.add("active");
+    btns[1].classList.add("active");
+  }
+  window.scrollTo(0, 0);
+}
+</script>
+
+</body>
+</html>
