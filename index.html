@@ -49,12 +49,11 @@ body {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 4px;
-  padding: 4px calc(4px + env(safe-area-inset-left)) calc(4px + env(safe-area-inset-bottom)) calc(4px + env(safe-area-inset-right));
+  padding: calc(4px + env(safe-area-inset-top)) calc(4px + env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) calc(4px + env(safe-area-inset-left));
   width: 100%;
   max-width: 600px;
   height: 100vh;
-  height: -webkit-fill-available;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -1540,7 +1539,25 @@ draw();
 
 // ============ SERVICE WORKER ============
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(function() {});
+  navigator.serviceWorker.register('sw.js').then(function(reg) {
+    reg.addEventListener('updatefound', function() {
+      var newWorker = reg.installing;
+      if (newWorker) {
+        newWorker.addEventListener('statechange', function() {
+          if (newWorker.state === 'activated') {
+            if (!gameStarted || gameOver) {
+              location.reload();
+            }
+          }
+        });
+      }
+    });
+  }).catch(function() {});
+  navigator.serviceWorker.addEventListener('controllerchange', function() {
+    if (!gameStarted || gameOver) {
+      location.reload();
+    }
+  });
 }
 </script>
 </body>

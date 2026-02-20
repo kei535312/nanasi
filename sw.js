@@ -1,5 +1,5 @@
 // Service Worker for コリドール PWA
-const CACHE_NAME = 'quoridor-v4';
+const CACHE_NAME = 'quoridor-v5';
 const ASSETS = [
   '/nanasi/',
   '/nanasi/index.html',
@@ -37,35 +37,24 @@ self.addEventListener('activate', function(event) {
   );
 });
 
-// Fetch: cache-first, but skip caching for /bp/ and /docs/ paths
+// Fetch: network-first strategy (auto-update support)
+// Skip caching for /bp/ and /docs/ paths
 self.addEventListener('fetch', function(event) {
   var url = event.request.url;
   if (url.indexOf('/bp/') !== -1 || url.indexOf('/docs/') !== -1) {
     return;
   }
   event.respondWith(
-    caches.match(event.request).then(function(cached) {
-      if (cached) {
-        var fetchPromise = fetch(event.request).then(function(response) {
-          if (response && response.status === 200) {
-            var clone = response.clone();
-            caches.open(CACHE_NAME).then(function(cache) {
-              cache.put(event.request, clone);
-            });
-          }
-          return response;
-        }).catch(function() {});
-        return cached;
+    fetch(event.request).then(function(response) {
+      if (response && response.status === 200) {
+        var clone = response.clone();
+        caches.open(CACHE_NAME).then(function(cache) {
+          cache.put(event.request, clone);
+        });
       }
-      return fetch(event.request).then(function(response) {
-        if (response && response.status === 200) {
-          var clone = response.clone();
-          caches.open(CACHE_NAME).then(function(cache) {
-            cache.put(event.request, clone);
-          });
-        }
-        return response;
-      });
+      return response;
+    }).catch(function() {
+      return caches.match(event.request);
     })
   );
 });
