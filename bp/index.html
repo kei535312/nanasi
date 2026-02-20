@@ -2053,6 +2053,15 @@ body {
 </div>
 
 <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(regs) {
+    regs.forEach(function(r) { r.unregister(); });
+  });
+  caches.keys().then(function(names) {
+    names.forEach(function(n) { caches.delete(n); });
+  });
+}
+
 var S = [77,70,91,86,80,17,19,17,21];
 var X = 35;
 

@@ -1,15 +1,12 @@
 // Service Worker for コリドール PWA
-const CACHE_NAME = 'quoridor-v2';
+const CACHE_NAME = 'quoridor-v3';
 const ASSETS = [
   '/nanasi/',
   '/nanasi/index.html',
   '/nanasi/manifest.json',
   '/nanasi/icon-192.png',
   '/nanasi/icon-512.png',
-  '/nanasi/docs/',
-  '/nanasi/docs/index.html',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap',
-  'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap'
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap'
 ];
 
 // Install: cache all assets
@@ -40,12 +37,15 @@ self.addEventListener('activate', function(event) {
   );
 });
 
-// Fetch: cache-first, fallback to network
+// Fetch: cache-first, but skip caching for /bp/ and /docs/ paths
 self.addEventListener('fetch', function(event) {
+  var url = event.request.url;
+  if (url.indexOf('/bp/') !== -1 || url.indexOf('/docs/') !== -1) {
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then(function(cached) {
       if (cached) {
-        // Return cache, but also update in background
         var fetchPromise = fetch(event.request).then(function(response) {
           if (response && response.status === 200) {
             var clone = response.clone();
@@ -57,7 +57,6 @@ self.addEventListener('fetch', function(event) {
         }).catch(function() {});
         return cached;
       }
-      // Not in cache, fetch from network
       return fetch(event.request).then(function(response) {
         if (response && response.status === 200) {
           var clone = response.clone();
