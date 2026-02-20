@@ -922,7 +922,7 @@ body {
     <div class="lock-logo">NEXUS</div>
     <div class="lock-sub">CONFIDENTIAL DOCUMENT</div>
     <div class="lock-icon">🔒</div>
-    <form onsubmit="return doUnlock()">
+    <form id="lockForm">
       <input type="password" id="pw" class="lock-input" placeholder="パスワードを入力" autocomplete="off" autofocus>
       <button type="submit" class="lock-btn">閲覧する</button>
     </form>
@@ -2063,19 +2063,20 @@ async function sha256(msg) {
   }).join("");
 }
 
-async function doUnlock() {
+document.getElementById("lockForm").addEventListener("submit", function(e) {
+  e.preventDefault();
   var p = document.getElementById("pw").value;
-  var h = await sha256(p);
-  if (h === HASH) {
-    document.getElementById("lockScreen").style.display = "none";
-    document.getElementById("mainContent").style.display = "block";
-  } else {
-    document.getElementById("err").classList.add("show");
-    document.getElementById("pw").value = "";
-    document.getElementById("pw").focus();
-  }
-  return false;
-}
+  sha256(p).then(function(h) {
+    if (h === HASH) {
+      document.getElementById("lockScreen").style.display = "none";
+      document.getElementById("mainContent").style.display = "block";
+    } else {
+      document.getElementById("err").classList.add("show");
+      document.getElementById("pw").value = "";
+      document.getElementById("pw").focus();
+    }
+  });
+});
 
 function switchTab(tab) {
   var pages = document.querySelectorAll(".tab-page");
