@@ -41,49 +41,33 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 8px;
-  padding: 8px calc(8px + env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-right));
+  gap: 6px;
+  padding: 4px;
+  padding: 4px calc(4px + env(safe-area-inset-left)) calc(4px + env(safe-area-inset-bottom)) calc(4px + env(safe-area-inset-right));
   width: 100%;
   max-width: 600px;
-  max-height: 100vh;
-  max-height: -webkit-fill-available;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
+  height: 100vh;
+  height: -webkit-fill-available;
+  overflow: hidden;
 }
 
-/* ---- Title ---- */
-.title-area { text-align: center; }
-.title-area h1 {
-  font-size: clamp(22px, 5vw, 36px);
-  font-weight: 900;
-  letter-spacing: clamp(4px, 1.5vw, 10px);
-  background: linear-gradient(135deg, #f8cdda 0%, #a0b4f8 50%, #d4fc79 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* ---- Player Zone ---- */
+.player-zone {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
 }
-.title-area .subtitle {
-  font-size: clamp(9px, 1.8vw, 12px);
-  letter-spacing: 3px;
-  color: #666;
-  margin-top: 2px;
+.player-zone.p2-zone {
+  transform: rotate(180deg);
 }
 
 /* ---- Player Panels ---- */
-.info-bar {
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-  gap: 8px;
-  width: 100%;
-}
 .player-panel {
-  flex: 1;
-  min-width: 0;
-  padding: 10px 12px;
-  border-radius: 12px;
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 10px;
   background: rgba(255,255,255,0.03);
   border: 2px solid rgba(255,255,255,0.06);
   transition: all 0.4s cubic-bezier(.4,0,.2,1);
@@ -95,7 +79,7 @@ body {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  border-radius: 12px 12px 0 0;
+  border-radius: 10px 10px 0 0;
   opacity: 0;
   transition: opacity 0.4s;
 }
@@ -110,19 +94,18 @@ body {
   border-color: rgba(46, 134, 222, 0.4);
   box-shadow: 0 0 20px rgba(46, 134, 222, 0.1), inset 0 0 20px rgba(46, 134, 222, 0.03);
 }
-.panel-header {
+.panel-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 6px;
 }
 .player-icon {
-  width: 26px; height: 26px;
-  border-radius: 8px;
+  width: 24px; height: 24px;
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
   color: white;
   flex-shrink: 0;
@@ -141,7 +124,7 @@ body {
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
-  margin-left: auto;
+  margin-left: 4px;
   opacity: 0;
   transition: opacity 0.3s;
   letter-spacing: 0.5px;
@@ -154,11 +137,11 @@ body {
   display: flex;
   gap: 3px;
   align-items: center;
-  margin-bottom: 6px;
   flex-wrap: wrap;
+  margin-left: auto;
 }
 .wall-pip {
-  width: 12px; height: 5px;
+  width: 10px; height: 4px;
   border-radius: 2px;
   transition: all 0.3s;
 }
@@ -166,9 +149,9 @@ body {
 .player-panel.p2 .wall-pip { background: rgba(46,134,222,0.5); }
 .wall-pip.used { background: rgba(255,255,255,0.06) !important; }
 .wall-label {
-  font-size: 10px;
+  font-size: 9px;
   color: #555;
-  margin-left: 4px;
+  margin-left: 3px;
 }
 
 /* ---- Timer ---- */
@@ -176,18 +159,18 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 .timer-bar-bg {
   flex: 1;
-  height: 5px;
-  border-radius: 3px;
+  height: 4px;
+  border-radius: 2px;
   background: rgba(255,255,255,0.06);
   overflow: hidden;
 }
 .timer-bar-fill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: 2px;
   transition: width 0.25s linear, background 0.5s;
   width: 100%;
 }
@@ -195,10 +178,10 @@ body {
 .player-panel.p2 .timer-bar-fill { background: linear-gradient(90deg, #2e86de, #54a0ff); }
 .timer-bar-fill.urgent { background: linear-gradient(90deg, #e74c3c, #ff4757) !important; }
 .timer-text {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  min-width: 26px;
+  min-width: 22px;
   text-align: right;
   color: #888;
   transition: color 0.3s;
@@ -206,85 +189,63 @@ body {
 .timer-text.urgent { color: #e74c3c; }
 .player-panel:not(.active) .timer-area { opacity: 0.3; }
 
-/* ---- Board ---- */
-#board-container {
-  position: relative;
-  -webkit-user-select: none;
-  user-select: none;
-  touch-action: none;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-canvas#board {
-  display: block;
-  border-radius: 12px;
-  cursor: pointer;
-  box-shadow:
-    0 4px 30px rgba(0,0,0,0.4),
-    0 0 60px rgba(88, 28, 135, 0.06);
-  max-width: 100%;
-  touch-action: none;
-}
-
 /* ---- Controls ---- */
 .controls {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+  gap: 5px;
   justify-content: center;
+  width: 100%;
 }
 .ctrl-btn {
   position: relative;
-  padding: 10px 18px;
+  padding: 8px 14px;
   border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
+  border-radius: 8px;
   background: rgba(255,255,255,0.04);
   color: #999;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s;
   letter-spacing: 0.5px;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  min-height: 44px;
+  min-height: 40px;
 }
 .ctrl-btn:active { transform: scale(0.95); }
 .ctrl-btn.active-move {
   border-color: rgba(46,204,113,0.5);
   color: #2ecc71;
   background: rgba(46,204,113,0.08);
-  box-shadow: 0 0 16px rgba(46,204,113,0.1);
+  box-shadow: 0 0 12px rgba(46,204,113,0.1);
 }
 .ctrl-btn.active-wall {
   border-color: rgba(243,156,18,0.5);
   color: #f39c12;
   background: rgba(243,156,18,0.08);
-  box-shadow: 0 0 16px rgba(243,156,18,0.1);
+  box-shadow: 0 0 12px rgba(243,156,18,0.1);
 }
 .ctrl-btn .kbd {
   display: inline-block;
-  font-size: 10px;
-  padding: 1px 5px;
-  border-radius: 4px;
+  font-size: 9px;
+  padding: 1px 4px;
+  border-radius: 3px;
   background: rgba(255,255,255,0.06);
   color: #666;
-  margin-left: 6px;
+  margin-left: 4px;
   font-weight: 400;
   vertical-align: 1px;
 }
-/* Hide keyboard shortcuts on mobile */
 @media (hover: none) and (pointer: coarse) {
   .ctrl-btn .kbd { display: none; }
 }
 .ctrl-divider {
   width: 1px;
-  height: 28px;
+  height: 24px;
   background: rgba(255,255,255,0.08);
-  margin: 0 2px;
+  margin: 0 1px;
 }
 .orient-group {
   display: flex;
@@ -298,19 +259,19 @@ canvas#board {
   pointer-events: auto;
 }
 .orient-btn {
-  padding: 10px 14px;
+  padding: 8px 12px;
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 8px;
+  border-radius: 7px;
   background: rgba(255,255,255,0.03);
   color: #777;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  min-height: 44px;
+  min-height: 40px;
 }
 .orient-btn:active { transform: scale(0.95); }
 .orient-btn.active {
@@ -319,14 +280,52 @@ canvas#board {
   background: rgba(243,156,18,0.06);
 }
 
-/* ---- Sound control ---- */
-.sound-btn {
-  width: 44px; height: 44px;
-  border: 1px solid rgba(255,255,255,0.08);
+/* Inactive player controls */
+.controls.inactive {
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+/* ---- Board ---- */
+#board-container {
+  position: relative;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: none;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex: 1;
+  align-items: center;
+  min-height: 0;
+}
+canvas#board {
+  display: block;
   border-radius: 10px;
+  cursor: pointer;
+  box-shadow:
+    0 4px 30px rgba(0,0,0,0.4),
+    0 0 60px rgba(88, 28, 135, 0.06);
+  max-width: 100%;
+  max-height: 100%;
+  touch-action: none;
+}
+
+/* ---- Center controls (reset/sound) ---- */
+.center-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.sound-btn {
+  width: 38px; height: 38px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
   background: rgba(255,255,255,0.04);
   color: #888;
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
@@ -338,39 +337,33 @@ canvas#board {
 }
 .sound-btn:active { transform: scale(0.9); }
 .sound-btn.muted { color: #e74c3c; }
-
-/* ---- Message ---- */
-#message {
-  font-size: 12px;
-  min-height: 18px;
-  text-align: center;
-  color: #e17055;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-/* ---- Footer ---- */
-.footer-controls {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
 #reset-btn {
-  padding: 10px 28px;
+  padding: 8px 20px;
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
+  border-radius: 8px;
   background: rgba(255,255,255,0.04);
   color: #888;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  min-height: 44px;
+  min-height: 38px;
 }
 #reset-btn:active { transform: scale(0.95); background: rgba(231,76,60,0.15); }
+
+/* ---- Message ---- */
+#message {
+  font-size: 11px;
+  min-height: 16px;
+  text-align: center;
+  color: #e17055;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
 
 /* ---- Winner Overlay ---- */
 .winner-overlay {
@@ -475,17 +468,11 @@ canvas#board {
 .start-box button:active { transform: scale(0.95); }
 
 .hidden { display: none; }
-
-/* ---- Responsive ---- */
-@media (max-height: 700px) {
-  #app { gap: 6px; }
-  .title-area { display: none; }
-}
 </style>
 </head>
 <body>
 
-<!-- Start screen (needed for AudioContext) -->
+<!-- Start screen -->
 <div class="start-overlay" id="start-overlay">
   <div class="start-box">
     <h2>QUORIDOR</h2>
@@ -495,31 +482,28 @@ canvas#board {
 </div>
 
 <div id="app">
-  <div class="title-area">
-    <h1>QUORIDOR</h1>
-    <div class="subtitle">2 PLAYER STRATEGY GAME</div>
-  </div>
-
-  <div class="info-bar">
-    <div class="player-panel p1 active" id="p1-panel">
-      <div class="panel-header">
-        <div class="player-icon p1">1</div>
-        <span class="player-name">P1</span>
-        <span class="turn-badge">TURN</span>
-      </div>
-      <div class="wall-indicators" id="p1-walls"></div>
-      <div class="timer-area">
-        <div class="timer-bar-bg"><div class="timer-bar-fill" id="p1-timer-bar"></div></div>
-        <span class="timer-text" id="p1-timer-text">30</span>
+  <!-- P2 zone (top, rotated 180deg for face-to-face play) -->
+  <div class="player-zone p2-zone">
+    <div class="controls inactive" id="controls-p2">
+      <button class="ctrl-btn active-move" id="btn-move-p2" onclick="setMode('move')">
+        移動<span class="kbd">M</span>
+      </button>
+      <button class="ctrl-btn" id="btn-wall-p2" onclick="setMode('wall')">
+        壁<span class="kbd">W</span>
+      </button>
+      <div class="ctrl-divider"></div>
+      <div class="orient-group" id="orient-group-p2">
+        <button class="orient-btn active" id="btn-h-p2" onclick="setOrientation('h')">横</button>
+        <button class="orient-btn" id="btn-v-p2" onclick="setOrientation('v')">縦</button>
       </div>
     </div>
     <div class="player-panel p2" id="p2-panel">
-      <div class="panel-header">
+      <div class="panel-row">
         <div class="player-icon p2">2</div>
         <span class="player-name">P2</span>
         <span class="turn-badge">TURN</span>
+        <div class="wall-indicators" id="p2-walls"></div>
       </div>
-      <div class="wall-indicators" id="p2-walls"></div>
       <div class="timer-area">
         <div class="timer-bar-bg"><div class="timer-bar-fill" id="p2-timer-bar"></div></div>
         <span class="timer-text" id="p2-timer-text">30</span>
@@ -527,30 +511,46 @@ canvas#board {
     </div>
   </div>
 
+  <!-- Board -->
   <div id="board-container">
     <canvas id="board"></canvas>
   </div>
 
-  <div class="controls">
-    <button class="ctrl-btn active-move" id="btn-move" onclick="setMode('move')">
-      移動<span class="kbd">M</span>
-    </button>
-    <button class="ctrl-btn" id="btn-wall" onclick="setMode('wall')">
-      壁を置く<span class="kbd">W</span>
-    </button>
-    <div class="ctrl-divider"></div>
-    <div class="orient-group" id="orient-group">
-      <button class="orient-btn active" id="btn-h" onclick="setOrientation('h')">横 ―</button>
-      <button class="orient-btn" id="btn-v" onclick="setOrientation('v')">縦 |</button>
-    </div>
-    <div class="ctrl-divider"></div>
-    <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="BGM ON/OFF">&#9835;</button>
-  </div>
-
   <div id="message"></div>
 
-  <div class="footer-controls">
+  <!-- Center controls -->
+  <div class="center-controls">
+    <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="BGM ON/OFF">&#9835;</button>
     <button id="reset-btn" onclick="resetGame()">リセット</button>
+  </div>
+
+  <!-- P1 zone (bottom, normal orientation) -->
+  <div class="player-zone p1-zone">
+    <div class="player-panel p1 active" id="p1-panel">
+      <div class="panel-row">
+        <div class="player-icon p1">1</div>
+        <span class="player-name">P1</span>
+        <span class="turn-badge">TURN</span>
+        <div class="wall-indicators" id="p1-walls"></div>
+      </div>
+      <div class="timer-area">
+        <div class="timer-bar-bg"><div class="timer-bar-fill" id="p1-timer-bar"></div></div>
+        <span class="timer-text" id="p1-timer-text">30</span>
+      </div>
+    </div>
+    <div class="controls" id="controls-p1">
+      <button class="ctrl-btn active-move" id="btn-move-p1" onclick="setMode('move')">
+        移動<span class="kbd">M</span>
+      </button>
+      <button class="ctrl-btn" id="btn-wall-p1" onclick="setMode('wall')">
+        壁<span class="kbd">W</span>
+      </button>
+      <div class="ctrl-divider"></div>
+      <div class="orient-group" id="orient-group-p1">
+        <button class="orient-btn active" id="btn-h-p1" onclick="setOrientation('h')">横</button>
+        <button class="orient-btn" id="btn-v-p1" onclick="setOrientation('v')">縦</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -591,11 +591,10 @@ canvas#board {
 const GRID = 9;
 const TURN_TIME = 30;
 
-// Dynamic sizing based on viewport
 function calcBoardSize() {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const maxBoard = Math.min(vw - 24, vh * 0.52, 560);
+  const maxBoard = Math.min(vw - 16, vh * 0.46, 520);
   const cellAndGap = maxBoard / (GRID + (GRID - 1) * 0.16 + 0.6);
   const cell = Math.floor(cellAndGap);
   const gap = Math.max(4, Math.round(cell * 0.16));
@@ -632,7 +631,6 @@ let bgmTimeout = null;
 function initAudio() {
   try {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    // Safari requires resume after user gesture
     if (audioCtx.state === 'suspended') audioCtx.resume();
     bgmGain = audioCtx.createGain();
     bgmGain.gain.value = 0.18;
@@ -1224,7 +1222,7 @@ function renderWallPips(containerId, count) {
   const el = document.getElementById(containerId);
   let html = '';
   for (let i = 0; i < 10; i++) html += '<div class="wall-pip' + (i >= count ? ' used' : '') + '"></div>';
-  html += '<span class="wall-label">' + count + ' / 10</span>';
+  html += '<span class="wall-label">' + count + '</span>';
   el.innerHTML = html;
 }
 
@@ -1233,11 +1231,20 @@ function updateUI() {
   document.getElementById('p2-panel').classList.toggle('active', currentPlayer === 1);
   renderWallPips('p1-walls', wallCounts[0]);
   renderWallPips('p2-walls', wallCounts[1]);
-  document.getElementById('btn-move').className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
-  document.getElementById('btn-wall').className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
-  document.getElementById('orient-group').classList.toggle('visible', mode === 'wall');
-  document.getElementById('btn-h').classList.toggle('active', orientation === 'h');
-  document.getElementById('btn-v').classList.toggle('active', orientation === 'v');
+
+  // Update both sets of controls
+  for (var pIdx = 0; pIdx < 2; pIdx++) {
+    var suffix = pIdx === 0 ? '-p1' : '-p2';
+    var controlsEl = document.getElementById('controls' + suffix);
+    controlsEl.classList.toggle('inactive', currentPlayer !== pIdx);
+
+    document.getElementById('btn-move' + suffix).className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
+    document.getElementById('btn-wall' + suffix).className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
+    document.getElementById('orient-group' + suffix).classList.toggle('visible', mode === 'wall');
+    document.getElementById('btn-h' + suffix).classList.toggle('active', orientation === 'h');
+    document.getElementById('btn-v' + suffix).classList.toggle('active', orientation === 'v');
+  }
+
   updateTimerUI();
 }
 
@@ -1289,12 +1296,19 @@ function startGame() {
 function resetGame() {
   document.getElementById('winner-overlay').classList.remove('show');
   clearInterval(timerInterval);
-  stopBGM();
+  // AudioContextごとリセットして音の重なりを防止
+  if (bgmTimeout) clearTimeout(bgmTimeout);
+  bgmPlaying = false;
+  if (audioCtx) {
+    audioCtx.close().catch(function(){});
+    audioCtx = null;
+  }
   initState();
   gameStarted = true;
   showMsg('');
   updateUI();
   draw();
+  initAudio();
   startBGM();
   startTurnTimer();
 }
@@ -1348,6 +1362,7 @@ function handleBoardAction(px, py) {
     wallCounts[currentPlayer]--;
     playWallSFX();
     showMsg('');
+    mode = 'move';
     hoverWall = null;
     currentPlayer = 1 - currentPlayer;
     updateUI(); draw(); startTurnTimer();
@@ -1386,7 +1401,6 @@ canvas.addEventListener('touchstart', function(e) {
 
 canvas.addEventListener('touchmove', function(e) {
   e.preventDefault();
-  // Show wall preview on touch move
   if (mode === 'wall' && !gameOver) {
     const pos = getCanvasPos(e);
     const slot = pixelToWallSlot(pos.px, pos.py);
@@ -1399,7 +1413,6 @@ canvas.addEventListener('touchend', function(e) {
   e.preventDefault();
   if (!touchStartPos) return;
   const endPos = getCanvasPos(e);
-  // Only act if finger didn't move too far (prevent accidental scrolls)
   const dx = endPos.px - touchStartPos.px;
   const dy = endPos.py - touchStartPos.py;
   if (Math.abs(dx) < CELL * 1.5 && Math.abs(dy) < CELL * 1.5) {
