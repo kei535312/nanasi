@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>コリドール</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@400;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@400;600;700;900&family=Zen+Maru+Gothic:wght@400;700;900&family=DotGothic16&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -27,7 +27,7 @@ html, body {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Orbitron', 'Inter', -apple-system, sans-serif;
+  font-family: var(--font);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -150,7 +150,7 @@ body::after {
 .controls { display: flex; align-items: center; gap: 5px; justify-content: center; width: 100%; }
 .ctrl-btn {
   position: relative; padding: 8px 14px; border: 1px solid var(--panel-border); border-radius: 4px;
-  background: var(--panel-bg); color: var(--text-dim); font-family: 'Orbitron', inherit;
+  background: var(--panel-bg); color: var(--text-dim); font-family: inherit;
   font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.25s; letter-spacing: 1px;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 40px; text-transform: uppercase;
 }
@@ -164,7 +164,7 @@ body::after {
 .orient-group.visible { opacity: 1; pointer-events: auto; }
 .orient-btn {
   padding: 8px 12px; border: 1px solid var(--panel-border); border-radius: 4px;
-  background: var(--panel-bg); color: var(--text-dim); font-family: 'Orbitron', inherit;
+  background: var(--panel-bg); color: var(--text-dim); font-family: inherit;
   font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 40px;
 }
@@ -191,21 +191,19 @@ canvas#board {
 }
 .sound-btn:active { transform: scale(0.9); }
 .sound-btn.muted { color: #ff2222; }
-/* Snap indicator */
-.snap-btn {
-  width: 38px; height: 38px; border: 1px solid var(--panel-border); border-radius: 4px;
-  background: var(--panel-bg); color: var(--text-dim); font-size: 14px; cursor: pointer;
-  transition: all 0.2s; display: flex; align-items: center; justify-content: center;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation; position: relative;
+
+/* Snap indicator (small, subtle) */
+.snap-indicator {
+  font-size: 10px; color: var(--text-dim); opacity: 0.5; display: flex; align-items: center; gap: 3px;
 }
-.snap-btn:active { transform: scale(0.9); }
-.snap-btn.active { color: var(--move-color); border-color: var(--move-color); }
-.snap-btn.listening { animation: snap-pulse 1s ease-in-out infinite; }
-@keyframes snap-pulse { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 12px var(--move-color); } }
+.snap-indicator.active { opacity: 1; color: var(--move-color); }
+.snap-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); }
+.snap-indicator.active .snap-dot { background: var(--move-color); animation: snap-pulse 1s ease-in-out infinite; }
+@keyframes snap-pulse { 0%,100% { box-shadow: none; opacity: 0.6; } 50% { box-shadow: 0 0 6px var(--move-color); opacity: 1; } }
 
 #reset-btn {
   padding: 8px 20px; border: 1px solid var(--panel-border); border-radius: 4px;
-  background: var(--panel-bg); color: var(--text-dim); font-family: 'Orbitron', inherit;
+  background: var(--panel-bg); color: var(--text-dim); font-family: inherit;
   font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.25s;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   min-height: 38px; letter-spacing: 2px; text-transform: uppercase;
@@ -221,7 +219,7 @@ canvas#board {
 }
 .winner-overlay.show { background: rgba(0,4,12,0.85); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); pointer-events: auto; }
 .winner-box {
-  background: var(--winner-bg); border-radius: 12px; padding: 40px 44px; text-align: center;
+  background: linear-gradient(145deg, rgba(10,20,40,0.95), rgba(5,10,25,0.95)); border-radius: 12px; padding: 40px 44px; text-align: center;
   border: 1px solid var(--panel-border);
   box-shadow: 0 20px 80px rgba(0,0,0,0.8), 0 0 60px var(--board-glow);
   transform: scale(0.5) rotate(-5deg); opacity: 0;
@@ -230,7 +228,7 @@ canvas#board {
 .winner-overlay.show .winner-box { transform: scale(1) rotate(0deg); opacity: 1; }
 .winner-box .trophy { font-size: 64px; margin-bottom: 12px; animation: trophy-bounce 0.8s ease-out 0.5s both; filter: drop-shadow(0 0 20px var(--wall-ui-color)); }
 @keyframes trophy-bounce { 0% { transform: scale(0) rotate(-30deg); } 50% { transform: scale(1.3) rotate(5deg); } 70% { transform: scale(0.9) rotate(-3deg); } 100% { transform: scale(1) rotate(0deg); } }
-.winner-box h2 { font-size: clamp(24px, 6vw, 32px); font-weight: 900; margin-bottom: 6px; letter-spacing: 6px; text-transform: uppercase; font-family: 'Orbitron', sans-serif; }
+.winner-box h2 { font-size: clamp(24px, 6vw, 32px); font-weight: 900; margin-bottom: 6px; letter-spacing: 6px; text-transform: uppercase; }
 .winner-box h2.win-p1 { color: var(--p1-light); text-shadow: 0 0 20px var(--p1-dim), 0 0 40px var(--p1-glow); animation: saber-glow 1.5s ease-in-out infinite alternate; }
 .winner-box h2.win-p2 { color: var(--p2-light); text-shadow: 0 0 20px var(--p2-dim), 0 0 40px var(--p2-glow); animation: saber-glow 1.5s ease-in-out infinite alternate; }
 @keyframes saber-glow { 0% { filter: brightness(1); } 100% { filter: brightness(1.3); } }
@@ -238,7 +236,7 @@ canvas#board {
 .winner-box p { color: #445566; font-size: 12px; margin-bottom: 24px; letter-spacing: 1px; }
 .winner-box button {
   padding: 16px 44px; border: 1px solid var(--panel-border); border-radius: 6px;
-  background: var(--btn-bg); color: var(--btn-color); font-family: 'Orbitron', inherit;
+  background: linear-gradient(135deg, rgba(0,50,150,0.4), rgba(0,80,200,0.3)); color: #88bbff; font-family: inherit;
   font-size: 13px; font-weight: 700; cursor: pointer; letter-spacing: 2px;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 52px;
   transition: all 0.2s; text-transform: uppercase;
@@ -257,12 +255,12 @@ canvas#board {
 .start-box h2 {
   font-size: clamp(28px, 8vw, 44px); font-weight: 900; letter-spacing: clamp(6px, 2vw, 14px);
   color: var(--title-color); text-shadow: 0 0 30px var(--title-glow);
-  margin-bottom: 8px; font-family: 'Orbitron', sans-serif;
+  margin-bottom: 8px;
 }
 .start-box .tagline { color: var(--text-dim); font-size: clamp(10px, 2.5vw, 12px); margin-bottom: 40px; letter-spacing: 3px; }
 .start-box button {
   padding: 16px 48px; border: 1px solid var(--title-glow); border-radius: 6px;
-  background: var(--start-btn-bg); color: var(--title-color); font-family: 'Orbitron', inherit;
+  background: var(--start-btn-bg, rgba(0,0,0,0.3)); color: var(--title-color); font-family: inherit;
   font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: 3px;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 52px;
   text-transform: uppercase; transition: all 0.3s; box-shadow: 0 0 20px var(--title-glow);
@@ -319,7 +317,7 @@ canvas#board {
 
   <div class="center-controls">
     <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="BGM ON/OFF">&#9835;</button>
-    <button class="snap-btn" id="snap-btn" onclick="toggleSnap()" title="SNAP DETECT">&#128064;</button>
+    <div class="snap-indicator" id="snap-indicator"><div class="snap-dot"></div><span>SNAP</span></div>
     <button id="reset-btn" onclick="resetGame()">RESET</button>
   </div>
 
@@ -364,48 +362,42 @@ canvas#board {
 var SNAP_ENABLED = true;
 
 var THEMES = [
-  { // Sunday - Crimson Nebula
-    name: 'CRIMSON NEBULA', subtitle: 'A DARK STRATEGY GAME', p1name: 'SITH', p2name: 'JEDI', winMsg: 'THE FORCE IS STRONG',
-    bg: '#0a0208', star1: 'rgba(255,100,100,0.8)', star2: 'rgba(255,200,150,0.7)', star3: 'rgba(200,100,150,0.6)',
-    nebula1: 'rgba(200,0,50,0.05)', nebula2: 'rgba(100,0,200,0.04)',
-    p1: '#cc0000', p1Light: '#ff4444', p2: '#9900cc', p2Light: '#cc66ff',
-    wallColor: [255,200,0], boardBg1: '#100810', boardBg2: '#0c0418', boardBg3: '#080210',
-    cellFill: 'rgba(60,20,40,0.25)', cellStroke: 'rgba(120,40,80,0.08)',
-    moveColor: 'rgba(255,100,200,', validDot: 'rgba(255,100,200,0.4)',
-    title: '#ff4466', confetti: ['#ff0044','#ff4488','#9900cc','#cc66ff','#ffcc00','#ffffff','#ff6600','#00ffaa']
+  { // Sunday - EVANGELION
+    name: 'EVANGELION', subtitle: '\u4f7f\u5f92\u3001\u8972\u6765', p1name: '\u521d\u53f7\u6a5f', p2name: '\u5f10\u53f7\u6a5f', winMsg: '\u30d1\u30bf\u30fc\u30f3\u9752\uff01\u5168\u54e1\u64a4\u9000\uff01',
+    font: "'Orbitron', 'Inter', sans-serif",
+    bg: '#050008', star1: 'rgba(180,0,255,0.8)', star2: 'rgba(0,255,100,0.7)', star3: 'rgba(255,100,0,0.6)',
+    nebula1: 'rgba(100,0,200,0.06)', nebula2: 'rgba(0,200,50,0.04)',
+    p1: '#7b2d8e', p1Light: '#c466ff', p2: '#cc3300', p2Light: '#ff6644',
+    wallColor: [0,255,100], boardBg1: '#0a0014', boardBg2: '#0c0020', boardBg3: '#06000e',
+    cellFill: 'rgba(40,0,60,0.3)', cellStroke: 'rgba(100,0,200,0.1)',
+    moveColor: 'rgba(0,255,150,', validDot: 'rgba(0,255,150,0.5)',
+    title: '#00ff88', confetti: ['#7b2d8e','#c466ff','#cc3300','#ff6644','#00ff88','#ff00ff','#ffcc00','#ffffff']
   },
-  { // Monday - Deep Ocean
-    name: 'DEEP OCEAN', subtitle: 'ABYSSAL STRATEGY', p1name: 'LEVIATHAN', p2name: 'KRAKEN', winMsg: 'RULER OF THE DEEP',
-    bg: '#020a10', star1: 'rgba(100,200,255,0.8)', star2: 'rgba(150,255,200,0.7)', star3: 'rgba(100,150,255,0.6)',
-    nebula1: 'rgba(0,50,150,0.05)', nebula2: 'rgba(0,150,100,0.04)',
-    p1: '#cc4400', p1Light: '#ff6622', p2: '#0088aa', p2Light: '#22ccee',
-    wallColor: [0,220,180], boardBg1: '#041018', boardBg2: '#061420', boardBg3: '#020c14',
-    cellFill: 'rgba(10,40,60,0.3)', cellStroke: 'rgba(30,80,120,0.1)',
-    moveColor: 'rgba(0,255,200,', validDot: 'rgba(0,255,200,0.4)',
-    title: '#22ccee', confetti: ['#cc4400','#ff6622','#0088aa','#22ccee','#00ffcc','#ffffff','#ff8800','#44ff88']
+  { // Monday - DORAEMON
+    name: 'DORAEMON', subtitle: '\u3072\u307f\u3064\u9053\u5177\u3067\u52dd\u8ca0\uff01', p1name: '\u30c9\u30e9\u3048\u3082\u3093', p2name: '\u306e\u3073\u592a', winMsg: '\u672a\u6765\u304b\u3089\u6765\u305f\u52dd\u5229\uff01',
+    font: "'Zen Maru Gothic', 'Inter', sans-serif",
+    bg: '#001428', star1: 'rgba(100,180,255,0.7)', star2: 'rgba(255,255,150,0.6)', star3: 'rgba(200,200,255,0.5)',
+    nebula1: 'rgba(0,80,200,0.06)', nebula2: 'rgba(0,150,255,0.04)',
+    p1: '#0066cc', p1Light: '#44aaff', p2: '#cc2200', p2Light: '#ff5533',
+    wallColor: [255,220,0], boardBg1: '#001830', boardBg2: '#002040', boardBg3: '#001020',
+    cellFill: 'rgba(0,30,80,0.3)', cellStroke: 'rgba(0,80,200,0.1)',
+    moveColor: 'rgba(255,220,50,', validDot: 'rgba(255,220,50,0.5)',
+    title: '#44aaff', confetti: ['#0066cc','#44aaff','#cc2200','#ff5533','#ffdd00','#ffffff','#ff8800','#88ddff']
   },
-  { // Tuesday - Volcanic Forge
-    name: 'VOLCANIC FORGE', subtitle: 'FORGED IN FIRE', p1name: 'MAGMA', p2name: 'OBSIDIAN', winMsg: 'BORN FROM THE FLAMES',
-    bg: '#0c0400', star1: 'rgba(255,150,50,0.8)', star2: 'rgba(255,100,50,0.7)', star3: 'rgba(200,150,100,0.6)',
-    nebula1: 'rgba(200,50,0,0.06)', nebula2: 'rgba(255,100,0,0.04)',
-    p1: '#ee4400', p1Light: '#ff6633', p2: '#886600', p2Light: '#bbaa22',
-    wallColor: [255,120,20], boardBg1: '#140a04', boardBg2: '#180c02', boardBg3: '#100800',
-    cellFill: 'rgba(60,30,10,0.3)', cellStroke: 'rgba(120,60,20,0.1)',
-    moveColor: 'rgba(255,200,50,', validDot: 'rgba(255,200,50,0.4)',
-    title: '#ff8822', confetti: ['#ee4400','#ff6633','#886600','#bbaa22','#ff4400','#ffcc00','#ff8800','#ffffff']
+  { // Tuesday - ANPANMAN
+    name: 'ANPANMAN', subtitle: '\u52c7\u6c17\u3068\u3084\u3055\u3057\u3055\u306e\u6226\u3044', p1name: '\u30a2\u30f3\u30d1\u30f3\u30de\u30f3', p2name: '\u30d0\u30a4\u30ad\u30f3\u30de\u30f3', winMsg: '\u611b\u3068\u52c7\u6c17\u306e\u52dd\u5229\uff01',
+    font: "'Zen Maru Gothic', 'Inter', sans-serif",
+    bg: '#1a0800', star1: 'rgba(255,200,100,0.8)', star2: 'rgba(255,150,50,0.7)', star3: 'rgba(255,220,180,0.6)',
+    nebula1: 'rgba(255,80,0,0.05)', nebula2: 'rgba(200,100,0,0.04)',
+    p1: '#cc4400', p1Light: '#ff7733', p2: '#6622aa', p2Light: '#9955dd',
+    wallColor: [255,180,60], boardBg1: '#1a0c04', boardBg2: '#201008', boardBg3: '#140a02',
+    cellFill: 'rgba(60,30,10,0.3)', cellStroke: 'rgba(150,60,20,0.1)',
+    moveColor: 'rgba(255,200,100,', validDot: 'rgba(255,200,100,0.5)',
+    title: '#ff8833', confetti: ['#cc4400','#ff7733','#6622aa','#9955dd','#ffcc00','#ffffff','#ff4400','#88ff44']
   },
-  { // Wednesday - Emerald Matrix
-    name: 'EMERALD MATRIX', subtitle: 'DIGITAL WARFARE', p1name: 'VIRUS', p2name: 'FIREWALL', winMsg: 'SYSTEM OVERRIDE',
-    bg: '#000a04', star1: 'rgba(100,255,150,0.8)', star2: 'rgba(200,255,100,0.7)', star3: 'rgba(100,200,150,0.6)',
-    nebula1: 'rgba(0,200,50,0.04)', nebula2: 'rgba(0,100,200,0.03)',
-    p1: '#00aa44', p1Light: '#44ff88', p2: '#008866', p2Light: '#22ddaa',
-    wallColor: [100,255,150], boardBg1: '#040e08', boardBg2: '#061210', boardBg3: '#020a06',
-    cellFill: 'rgba(10,40,20,0.3)', cellStroke: 'rgba(30,100,50,0.1)',
-    moveColor: 'rgba(150,255,200,', validDot: 'rgba(150,255,200,0.4)',
-    title: '#44ff88', confetti: ['#00aa44','#44ff88','#008866','#22ddaa','#88ff44','#ffffff','#00ff66','#aaffcc']
-  },
-  { // Thursday - Galactic Empire (Star Wars style)
+  { // Wednesday - STAR WARS
     name: 'GALACTIC EMPIRE', subtitle: 'A GALACTIC STRATEGY GAME', p1name: 'SITH', p2name: 'JEDI', winMsg: 'THE FORCE IS STRONG',
+    font: "'Orbitron', 'Inter', sans-serif",
     bg: '#020810', star1: 'rgba(150,180,255,0.8)', star2: 'rgba(255,200,150,0.7)', star3: 'rgba(200,150,255,0.6)',
     nebula1: 'rgba(255,0,0,0.04)', nebula2: 'rgba(0,100,255,0.04)',
     p1: '#cc0000', p1Light: '#ff4444', p2: '#0044cc', p2Light: '#44aaff',
@@ -414,25 +406,38 @@ var THEMES = [
     moveColor: 'rgba(0,255,100,', validDot: 'rgba(0,255,100,0.4)',
     title: '#ffcc00', confetti: ['#ff0000','#ff4444','#0066ff','#44aaff','#ffcc00','#ffffff','#ff6600','#00ff88']
   },
-  { // Friday - Neon Arcade
-    name: 'NEON ARCADE', subtitle: 'RETRO CYBER BATTLE', p1name: 'NEON', p2name: 'PIXEL', winMsg: 'HIGH SCORE ACHIEVED',
-    bg: '#08001a', star1: 'rgba(255,100,255,0.8)', star2: 'rgba(100,255,255,0.7)', star3: 'rgba(255,255,100,0.6)',
-    nebula1: 'rgba(200,0,255,0.05)', nebula2: 'rgba(0,200,255,0.04)',
-    p1: '#ff0088', p1Light: '#ff44aa', p2: '#00ccff', p2Light: '#66eeff',
-    wallColor: [255,0,255], boardBg1: '#0c0420', boardBg2: '#100828', boardBg3: '#080218',
-    cellFill: 'rgba(40,10,60,0.3)', cellStroke: 'rgba(100,30,150,0.1)',
-    moveColor: 'rgba(255,255,0,', validDot: 'rgba(255,255,0,0.4)',
-    title: '#ff44ff', confetti: ['#ff0088','#ff44aa','#00ccff','#66eeff','#ffff00','#ff00ff','#00ff88','#ffffff']
+  { // Thursday - DRAGON BALL
+    name: 'DRAGON BALL', subtitle: '\u30aa\u30e9\u306b\u5143\u6c17\u3092\u308f\u3051\u3066\u304f\u308c\uff01', p1name: '\u609f\u7a7a', p2name: '\u30d9\u30b8\u30fc\u30bf', winMsg: '\u30ab\u30e1\u30cf\u30e1\u6ce2\uff01\uff01\uff01',
+    font: "'Orbitron', 'Inter', sans-serif",
+    bg: '#0a0400', star1: 'rgba(255,200,50,0.8)', star2: 'rgba(100,200,255,0.7)', star3: 'rgba(255,150,0,0.6)',
+    nebula1: 'rgba(255,150,0,0.05)', nebula2: 'rgba(0,100,255,0.04)',
+    p1: '#dd8800', p1Light: '#ffbb33', p2: '#0055bb', p2Light: '#3399ee',
+    wallColor: [255,100,0], boardBg1: '#100800', boardBg2: '#180c04', boardBg3: '#0c0600',
+    cellFill: 'rgba(60,30,0,0.3)', cellStroke: 'rgba(150,80,0,0.1)',
+    moveColor: 'rgba(255,220,50,', validDot: 'rgba(255,220,50,0.5)',
+    title: '#ffaa00', confetti: ['#dd8800','#ffbb33','#0055bb','#3399ee','#ff4400','#ffff00','#ff6600','#ffffff']
   },
-  { // Saturday - Frozen Tundra
-    name: 'FROZEN TUNDRA', subtitle: 'ICE AND STEEL', p1name: 'FROST', p2name: 'STORM', winMsg: 'WINTER HAS COME',
-    bg: '#040810', star1: 'rgba(180,220,255,0.8)', star2: 'rgba(200,200,255,0.7)', star3: 'rgba(150,200,255,0.6)',
-    nebula1: 'rgba(100,150,255,0.04)', nebula2: 'rgba(150,200,255,0.03)',
-    p1: '#2266aa', p1Light: '#55aaee', p2: '#668899', p2Light: '#99ccdd',
-    wallColor: [150,220,255], boardBg1: '#060c16', boardBg2: '#081020', boardBg3: '#040a12',
-    cellFill: 'rgba(20,40,60,0.3)', cellStroke: 'rgba(60,100,150,0.1)',
-    moveColor: 'rgba(150,230,255,', validDot: 'rgba(150,230,255,0.4)',
-    title: '#88ccff', confetti: ['#2266aa','#55aaee','#668899','#99ccdd','#aaddff','#ffffff','#88bbee','#cceeff']
+  { // Friday - MARIO
+    name: 'SUPER MARIO', subtitle: "IT'S-A ME, QUORIDOR!", p1name: 'MARIO', p2name: 'LUIGI', winMsg: 'HERE WE GO!!',
+    font: "'DotGothic16', 'Inter', sans-serif",
+    bg: '#000820', star1: 'rgba(255,200,50,0.8)', star2: 'rgba(100,255,100,0.7)', star3: 'rgba(255,100,100,0.6)',
+    nebula1: 'rgba(200,0,0,0.05)', nebula2: 'rgba(0,150,0,0.04)',
+    p1: '#cc0000', p1Light: '#ff4444', p2: '#008800', p2Light: '#44cc44',
+    wallColor: [255,200,0], boardBg1: '#001030', boardBg2: '#001840', boardBg3: '#000820',
+    cellFill: 'rgba(0,20,60,0.3)', cellStroke: 'rgba(50,100,200,0.1)',
+    moveColor: 'rgba(255,255,0,', validDot: 'rgba(255,255,0,0.5)',
+    title: '#ff4444', confetti: ['#cc0000','#ff4444','#008800','#44cc44','#ffcc00','#ffffff','#ff8800','#00aaff']
+  },
+  { // Saturday - GHIBLI (Totoro / Mononoke)
+    name: 'GHIBLI FOREST', subtitle: '\u68ee\u306e\u5965\u306e\u6226\u7565', p1name: '\u30c8\u30c8\u30ed', p2name: '\u30e2\u30ce\u30ce\u30b1', winMsg: '\u98a8\u306e\u901a\u308a\u9053\u3001\u958b\u304b\u308c\u308a',
+    font: "'Zen Maru Gothic', 'Inter', sans-serif",
+    bg: '#020c04', star1: 'rgba(150,255,150,0.7)', star2: 'rgba(200,255,200,0.6)', star3: 'rgba(255,255,200,0.5)',
+    nebula1: 'rgba(0,100,50,0.05)', nebula2: 'rgba(50,150,50,0.04)',
+    p1: '#336622', p1Light: '#66bb44', p2: '#664400', p2Light: '#aa8844',
+    wallColor: [180,220,100], boardBg1: '#061008', boardBg2: '#081610', boardBg3: '#040c06',
+    cellFill: 'rgba(20,50,20,0.3)', cellStroke: 'rgba(60,120,40,0.1)',
+    moveColor: 'rgba(200,255,150,', validDot: 'rgba(200,255,150,0.5)',
+    title: '#88cc44', confetti: ['#336622','#66bb44','#664400','#aa8844','#88cc44','#ffffff','#ccff88','#ffdd88']
   }
 ];
 
@@ -442,6 +447,7 @@ function applyTheme() {
   T = THEMES[day];
   var s = document.documentElement.style;
   s.setProperty('--bg', T.bg);
+  s.setProperty('--font', T.font);
   s.setProperty('--text', '#c0d0e8');
   s.setProperty('--text-dim', '#556688');
   s.setProperty('--panel-bg', 'rgba(10,20,40,0.7)');
@@ -457,9 +463,7 @@ function applyTheme() {
   s.setProperty('--wall-ui-glow', 'rgba('+wc[0]+','+wc[1]+','+wc[2]+',0.08)');
   s.setProperty('--msg-color', '#ff6644');
   s.setProperty('--board-glow', 'rgba(0,50,150,0.06)');
-  s.setProperty('--winner-bg', 'linear-gradient(145deg, rgba(10,20,40,0.95), rgba(5,10,25,0.95))');
-  s.setProperty('--btn-bg', 'linear-gradient(135deg, rgba(0,50,150,0.4), rgba(0,80,200,0.3))');
-  s.setProperty('--btn-color', '#88bbff');
+  // winner-box and btn backgrounds are hardcoded in CSS (gradients in variables can fail in some browsers)
   s.setProperty('--title-color', T.title);
   s.setProperty('--title-glow', T.title + '33');
   s.setProperty('--start-btn-bg', 'linear-gradient(135deg, ' + T.title + '26, ' + T.title + '1a)');
@@ -470,6 +474,7 @@ function applyTheme() {
   document.getElementById('p1-name').textContent = T.p1name;
   document.getElementById('p2-name').textContent = T.p2name;
   document.getElementById('winner-msg').textContent = T.winMsg;
+  document.body.style.fontFamily = T.font;
 }
 applyTheme();
 
@@ -628,17 +633,12 @@ function playTimerWarnSFX() { if (!audioCtx) return; var now = audioCtx.currentT
 function playTimeoutSFX() { if (!audioCtx) return; var now = audioCtx.currentTime; for (var i = 0; i < 3; i++) { var o = audioCtx.createOscillator(); var e = audioCtx.createGain(); o.type = 'sawtooth'; o.frequency.value = 300 - i * 80; e.gain.setValueAtTime(0.12, now + i * 0.15); e.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.14); o.connect(e); e.connect(audioCtx.destination); o.start(now + i * 0.15); o.stop(now + i * 0.15 + 0.15); } }
 function playWinSFX() { if (!audioCtx) return; var now = audioCtx.currentTime; [196.0,261.6,329.6,392.0,523.3].forEach(function(freq, i) { var o = audioCtx.createOscillator(); var e = audioCtx.createGain(); o.type = 'sawtooth'; o.frequency.value = freq; var t = now + i * 0.18; e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(0.15, t + 0.05); e.gain.exponentialRampToValueAtTime(0.01, t + 0.6); o.connect(e); e.connect(audioCtx.destination); o.start(t); o.stop(t + 0.6); var o2 = audioCtx.createOscillator(); var e2 = audioCtx.createGain(); o2.type = 'sine'; o2.frequency.value = freq * 2; e2.gain.setValueAtTime(0, t); e2.gain.linearRampToValueAtTime(0.05, t + 0.05); e2.gain.exponentialRampToValueAtTime(0.001, t + 0.5); o2.connect(e2); e2.connect(audioCtx.destination); o2.start(t); o2.stop(t + 0.5); }); }
 
-// ============ FINGER SNAP DETECTION ============
+// ============ FINGER SNAP DETECTION (auto-start) ============
 var snapActive = false, snapStream = null, snapAnalyser = null, snapCtx = null, snapRafId = null;
 var snapCooldown = false;
 
-function toggleSnap() {
-  if (!SNAP_ENABLED) return;
-  if (snapActive) { stopSnap(); } else { startSnap(); }
-}
-
 function startSnap() {
-  if (snapActive) return;
+  if (!SNAP_ENABLED || snapActive) return;
   navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
     snapStream = stream;
     snapCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -647,11 +647,11 @@ function startSnap() {
     snapAnalyser.fftSize = 2048;
     src.connect(snapAnalyser);
     snapActive = true;
-    updateSnapBtn();
+    updateSnapIndicator();
     detectSnap();
   }).catch(function() {
     snapActive = false;
-    updateSnapBtn();
+    updateSnapIndicator();
   });
 }
 
@@ -661,7 +661,7 @@ function stopSnap() {
   if (snapStream) { snapStream.getTracks().forEach(function(t) { t.stop(); }); snapStream = null; }
   if (snapCtx) { snapCtx.close().catch(function(){}); snapCtx = null; }
   snapAnalyser = null;
-  updateSnapBtn();
+  updateSnapIndicator();
 }
 
 function detectSnap() {
@@ -717,12 +717,10 @@ function onSnapDetected() {
   }
 }
 
-function updateSnapBtn() {
-  var btn = document.getElementById('snap-btn');
-  if (!SNAP_ENABLED) { btn.style.display = 'none'; return; }
-  btn.classList.toggle('active', snapActive);
-  btn.classList.toggle('listening', snapActive);
-  btn.textContent = snapActive ? '\uD83D\uDC42' : '\uD83D\uDC41';
+function updateSnapIndicator() {
+  var el = document.getElementById('snap-indicator');
+  if (!SNAP_ENABLED) { el.style.display = 'none'; return; }
+  el.classList.toggle('active', snapActive);
 }
 
 // ============ STATE ============
@@ -962,6 +960,8 @@ function startGame() {
   document.getElementById('start-overlay').classList.add('hidden');
   initAudio(); initState(); gameStarted = true;
   resizeBoard(); showMsg(''); updateUI(); draw(); startBGM(); startTurnTimer();
+  // Auto-start snap detection
+  if (SNAP_ENABLED) startSnap();
 }
 
 function resetGame() {
@@ -970,6 +970,8 @@ function resetGame() {
   clearInterval(timerInterval); if (bgmTimeout) clearTimeout(bgmTimeout); bgmPlaying = false;
   if (audioCtx) { audioCtx.close().catch(function(){}); audioCtx = null; }
   initState(); gameStarted = true; showMsg(''); updateUI(); draw(); initAudio(); startBGM(); startTurnTimer();
+  // Re-start snap if not already active
+  if (SNAP_ENABLED && !snapActive) startSnap();
 }
 
 // ============ TOUCH & POINTER ============
@@ -1021,7 +1023,7 @@ window.addEventListener('resize', function() { clearTimeout(resizeTimer); resize
 window.addEventListener('orientationchange', function() { setTimeout(function() { if (gameStarted) resizeBoard(); }, 300); });
 
 // ============ INIT ============
-initState(); resizeBoard(); updateUI(); draw(); updateSnapBtn();
+initState(); resizeBoard(); updateUI(); draw(); updateSnapIndicator();
 
 // ============ SERVICE WORKER ============
 if ('serviceWorker' in navigator) {
