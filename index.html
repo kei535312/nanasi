@@ -918,16 +918,41 @@ window.addEventListener('orientationchange', function() { setTimeout(function() 
 // ============ INIT ============
 initState(); resizeBoard(); updateUI(); draw();
 
-// ============ SERVICE WORKER ============
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(function(reg) {
-    reg.addEventListener('updatefound', function() {
-      var newWorker = reg.installing;
-      if (newWorker) { newWorker.addEventListener('statechange', function() { if (newWorker.state === 'activated' && (!gameStarted || gameOver)) location.reload(); }); }
+// ============ CACHE CLEANUP & SERVICE WORKER ============
+// Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
+(function() {
+  var CURRENT = 'quoridor-v10';
+  if ('caches' in window) {
+    caches.keys().then(function(keys) {
+      var old = keys.filter(function(k) { return k !== CURRENT; });
+      if (old.length > 0) {
+        Promise.all(old.map(function(k) { return caches.delete(k); })).then(function() {
+          // If we cleaned old caches, force SW update and reload
+          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.getRegistration().then(function(reg) {
+              if (reg) reg.update();
+            });
+          }
+        });
+      }
     });
-  }).catch(function() {});
-  navigator.serviceWorker.addEventListener('controllerchange', function() { if (!gameStarted || gameOver) location.reload(); });
-}
+  }
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(function(reg) {
+      reg.addEventListener('updatefound', function() {
+        var newWorker = reg.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', function() {
+            if (newWorker.state === 'activated') location.reload();
+          });
+        }
+      });
+    }).catch(function() {});
+    navigator.serviceWorker.addEventListener('controllerchange', function() {
+      location.reload();
+    });
+  }
+})();
 </script>
 </body>
 </html>
