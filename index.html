@@ -161,7 +161,7 @@ body::after {
 }
 .ctrl-btn:active { transform: scale(0.95); }
 .ctrl-btn.active-move { border-color: var(--move-color); color: var(--move-color); background: var(--move-bg); box-shadow: 0 0 12px var(--move-glow); }
-.ctrl-btn.active-wall { border-color: var(--wall-ui-color); color: var(--wall-ui-color); background: var(--wall-ui-bg); box-shadow: 0 0 12px var(--wall-ui-glow); }
+.ctrl-btn.active-wall { border-color: var(--wall-ui-color); border-width: 2px; color: var(--wall-ui-color); background: rgba(255,200,0,0.2); box-shadow: 0 0 16px var(--wall-ui-color), inset 0 0 8px rgba(255,200,0,0.15); text-shadow: 0 0 6px var(--wall-ui-color); }
 .ctrl-btn .kbd { display: inline-block; font-size: 8px; padding: 1px 4px; border-radius: 2px; background: rgba(255,255,255,0.05); color: #445; margin-left: 4px; font-weight: 400; vertical-align: 1px; }
 @media (hover: none) and (pointer: coarse) { .ctrl-btn .kbd { display: none; } }
 .ctrl-divider { width: 1px; height: 24px; background: var(--panel-border); margin: 0 1px; }
@@ -196,7 +196,7 @@ canvas#board {
 }
 #reset-btn:active { transform: scale(0.95); background: rgba(255,0,0,0.1); }
 
-#message { font-size: 10px; min-height: 16px; text-align: center; color: var(--msg-color); font-weight: 600; letter-spacing: 1px; flex-shrink: 0; }
+#message { font-size: 12px; min-height: 18px; text-align: center; color: var(--wall-ui-color); font-weight: 700; letter-spacing: 1px; flex-shrink: 0; }
 
 .winner-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0);
@@ -889,8 +889,14 @@ function updateUI() {
     var isActive = currentPlayer === pIdx;
     document.getElementById('controls' + sfx).classList.toggle('inactive', !isActive);
     document.getElementById('btn-move' + sfx).className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
-    document.getElementById('btn-wh' + sfx).className = 'ctrl-btn' + (mode === 'wall' && orientation === 'h' ? ' active-wall' : '');
-    document.getElementById('btn-wv' + sfx).className = 'ctrl-btn' + (mode === 'wall' && orientation === 'v' ? ' active-wall' : '');
+    var whBtn = document.getElementById('btn-wh' + sfx);
+    var wvBtn = document.getElementById('btn-wv' + sfx);
+    var isWallH = mode === 'wall' && orientation === 'h';
+    var isWallV = mode === 'wall' && orientation === 'v';
+    whBtn.className = 'ctrl-btn' + (isWallH ? ' active-wall' : '');
+    wvBtn.className = 'ctrl-btn' + (isWallV ? ' active-wall' : '');
+    whBtn.textContent = isWallH ? '▶ 横壁' : '横壁';
+    wvBtn.textContent = isWallV ? '▶ 縦壁' : '縦壁';
   }
   updateTimerUI();
 }
@@ -1012,7 +1018,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v21';
+  var CURRENT = 'quoridor-v22';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
@@ -1029,7 +1035,7 @@ initState(); resizeBoard(); updateUI(); draw();
     });
   }
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(function(reg) {
+    navigator.serviceWorker.register('sw.js?v=22').then(function(reg) {
       reg.addEventListener('updatefound', function() {
         var newWorker = reg.installing;
         if (newWorker) {
