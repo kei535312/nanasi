@@ -277,8 +277,7 @@ canvas#board {
   <div class="player-zone p2-zone">
     <div class="controls inactive" id="controls-p2">
       <button class="ctrl-btn active-move" id="btn-move-p2" onclick="setMode('move')">MOVE</button>
-      <button class="ctrl-btn" id="btn-wh-p2" onclick="setWall('h')">横壁</button>
-      <button class="ctrl-btn" id="btn-wv-p2" onclick="setWall('v')">縦壁</button>
+      <button class="ctrl-btn" id="btn-wall-p2" onclick="setMode('wall')">WALL</button>
     </div>
     <div class="player-panel p2" id="p2-panel">
       <div class="panel-row">
@@ -317,8 +316,7 @@ canvas#board {
     </div>
     <div class="controls" id="controls-p1">
       <button class="ctrl-btn active-move" id="btn-move-p1" onclick="setMode('move')">MOVE</button>
-      <button class="ctrl-btn" id="btn-wh-p1" onclick="setWall('h')">横壁</button>
-      <button class="ctrl-btn" id="btn-wv-p1" onclick="setWall('v')">縦壁</button>
+      <button class="ctrl-btn" id="btn-wall-p1" onclick="setMode('wall')">WALL</button>
     </div>
   </div>
 </div>
@@ -688,12 +686,11 @@ function playWinSFX() { if (!audioCtx) return; var now = audioCtx.currentTime; [
 // ============ STATE ============
 var players, walls, wallCounts, currentPlayer, mode, orientation, gameOver, hoverWall;
 var turnTimeLeft, timerInterval, gameStarted;
-var showOrientPicker = false; // canvas-based orientation picker visible?
 
 function initState() {
   players = [{ row: 8, col: 4 }, { row: 0, col: 4 }];
   walls = []; wallCounts = [10, 10]; currentPlayer = 0; mode = 'move';
-  orientation = 'h'; gameOver = false; hoverWall = null; showOrientPicker = false; turnTimeLeft = TURN_TIME; gameStarted = false;
+  orientation = 'h'; gameOver = false; hoverWall = null; turnTimeLeft = TURN_TIME; gameStarted = false;
 }
 
 // ============ TIMER ============
@@ -708,7 +705,7 @@ function startTurnTimer() {
     updateTimerUI();
   }, 250);
 }
-function onTimeout() { playTimeoutSFX(); showMsg('TIME OUT'); currentPlayer = 1 - currentPlayer; mode = 'move'; hoverWall = null; showOrientPicker = false; updateUI(); draw(); startTurnTimer(); }
+function onTimeout() { playTimeoutSFX(); showMsg('TIME OUT'); currentPlayer = 1 - currentPlayer; mode = 'move'; hoverWall = null; updateUI(); draw(); startTurnTimer(); }
 
 function updateTimerUI() {
   var sec = Math.ceil(turnTimeLeft), pct = (turnTimeLeft / TURN_TIME) * 100, urgent = turnTimeLeft <= 5;
@@ -725,6 +722,11 @@ function cellX(col) { return PAD + col * (CELL + GAP); }
 function cellY(row) { return PAD + row * (CELL + GAP); }
 function pixelToCell(px, py) { for (var r = 0; r < GRID; r++) for (var c = 0; c < GRID; c++) { var x = cellX(c), y = cellY(r); if (px >= x && px < x + CELL && py >= y && py < y + CELL) return { row: r, col: c }; } return null; }
 function pixelToWallSlot(px, py) { var dist = Math.max(CELL * 0.55, 24); for (var r = 0; r < GRID - 1; r++) for (var c = 0; c < GRID - 1; c++) { var cx = cellX(c) + CELL + GAP / 2; var cy = cellY(r) + CELL + GAP / 2; if (Math.abs(px - cx) < dist && Math.abs(py - cy) < dist) return { row: r, col: c }; } return null; }
+function autoDetectOrientation(px, py, slot) {
+  var intCx = cellX(slot.col) + CELL + GAP / 2;
+  var intCy = cellY(slot.row) + CELL + GAP / 2;
+  return Math.abs(px - intCx) >= Math.abs(py - intCy) ? 'h' : 'v';
+}
 
 // ============ WALL LOGIC ============
 function isBlocked(r1, c1, r2, c2) {
@@ -812,72 +814,23 @@ function draw() {
     }
   }
 
+  // Show intersection guide dots when in wall mode
+  if (!gameOver && mode === 'wall') {
+    ctx.save();
+    ctx.fillStyle = 'rgba(' + T.wallColor[0] + ',' + T.wallColor[1] + ',' + T.wallColor[2] + ',0.2)';
+    for (var ir = 0; ir < GRID - 1; ir++) {
+      for (var ic = 0; ic < GRID - 1; ic++) {
+        var ix = cellX(ic) + CELL + GAP / 2;
+        var iy = cellY(ir) + CELL + GAP / 2;
+        ctx.beginPath(); ctx.arc(ix, iy, Math.max(3, GAP * 0.4), 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
   for (var wi = 0; wi < walls.length; wi++) drawWall(walls[wi].row, walls[wi].col, walls[wi].orient);
   if (hoverWall && !gameOver) drawWallPreview(hoverWall.row, hoverWall.col, hoverWall.orient, canPlaceWall(hoverWall.row, hoverWall.col, hoverWall.orient));
   drawPlayer(players[0], 0); drawPlayer(players[1], 1);
-
-  // Canvas-based orientation picker overlay
-  if (showOrientPicker && !gameOver) { drawOrientPicker(); }
-}
-
-function drawOrientPicker() {
-  var wc = T.wallColor;
-  var half = BOARD_PX / 2;
-  // Dim the board
-  ctx.save();
-  ctx.fillStyle = 'rgba(0,0,0,0.7)';
-  ctx.fillRect(0, 0, BOARD_PX, BOARD_PX);
-
-  // Left half: horizontal wall button
-  var lx = BOARD_PX * 0.05, ly = BOARD_PX * 0.2, lw = half - BOARD_PX * 0.08, lh = BOARD_PX * 0.6;
-  ctx.fillStyle = 'rgba(' + wc[0] + ',' + wc[1] + ',' + wc[2] + ',0.15)';
-  ctx.strokeStyle = 'rgba(' + wc[0] + ',' + wc[1] + ',' + wc[2] + ',0.6)';
-  ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.roundRect(lx, ly, lw, lh, 12); ctx.fill(); ctx.stroke();
-
-  // Draw horizontal wall icon (━━━)
-  var iconY = ly + lh * 0.35;
-  var iconW = lw * 0.6;
-  var iconX = lx + (lw - iconW) / 2;
-  ctx.fillStyle = 'rgb(' + wc[0] + ',' + wc[1] + ',' + wc[2] + ')';
-  ctx.shadowColor = 'rgb(' + wc[0] + ',' + wc[1] + ',' + wc[2] + ')';
-  ctx.shadowBlur = 10;
-  ctx.beginPath(); ctx.roundRect(iconX, iconY, iconW, 8, 4); ctx.fill();
-  ctx.shadowBlur = 0;
-
-  // Text "横壁"
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '700 ' + Math.max(16, BOARD_PX * 0.06) + 'px ' + T.font;
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('横壁', lx + lw / 2, ly + lh * 0.65);
-
-  // Right half: vertical wall button
-  var rx = half + BOARD_PX * 0.03, ry = ly, rw = lw, rh = lh;
-  ctx.fillStyle = 'rgba(' + wc[0] + ',' + wc[1] + ',' + wc[2] + ',0.15)';
-  ctx.strokeStyle = 'rgba(' + wc[0] + ',' + wc[1] + ',' + wc[2] + ',0.6)';
-  ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.roundRect(rx, ry, rw, rh, 12); ctx.fill(); ctx.stroke();
-
-  // Draw vertical wall icon (┃)
-  var viconH = lh * 0.3;
-  var viconX = rx + rw / 2 - 4;
-  var viconY = ry + rh * 0.22;
-  ctx.fillStyle = 'rgb(' + wc[0] + ',' + wc[1] + ',' + wc[2] + ')';
-  ctx.shadowColor = 'rgb(' + wc[0] + ',' + wc[1] + ',' + wc[2] + ')';
-  ctx.shadowBlur = 10;
-  ctx.beginPath(); ctx.roundRect(viconX, viconY, 8, viconH, 4); ctx.fill();
-  ctx.shadowBlur = 0;
-
-  // Text "縦壁"
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText('縦壁', rx + rw / 2, ry + rh * 0.65);
-
-  // Top instruction text
-  ctx.fillStyle = 'rgba(255,255,255,0.8)';
-  ctx.font = '700 ' + Math.max(14, BOARD_PX * 0.05) + 'px ' + T.font;
-  ctx.fillText('壁の向きを選択', BOARD_PX / 2, ly - BOARD_PX * 0.05);
-
-  ctx.restore();
 }
 
 function drawWall(r, c, orient) {
@@ -953,39 +906,16 @@ function updateUI() {
     var isActive = currentPlayer === pIdx;
     document.getElementById('controls' + sfx).classList.toggle('inactive', !isActive);
     document.getElementById('btn-move' + sfx).className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
-    var whBtn = document.getElementById('btn-wh' + sfx);
-    var wvBtn = document.getElementById('btn-wv' + sfx);
-    var isWallH = mode === 'wall' && orientation === 'h';
-    var isWallV = mode === 'wall' && orientation === 'v';
-    whBtn.className = 'ctrl-btn' + (isWallH ? ' active-wall' : '');
-    wvBtn.className = 'ctrl-btn' + (isWallV ? ' active-wall' : '');
-    whBtn.textContent = isWallH ? '▶ 横壁' : '横壁';
-    wvBtn.textContent = isWallV ? '▶ 縦壁' : '縦壁';
+    document.getElementById('btn-wall' + sfx).className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
   }
   updateTimerUI();
 }
 function setMode(m) {
   if (gameOver) return;
-  if (m === 'wall') {
-    // Show canvas orientation picker on the board
-    showOrientPicker = true;
-    mode = 'wall'; hoverWall = null;
-    showMsg('壁の向きをボード上で選択');
-    updateUI(); draw();
-    return;
-  }
-  showOrientPicker = false;
-  mode = m; hoverWall = null; showMsg('');
+  mode = m; hoverWall = null;
+  showMsg(m === 'wall' ? '交差点の近くをタップ：左右→横壁、上下→縦壁' : '');
   updateUI(); draw();
 }
-function setWall(o) {
-  if (gameOver) return;
-  showOrientPicker = false; // Direct selection, no picker needed
-  mode = 'wall'; orientation = o; hoverWall = null;
-  showMsg(o === 'h' ? '横壁モード：交差点をタップ' : '縦壁モード：交差点をタップ');
-  updateUI(); draw();
-}
-function setOrientation(o) { if (gameOver) return; showOrientPicker = false; orientation = o; mode = 'wall'; hoverWall = null; showMsg(o === 'h' ? '横壁モード：交差点をタップ' : '縦壁モード：交差点をタップ'); updateUI(); draw(); }
 function showMsg(text) { document.getElementById('message').textContent = text; }
 
 function showWinner(p) {
@@ -1038,45 +968,8 @@ function getCanvasPos(e) {
   return { px: (clientX - rect.left) * scaleX, py: (clientY - rect.top) * scaleY };
 }
 
-function handleOrientPickerTap(px, py) {
-  // Check if tap is within the picker buttons
-  var half = BOARD_PX / 2;
-  var ly = BOARD_PX * 0.2, lh = BOARD_PX * 0.6;
-  var lx = BOARD_PX * 0.05, lw = half - BOARD_PX * 0.08;
-  var rx = half + BOARD_PX * 0.03, rw = lw;
-
-  if (py >= ly && py <= ly + lh) {
-    if (px >= lx && px <= lx + lw) {
-      // Tapped horizontal
-      showOrientPicker = false;
-      orientation = 'h';
-      mode = 'wall';
-      showMsg('横壁モード：交差点をタップ');
-      updateUI(); draw();
-      return true;
-    }
-    if (px >= rx && px <= rx + rw) {
-      // Tapped vertical
-      showOrientPicker = false;
-      orientation = 'v';
-      mode = 'wall';
-      showMsg('縦壁モード：交差点をタップ');
-      updateUI(); draw();
-      return true;
-    }
-  }
-  // Tapped outside picker — cancel
-  showOrientPicker = false;
-  mode = 'move';
-  showMsg('');
-  updateUI(); draw();
-  return true;
-}
-
 function handleBoardAction(px, py) {
   if (gameOver || !gameStarted) return; ensureAudioResumed();
-  // If orientation picker is showing, handle it first
-  if (showOrientPicker) { handleOrientPickerTap(px, py); return; }
   if (mode === 'move') {
     var cell = pixelToCell(px, py); if (!cell) return;
     var moves = getValidMoves(currentPlayer);
@@ -1087,27 +980,37 @@ function handleBoardAction(px, py) {
     if (currentPlayer === 1 && players[1].row === 8) { draw(); updateUI(); showWinner(1); return; }
     currentPlayer = 1 - currentPlayer; updateUI(); draw(); startTurnTimer();
   } else {
-    var slot = pixelToWallSlot(px, py); if (!slot) { showMsg('TAP INTERSECTION'); return; }
+    var slot = pixelToWallSlot(px, py); if (!slot) { showMsg('交差点の近くをタップ'); return; }
     if (wallCounts[currentPlayer] <= 0) { showMsg('NO WALLS LEFT'); return; }
-    if (!canPlaceWall(slot.row, slot.col, orientation)) { showMsg('CANNOT PLACE'); return; }
-    walls.push({ row: slot.row, col: slot.col, orient: orientation }); wallCounts[currentPlayer]--;
-    playWallSFX(); showMsg(''); mode = 'move'; hoverWall = null; showOrientPicker = false;
+    // Auto-detect orientation from tap position
+    var autoOrient = autoDetectOrientation(px, py, slot);
+    if (!canPlaceWall(slot.row, slot.col, autoOrient)) {
+      // Try the other orientation as fallback
+      var altOrient = autoOrient === 'h' ? 'v' : 'h';
+      if (canPlaceWall(slot.row, slot.col, altOrient)) {
+        autoOrient = altOrient;
+      } else {
+        showMsg('CANNOT PLACE'); return;
+      }
+    }
+    walls.push({ row: slot.row, col: slot.col, orient: autoOrient }); wallCounts[currentPlayer]--;
+    playWallSFX(); showMsg(''); mode = 'move'; hoverWall = null;
     currentPlayer = 1 - currentPlayer; updateUI(); draw(); startTurnTimer();
   }
 }
 
 canvas.addEventListener('click', function(e) { var pos = getCanvasPos(e); handleBoardAction(pos.px, pos.py); });
-canvas.addEventListener('mousemove', function(e) { if (gameOver || mode !== 'wall' || showOrientPicker) { if (hoverWall) { hoverWall = null; draw(); } return; } var pos = getCanvasPos(e); var slot = pixelToWallSlot(pos.px, pos.py); hoverWall = slot ? { row: slot.row, col: slot.col, orient: orientation } : null; draw(); });
+canvas.addEventListener('mousemove', function(e) { if (gameOver || mode !== 'wall') { if (hoverWall) { hoverWall = null; draw(); } return; } var pos = getCanvasPos(e); var slot = pixelToWallSlot(pos.px, pos.py); if (slot) { hoverWall = { row: slot.row, col: slot.col, orient: autoDetectOrientation(pos.px, pos.py, slot) }; } else { hoverWall = null; } draw(); });
 canvas.addEventListener('mouseleave', function() { hoverWall = null; draw(); });
 
 var touchStartPos = null;
 canvas.addEventListener('touchstart', function(e) { e.preventDefault(); touchStartPos = getCanvasPos(e); }, { passive: false });
-canvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (mode === 'wall' && !gameOver && !showOrientPicker) { var pos = getCanvasPos(e); var slot = pixelToWallSlot(pos.px, pos.py); hoverWall = slot ? { row: slot.row, col: slot.col, orient: orientation } : null; draw(); } }, { passive: false });
+canvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (mode === 'wall' && !gameOver) { var pos = getCanvasPos(e); var slot = pixelToWallSlot(pos.px, pos.py); if (slot) { hoverWall = { row: slot.row, col: slot.col, orient: autoDetectOrientation(pos.px, pos.py, slot) }; } else { hoverWall = null; } draw(); } }, { passive: false });
 canvas.addEventListener('touchend', function(e) { e.preventDefault(); if (!touchStartPos) return; var endPos = getCanvasPos(e); var dx = endPos.px - touchStartPos.px; var dy = endPos.py - touchStartPos.py; if (Math.abs(dx) < CELL * 1.5 && Math.abs(dy) < CELL * 1.5) { handleBoardAction(endPos.px, endPos.py); } hoverWall = null; touchStartPos = null; draw(); }, { passive: false });
 canvas.addEventListener('touchcancel', function() { hoverWall = null; touchStartPos = null; draw(); });
 document.addEventListener('touchmove', function(e) { if (e.target === canvas || canvas.contains(e.target)) e.preventDefault(); }, { passive: false });
 
-document.addEventListener('keydown', function(e) { if (!gameStarted) return; if (e.key === 'm' || e.key === 'M') setMode('move'); if (e.key === 'w' || e.key === 'W') setMode('wall'); if (e.key === 'h' || e.key === 'H') setOrientation('h'); if (e.key === 'v' || e.key === 'V') setOrientation('v'); if (e.key === 'r' || e.key === 'R') resetGame(); });
+document.addEventListener('keydown', function(e) { if (!gameStarted) return; if (e.key === 'm' || e.key === 'M') setMode('move'); if (e.key === 'w' || e.key === 'W') setMode('wall'); if (e.key === 'r' || e.key === 'R') resetGame(); });
 
 var resizeTimer;
 window.addEventListener('resize', function() { clearTimeout(resizeTimer); resizeTimer = setTimeout(function() { if (gameStarted) resizeBoard(); }, 150); });
@@ -1129,7 +1032,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v23';
+  var CURRENT = 'quoridor-v24';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
@@ -1146,7 +1049,7 @@ initState(); resizeBoard(); updateUI(); draw();
     });
   }
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=23').then(function(reg) {
+    navigator.serviceWorker.register('sw.js?v=24').then(function(reg) {
       reg.addEventListener('updatefound', function() {
         var newWorker = reg.installing;
         if (newWorker) {
