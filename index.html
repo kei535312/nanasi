@@ -30,7 +30,7 @@ body {
   font-family: var(--font);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end;
   min-height: 100vh;
   min-height: -webkit-fill-available;
   touch-action: manipulation;
@@ -304,16 +304,16 @@ canvas#board {
   </div>
 
   <div class="orient-row" id="orient-row-p2">
-    <button class="orient-btn active" id="btn-h-p2"><span class="orient-bar" style="width:22px;height:4px"></span>横</button>
-    <button class="orient-btn" id="btn-v-p2"><span class="orient-bar" style="width:4px;height:18px"></span>縦</button>
+    <button class="orient-btn active" id="btn-h-p2" ontouchend="event.preventDefault();setOrientation('h')" onclick="setOrientation('h')"><span class="orient-bar" style="width:22px;height:4px"></span>横</button>
+    <button class="orient-btn" id="btn-v-p2" ontouchend="event.preventDefault();setOrientation('v')" onclick="setOrientation('v')"><span class="orient-bar" style="width:4px;height:18px"></span>縦</button>
   </div>
 
   <div id="board-container"><canvas id="board"></canvas></div>
   <div id="message"></div>
 
   <div class="orient-row" id="orient-row-p1">
-    <button class="orient-btn active" id="btn-h-p1"><span class="orient-bar" style="width:22px;height:4px"></span>横</button>
-    <button class="orient-btn" id="btn-v-p1"><span class="orient-bar" style="width:4px;height:18px"></span>縦</button>
+    <button class="orient-btn active" id="btn-h-p1" ontouchend="event.preventDefault();setOrientation('h')" onclick="setOrientation('h')"><span class="orient-bar" style="width:22px;height:4px"></span>横</button>
+    <button class="orient-btn" id="btn-v-p1" ontouchend="event.preventDefault();setOrientation('v')" onclick="setOrientation('v')"><span class="orient-bar" style="width:4px;height:18px"></span>縦</button>
   </div>
 
   <div class="center-controls">
@@ -921,14 +921,7 @@ function showWinner(p) {
   playerLabel.className = 'win-label';
   playerLabel.textContent = p === 0 ? T.p1name : T.p2name;
   playerLabel.style.color = p === 0 ? T.p1Light : T.p2Light;
-  // Force layout flush then show overlay
-  overlay.offsetHeight;
-  overlay.classList.add('show');
-  overlay.style.pointerEvents = 'auto';
-  overlay.style.background = 'rgba(0,4,12,0.85)';
-  var box = overlay.querySelector('.winner-box');
-  if (box) { box.style.opacity = '1'; box.style.transform = 'scale(1) rotate(0deg)'; }
-  spawnConfetti(overlay);
+  setTimeout(function() { overlay.classList.add('show'); spawnConfetti(overlay); }, 50);
 }
 
 function spawnConfetti(container) {
@@ -953,8 +946,6 @@ function startGame() {
 
 function resetGame() {
   var overlay = document.getElementById('winner-overlay'); overlay.classList.remove('show');
-  overlay.style.pointerEvents = ''; overlay.style.background = '';
-  var box = overlay.querySelector('.winner-box'); if (box) { box.style.opacity = ''; box.style.transform = ''; }
   var confetti = overlay.querySelectorAll('.confetti'); for (var i = 0; i < confetti.length; i++) confetti[i].remove();
   clearInterval(timerInterval); if (bgmTimeout) clearTimeout(bgmTimeout); bgmPlaying = false;
   if (audioCtx) { audioCtx.close().catch(function(){}); audioCtx = null; }
@@ -1032,12 +1023,22 @@ window.addEventListener('orientationchange', function() { setTimeout(function() 
 })();
 
 // ============ INIT ============
+// Force-clear winner overlay on page load (prevents stale PWA state)
+(function() {
+  var wo = document.getElementById('winner-overlay');
+  wo.classList.remove('show');
+  wo.removeAttribute('style');
+  var wb = wo.querySelector('.winner-box');
+  if (wb) wb.removeAttribute('style');
+  var cf = wo.querySelectorAll('.confetti');
+  for (var i = 0; i < cf.length; i++) cf[i].remove();
+})();
 initState(); resizeBoard(); updateUI(); draw();
 
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v16';
+  var CURRENT = 'quoridor-v17';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
