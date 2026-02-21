@@ -151,12 +151,13 @@ body::after {
 .timer-text.urgent { color: #ff2222; }
 .player-panel:not(.active) .timer-area { opacity: 0.3; }
 
-.controls { display: flex; align-items: center; gap: 5px; justify-content: center; width: 100%; }
+.controls { display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%; }
 .ctrl-btn {
-  position: relative; padding: 8px 14px; border: 1px solid var(--panel-border); border-radius: 4px;
+  position: relative; flex: 1; padding: 10px 6px; border: 1px solid var(--panel-border); border-radius: 4px;
   background: var(--panel-bg); color: var(--text-dim); font-family: inherit;
-  font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.25s; letter-spacing: 1px;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 40px; text-transform: uppercase;
+  font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.25s; letter-spacing: 1px;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 44px;
+  text-align: center;
 }
 .ctrl-btn:active { transform: scale(0.95); }
 .ctrl-btn.active-move { border-color: var(--move-color); color: var(--move-color); background: var(--move-bg); box-shadow: 0 0 12px var(--move-glow); }
@@ -276,8 +277,8 @@ canvas#board {
   <div class="player-zone p2-zone">
     <div class="controls inactive" id="controls-p2">
       <button class="ctrl-btn active-move" id="btn-move-p2" onclick="setMode('move')">MOVE</button>
-      <button class="ctrl-btn" id="btn-wh-p2" onclick="setWall('h')">WALL ━</button>
-      <button class="ctrl-btn" id="btn-wv-p2" onclick="setWall('v')">WALL ┃</button>
+      <button class="ctrl-btn" id="btn-wh-p2" onclick="setWall('h')">横壁</button>
+      <button class="ctrl-btn" id="btn-wv-p2" onclick="setWall('v')">縦壁</button>
     </div>
     <div class="player-panel p2" id="p2-panel">
       <div class="panel-row">
@@ -316,8 +317,8 @@ canvas#board {
     </div>
     <div class="controls" id="controls-p1">
       <button class="ctrl-btn active-move" id="btn-move-p1" onclick="setMode('move')">MOVE</button>
-      <button class="ctrl-btn" id="btn-wh-p1" onclick="setWall('h')">WALL ━</button>
-      <button class="ctrl-btn" id="btn-wv-p1" onclick="setWall('v')">WALL ┃</button>
+      <button class="ctrl-btn" id="btn-wh-p1" onclick="setWall('h')">横壁</button>
+      <button class="ctrl-btn" id="btn-wv-p1" onclick="setWall('v')">縦壁</button>
     </div>
   </div>
 </div>
@@ -900,7 +901,8 @@ function setMode(m) {
 }
 function setWall(o) {
   if (gameOver) return;
-  mode = 'wall'; orientation = o; hoverWall = null; showMsg('');
+  mode = 'wall'; orientation = o; hoverWall = null;
+  showMsg(o === 'h' ? '横壁モード：交差点をタップ' : '縦壁モード：交差点をタップ');
   updateUI(); draw();
 }
 function setOrientation(o) { if (gameOver) return; orientation = o; hoverWall = null; updateUI(); draw(); }
@@ -1010,7 +1012,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v20';
+  var CURRENT = 'quoridor-v21';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
