@@ -129,12 +129,16 @@ body::after {
 .player-panel.active .turn-badge { opacity: 1; }
 .player-panel.p1 .turn-badge { background: var(--p1-glow); color: var(--p1-light); border: 1px solid var(--p1-dim); }
 .player-panel.p2 .turn-badge { background: var(--p2-glow); color: var(--p2-light); border: 1px solid var(--p2-dim); }
-.wall-indicators { display: flex; gap: 3px; align-items: center; flex-wrap: wrap; margin-left: auto; }
-.wall-pip { width: 10px; height: 3px; border-radius: 1px; transition: all 0.3s; }
-.player-panel.p1 .wall-pip { background: var(--p1-dim); box-shadow: 0 0 4px var(--p1-glow); }
-.player-panel.p2 .wall-pip { background: var(--p2-dim); box-shadow: 0 0 4px var(--p2-glow); }
-.wall-pip.used { background: rgba(255,255,255,0.04) !important; box-shadow: none !important; }
-.wall-label { font-size: 9px; color: #445; margin-left: 3px; }
+.wall-indicators { display: flex; gap: 2px; align-items: center; margin-left: auto; }
+.wall-pip { width: 6px; height: 16px; border-radius: 2px; transition: all 0.3s; }
+.player-panel.p1 .wall-pip { background: var(--p1); box-shadow: 0 0 6px var(--p1-dim); }
+.player-panel.p2 .wall-pip { background: var(--p2); box-shadow: 0 0 6px var(--p2-dim); }
+.wall-pip.used { background: rgba(255,255,255,0.06) !important; box-shadow: none !important; }
+.wall-label { font-size: 14px; font-weight: 900; margin-left: 6px; letter-spacing: 1px; }
+.player-panel.p1 .wall-label { color: var(--p1-light); text-shadow: 0 0 8px var(--p1-dim); }
+.player-panel.p2 .wall-label { color: var(--p2-light); text-shadow: 0 0 8px var(--p2-dim); }
+.wall-pip.used + .wall-label { }
+.wall-count-zero .wall-label { color: #ff2222 !important; text-shadow: 0 0 8px rgba(255,0,0,0.3) !important; animation: pulse-urgent 0.5s ease-in-out infinite; }
 
 .timer-area { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
 .timer-bar-bg { flex: 1; height: 3px; border-radius: 1px; background: rgba(255,255,255,0.04); overflow: hidden; }
@@ -160,21 +164,11 @@ body::after {
 .ctrl-btn .kbd { display: inline-block; font-size: 8px; padding: 1px 4px; border-radius: 2px; background: rgba(255,255,255,0.05); color: #445; margin-left: 4px; font-weight: 400; vertical-align: 1px; }
 @media (hover: none) and (pointer: coarse) { .ctrl-btn .kbd { display: none; } }
 .ctrl-divider { width: 1px; height: 24px; background: var(--panel-border); margin: 0 1px; }
-.orient-row {
-  display: none; gap: 8px; align-items: center; justify-content: center; width: 100%; flex-shrink: 0;
-}
-.orient-row.visible { display: flex; }
-.orient-btn {
-  flex: 1; max-width: 120px; padding: 10px 8px; border: 1px solid var(--panel-border); border-radius: 4px;
-  background: var(--panel-bg); color: var(--text-dim); font-family: inherit;
-  font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 44px;
-  display: flex; align-items: center; justify-content: center; gap: 6px; letter-spacing: 1px;
-}
-.orient-btn:active { transform: scale(0.95); }
-.orient-btn .orient-bar { display: block; border-radius: 2px; background: var(--text-dim); pointer-events: none; flex-shrink: 0; }
-.orient-btn.active { border-color: var(--wall-ui-color); color: var(--wall-ui-color); background: var(--wall-ui-bg); box-shadow: 0 0 10px var(--wall-ui-glow), inset 0 0 8px var(--wall-ui-glow); }
-.orient-btn.active .orient-bar { background: var(--wall-ui-color); }
+.orient-btn-inline { display: flex; align-items: center; gap: 4px; font-size: 10px; padding: 8px 10px; }
+.orient-btn-inline.orient-hidden { opacity: 0.15; pointer-events: none; }
+.orient-btn-inline.active-orient { border-color: var(--wall-ui-color); color: var(--wall-ui-color); background: var(--wall-ui-bg); box-shadow: 0 0 10px var(--wall-ui-glow), inset 0 0 8px var(--wall-ui-glow); }
+.orient-bar-h { display: inline-block; width: 18px; height: 3px; border-radius: 2px; background: currentColor; pointer-events: none; flex-shrink: 0; }
+.orient-bar-v { display: inline-block; width: 3px; height: 14px; border-radius: 2px; background: currentColor; pointer-events: none; flex-shrink: 0; }
 .controls.inactive { opacity: 0.25; pointer-events: none; }
 
 #board-container {
@@ -288,6 +282,9 @@ canvas#board {
     <div class="controls inactive" id="controls-p2">
       <button class="ctrl-btn active-move" id="btn-move-p2" onclick="setMode('move')">MOVE<span class="kbd">M</span></button>
       <button class="ctrl-btn" id="btn-wall-p2" onclick="setMode('wall')">WALL<span class="kbd">W</span></button>
+      <div class="ctrl-divider"></div>
+      <button class="ctrl-btn orient-btn-inline" id="btn-h-p2" onclick="setOrientation('h')"><span class="orient-bar-h"></span>横</button>
+      <button class="ctrl-btn orient-btn-inline" id="btn-v-p2" onclick="setOrientation('v')"><span class="orient-bar-v"></span>縦</button>
     </div>
     <div class="player-panel p2" id="p2-panel">
       <div class="panel-row">
@@ -303,18 +300,8 @@ canvas#board {
     </div>
   </div>
 
-  <div class="orient-row" id="orient-row-p2">
-    <button class="orient-btn active" id="btn-h-p2" ontouchend="event.preventDefault();setOrientation('h')" onclick="setOrientation('h')"><span class="orient-bar" style="width:22px;height:4px"></span>横</button>
-    <button class="orient-btn" id="btn-v-p2" ontouchend="event.preventDefault();setOrientation('v')" onclick="setOrientation('v')"><span class="orient-bar" style="width:4px;height:18px"></span>縦</button>
-  </div>
-
   <div id="board-container"><canvas id="board"></canvas></div>
   <div id="message"></div>
-
-  <div class="orient-row" id="orient-row-p1">
-    <button class="orient-btn active" id="btn-h-p1" ontouchend="event.preventDefault();setOrientation('h')" onclick="setOrientation('h')"><span class="orient-bar" style="width:22px;height:4px"></span>横</button>
-    <button class="orient-btn" id="btn-v-p1" ontouchend="event.preventDefault();setOrientation('v')" onclick="setOrientation('v')"><span class="orient-bar" style="width:4px;height:18px"></span>縦</button>
-  </div>
 
   <div class="center-controls">
     <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="BGM ON/OFF">&#9835;</button>
@@ -337,6 +324,9 @@ canvas#board {
     <div class="controls" id="controls-p1">
       <button class="ctrl-btn active-move" id="btn-move-p1" onclick="setMode('move')">MOVE<span class="kbd">M</span></button>
       <button class="ctrl-btn" id="btn-wall-p1" onclick="setMode('wall')">WALL<span class="kbd">W</span></button>
+      <div class="ctrl-divider"></div>
+      <button class="ctrl-btn orient-btn-inline" id="btn-h-p1" onclick="setOrientation('h')"><span class="orient-bar-h"></span>横</button>
+      <button class="ctrl-btn orient-btn-inline" id="btn-v-p1" onclick="setOrientation('v')"><span class="orient-bar-v"></span>縦</button>
     </div>
   </div>
 </div>
@@ -889,7 +879,14 @@ function drawPlayer(p, idx) {
 }
 
 // ============ UI ============
-function renderWallPips(id, count) { var el = document.getElementById(id); var h = ''; for (var i = 0; i < 10; i++) h += '<div class="wall-pip' + (i >= count ? ' used' : '') + '"></div>'; h += '<span class="wall-label">' + count + '</span>'; el.innerHTML = h; }
+function renderWallPips(id, count) {
+  var el = document.getElementById(id);
+  var h = '';
+  for (var i = 0; i < 10; i++) h += '<div class="wall-pip' + (i >= count ? ' used' : '') + '"></div>';
+  h += '<span class="wall-label">' + count + '/10</span>';
+  el.innerHTML = h;
+  el.classList.toggle('wall-count-zero', count === 0);
+}
 
 function updateUI() {
   document.getElementById('p1-panel').classList.toggle('active', currentPlayer === 0);
@@ -901,10 +898,11 @@ function updateUI() {
     document.getElementById('controls' + sfx).classList.toggle('inactive', !isActive);
     document.getElementById('btn-move' + sfx).className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
     document.getElementById('btn-wall' + sfx).className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
-    var orientRow = document.getElementById('orient-row' + sfx);
-    orientRow.classList.toggle('visible', mode === 'wall' && isActive);
-    document.getElementById('btn-h' + sfx).classList.toggle('active', orientation === 'h');
-    document.getElementById('btn-v' + sfx).classList.toggle('active', orientation === 'v');
+    var inWall = mode === 'wall' && isActive;
+    var btnH = document.getElementById('btn-h' + sfx);
+    var btnV = document.getElementById('btn-v' + sfx);
+    btnH.className = 'ctrl-btn orient-btn-inline' + (inWall ? '' : ' orient-hidden') + (inWall && orientation === 'h' ? ' active-orient' : '');
+    btnV.className = 'ctrl-btn orient-btn-inline' + (inWall ? '' : ' orient-hidden') + (inWall && orientation === 'v' ? ' active-orient' : '');
   }
   updateTimerUI();
 }
@@ -1000,27 +998,7 @@ var resizeTimer;
 window.addEventListener('resize', function() { clearTimeout(resizeTimer); resizeTimer = setTimeout(function() { if (gameStarted) resizeBoard(); }, 150); });
 window.addEventListener('orientationchange', function() { setTimeout(function() { if (gameStarted) resizeBoard(); }, 300); });
 
-// ============ ORIENT BTN HANDLERS (event delegation) ============
-(function() {
-  function getOrientFromBtn(el) {
-    while (el && el !== document) {
-      if (el.id === 'btn-h-p1' || el.id === 'btn-h-p2') return 'h';
-      if (el.id === 'btn-v-p1' || el.id === 'btn-v-p2') return 'v';
-      el = el.parentElement;
-    }
-    return null;
-  }
-  var handled = false;
-  document.addEventListener('touchend', function(e) {
-    var o = getOrientFromBtn(e.target);
-    if (o !== null) { e.preventDefault(); handled = true; setOrientation(o); }
-  }, { passive: false });
-  document.addEventListener('click', function(e) {
-    if (handled) { handled = false; return; }
-    var o = getOrientFromBtn(e.target);
-    if (o !== null) { e.preventDefault(); setOrientation(o); }
-  }, true);
-})();
+// Orient buttons now use same onclick pattern as MOVE/WALL (inside .controls div)
 
 // ============ INIT ============
 // Force-clear winner overlay on page load (prevents stale PWA state)
@@ -1038,7 +1016,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v17';
+  var CURRENT = 'quoridor-v18';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
