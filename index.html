@@ -82,7 +82,7 @@ body::after {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 4px;
   padding: calc(8px + env(safe-area-inset-top)) calc(4px + env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) calc(4px + env(safe-area-inset-left));
   width: 100%;
@@ -161,7 +161,7 @@ body::after {
 @media (hover: none) and (pointer: coarse) { .ctrl-btn .kbd { display: none; } }
 .ctrl-divider { width: 1px; height: 24px; background: var(--panel-border); margin: 0 1px; }
 .orient-row {
-  display: none; gap: 8px; align-items: center; justify-content: center; width: 100%;
+  display: none; gap: 8px; align-items: center; justify-content: center; width: 100%; flex-shrink: 0;
 }
 .orient-row.visible { display: flex; }
 .orient-btn {
@@ -289,10 +289,6 @@ canvas#board {
       <button class="ctrl-btn active-move" id="btn-move-p2" onclick="setMode('move')">MOVE<span class="kbd">M</span></button>
       <button class="ctrl-btn" id="btn-wall-p2" onclick="setMode('wall')">WALL<span class="kbd">W</span></button>
     </div>
-    <div class="orient-row" id="orient-row-p2">
-      <button class="orient-btn active" id="btn-h-p2" onclick="setOrientation('h')"><span class="orient-bar" style="width:22px;height:4px"></span>横</button>
-      <button class="orient-btn" id="btn-v-p2" onclick="setOrientation('v')"><span class="orient-bar" style="width:4px;height:18px"></span>縦</button>
-    </div>
     <div class="player-panel p2" id="p2-panel">
       <div class="panel-row">
         <div class="player-icon p2">II</div>
@@ -307,8 +303,18 @@ canvas#board {
     </div>
   </div>
 
+  <div class="orient-row" id="orient-row-p2">
+    <button class="orient-btn active" id="btn-h-p2"><span class="orient-bar" style="width:22px;height:4px"></span>横</button>
+    <button class="orient-btn" id="btn-v-p2"><span class="orient-bar" style="width:4px;height:18px"></span>縦</button>
+  </div>
+
   <div id="board-container"><canvas id="board"></canvas></div>
   <div id="message"></div>
+
+  <div class="orient-row" id="orient-row-p1">
+    <button class="orient-btn active" id="btn-h-p1"><span class="orient-bar" style="width:22px;height:4px"></span>横</button>
+    <button class="orient-btn" id="btn-v-p1"><span class="orient-bar" style="width:4px;height:18px"></span>縦</button>
+  </div>
 
   <div class="center-controls">
     <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="BGM ON/OFF">&#9835;</button>
@@ -331,10 +337,6 @@ canvas#board {
     <div class="controls" id="controls-p1">
       <button class="ctrl-btn active-move" id="btn-move-p1" onclick="setMode('move')">MOVE<span class="kbd">M</span></button>
       <button class="ctrl-btn" id="btn-wall-p1" onclick="setMode('wall')">WALL<span class="kbd">W</span></button>
-    </div>
-    <div class="orient-row" id="orient-row-p1">
-      <button class="orient-btn active" id="btn-h-p1" onclick="setOrientation('h')"><span class="orient-bar" style="width:22px;height:4px"></span>横</button>
-      <button class="orient-btn" id="btn-v-p1" onclick="setOrientation('v')"><span class="orient-bar" style="width:4px;height:18px"></span>縦</button>
     </div>
   </div>
 </div>
@@ -1007,13 +1009,30 @@ var resizeTimer;
 window.addEventListener('resize', function() { clearTimeout(resizeTimer); resizeTimer = setTimeout(function() { if (gameStarted) resizeBoard(); }, 150); });
 window.addEventListener('orientationchange', function() { setTimeout(function() { if (gameStarted) resizeBoard(); }, 300); });
 
+// ============ ORIENT BTN TOUCH HANDLERS ============
+(function() {
+  var touched = false;
+  function bindOrient(id, o) {
+    var btn = document.getElementById(id);
+    if (!btn) return;
+    btn.addEventListener('touchstart', function(e) {
+      e.preventDefault(); e.stopPropagation(); touched = true; setOrientation(o);
+    }, { passive: false });
+    btn.addEventListener('click', function(e) {
+      e.preventDefault(); e.stopPropagation(); if (touched) { touched = false; return; } setOrientation(o);
+    });
+  }
+  bindOrient('btn-h-p1', 'h'); bindOrient('btn-v-p1', 'v');
+  bindOrient('btn-h-p2', 'h'); bindOrient('btn-v-p2', 'v');
+})();
+
 // ============ INIT ============
 initState(); resizeBoard(); updateUI(); draw();
 
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v14';
+  var CURRENT = 'quoridor-v15';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
