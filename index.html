@@ -82,14 +82,14 @@ body::after {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 4px;
-  padding: calc(8px + env(safe-area-inset-top)) calc(4px + env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) calc(4px + env(safe-area-inset-left));
+  padding: calc(8px + env(safe-area-inset-top)) calc(4px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(4px + env(safe-area-inset-left));
   width: 100%;
   max-width: 600px;
   height: 100vh;
   height: 100dvh;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   z-index: 1;
 }
@@ -1009,21 +1009,26 @@ var resizeTimer;
 window.addEventListener('resize', function() { clearTimeout(resizeTimer); resizeTimer = setTimeout(function() { if (gameStarted) resizeBoard(); }, 150); });
 window.addEventListener('orientationchange', function() { setTimeout(function() { if (gameStarted) resizeBoard(); }, 300); });
 
-// ============ ORIENT BTN TOUCH HANDLERS ============
+// ============ ORIENT BTN HANDLERS (event delegation) ============
 (function() {
-  var touched = false;
-  function bindOrient(id, o) {
-    var btn = document.getElementById(id);
-    if (!btn) return;
-    btn.addEventListener('touchstart', function(e) {
-      e.preventDefault(); e.stopPropagation(); touched = true; setOrientation(o);
-    }, { passive: false });
-    btn.addEventListener('click', function(e) {
-      e.preventDefault(); e.stopPropagation(); if (touched) { touched = false; return; } setOrientation(o);
-    });
+  function getOrientFromBtn(el) {
+    while (el && el !== document) {
+      if (el.id === 'btn-h-p1' || el.id === 'btn-h-p2') return 'h';
+      if (el.id === 'btn-v-p1' || el.id === 'btn-v-p2') return 'v';
+      el = el.parentElement;
+    }
+    return null;
   }
-  bindOrient('btn-h-p1', 'h'); bindOrient('btn-v-p1', 'v');
-  bindOrient('btn-h-p2', 'h'); bindOrient('btn-v-p2', 'v');
+  var handled = false;
+  document.addEventListener('touchend', function(e) {
+    var o = getOrientFromBtn(e.target);
+    if (o !== null) { e.preventDefault(); handled = true; setOrientation(o); }
+  }, { passive: false });
+  document.addEventListener('click', function(e) {
+    if (handled) { handled = false; return; }
+    var o = getOrientFromBtn(e.target);
+    if (o !== null) { e.preventDefault(); setOrientation(o); }
+  }, true);
 })();
 
 // ============ INIT ============
@@ -1032,7 +1037,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v15';
+  var CURRENT = 'quoridor-v16';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
