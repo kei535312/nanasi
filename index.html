@@ -163,16 +163,16 @@ body::after {
 .orient-group { display: flex; gap: 4px; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
 .orient-group.visible { opacity: 1; pointer-events: auto; }
 .orient-btn {
-  padding: 6px 10px; border: 1px solid var(--panel-border); border-radius: 4px;
+  padding: 8px 14px; border: 1px solid var(--panel-border); border-radius: 4px;
   background: var(--panel-bg); color: var(--text-dim); font-family: inherit;
   font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 40px;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 40px; min-width: 40px;
   display: flex; align-items: center; justify-content: center; gap: 2px;
 }
 .orient-btn:active { transform: scale(0.95); }
 .orient-btn.active { border-color: var(--wall-ui-color); color: var(--wall-ui-color); background: var(--wall-ui-bg); box-shadow: 0 0 10px var(--wall-ui-glow), inset 0 0 8px var(--wall-ui-glow); }
-.orient-icon { display: flex; flex-direction: column; align-items: center; gap: 1px; }
-.orient-icon .wall-bar { border-radius: 1px; transition: background 0.2s; }
+.orient-icon { display: flex; flex-direction: column; align-items: center; gap: 1px; pointer-events: none; }
+.orient-icon .wall-bar { border-radius: 1px; transition: background 0.2s; pointer-events: none; }
 .orient-btn .orient-icon .wall-bar { background: var(--text-dim); }
 .orient-btn.active .orient-icon .wall-bar { background: var(--wall-ui-color); }
 .controls.inactive { opacity: 0.25; pointer-events: none; }
@@ -1004,7 +1004,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v11';
+  var CURRENT = 'quoridor-v12';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
