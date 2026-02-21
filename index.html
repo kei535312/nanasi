@@ -82,9 +82,9 @@ body::after {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 4px;
-  padding: calc(4px + env(safe-area-inset-top)) calc(4px + env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) calc(4px + env(safe-area-inset-left));
+  padding: calc(8px + env(safe-area-inset-top)) calc(4px + env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) calc(4px + env(safe-area-inset-left));
   width: 100%;
   max-width: 600px;
   height: 100vh;
@@ -160,21 +160,18 @@ body::after {
 .ctrl-btn .kbd { display: inline-block; font-size: 8px; padding: 1px 4px; border-radius: 2px; background: rgba(255,255,255,0.05); color: #445; margin-left: 4px; font-weight: 400; vertical-align: 1px; }
 @media (hover: none) and (pointer: coarse) { .ctrl-btn .kbd { display: none; } }
 .ctrl-divider { width: 1px; height: 24px; background: var(--panel-border); margin: 0 1px; }
-.orient-group { display: flex; gap: 4px; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
-.orient-group.visible { opacity: 1; pointer-events: auto; }
-.orient-btn {
+.orient-toggle {
   padding: 8px 14px; border: 1px solid var(--panel-border); border-radius: 4px;
-  background: var(--panel-bg); color: var(--text-dim); font-family: inherit;
+  background: var(--panel-bg); color: var(--wall-ui-color); font-family: inherit;
   font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 40px; min-width: 40px;
-  display: flex; align-items: center; justify-content: center; gap: 2px;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 40px; min-width: 44px;
+  display: none; align-items: center; justify-content: center;
+  border-color: var(--wall-ui-color); background: var(--wall-ui-bg);
+  box-shadow: 0 0 10px var(--wall-ui-glow), inset 0 0 8px var(--wall-ui-glow);
 }
-.orient-btn:active { transform: scale(0.95); }
-.orient-btn.active { border-color: var(--wall-ui-color); color: var(--wall-ui-color); background: var(--wall-ui-bg); box-shadow: 0 0 10px var(--wall-ui-glow), inset 0 0 8px var(--wall-ui-glow); }
-.orient-icon { display: flex; flex-direction: column; align-items: center; gap: 1px; pointer-events: none; }
-.orient-icon .wall-bar { border-radius: 1px; transition: background 0.2s; pointer-events: none; }
-.orient-btn .orient-icon .wall-bar { background: var(--text-dim); }
-.orient-btn.active .orient-icon .wall-bar { background: var(--wall-ui-color); }
+.orient-toggle.visible { display: flex; }
+.orient-toggle:active { transform: scale(0.9); }
+.orient-toggle .orient-bar { display: block; border-radius: 2px; background: var(--wall-ui-color); pointer-events: none; transition: all 0.15s; }
 .controls.inactive { opacity: 0.25; pointer-events: none; }
 
 #board-container {
@@ -289,10 +286,7 @@ canvas#board {
       <button class="ctrl-btn active-move" id="btn-move-p2" onclick="setMode('move')">MOVE<span class="kbd">M</span></button>
       <button class="ctrl-btn" id="btn-wall-p2" onclick="setMode('wall')">WALL<span class="kbd">W</span></button>
       <div class="ctrl-divider"></div>
-      <div class="orient-group" id="orient-group-p2">
-        <button class="orient-btn active" id="btn-h-p2" onclick="setOrientation('h')"><span class="orient-icon"><span class="wall-bar" style="width:22px;height:4px"></span></span></button>
-        <button class="orient-btn" id="btn-v-p2" onclick="setOrientation('v')"><span class="orient-icon"><span class="wall-bar" style="width:4px;height:22px"></span></span></button>
-      </div>
+      <button class="orient-toggle" id="orient-toggle-p2" onclick="toggleOrientation()"><span class="orient-bar" id="orient-bar-p2" style="width:22px;height:4px"></span></button>
     </div>
     <div class="player-panel p2" id="p2-panel">
       <div class="panel-row">
@@ -333,10 +327,7 @@ canvas#board {
       <button class="ctrl-btn active-move" id="btn-move-p1" onclick="setMode('move')">MOVE<span class="kbd">M</span></button>
       <button class="ctrl-btn" id="btn-wall-p1" onclick="setMode('wall')">WALL<span class="kbd">W</span></button>
       <div class="ctrl-divider"></div>
-      <div class="orient-group" id="orient-group-p1">
-        <button class="orient-btn active" id="btn-h-p1" onclick="setOrientation('h')"><span class="orient-icon"><span class="wall-bar" style="width:22px;height:4px"></span></span></button>
-        <button class="orient-btn" id="btn-v-p1" onclick="setOrientation('v')"><span class="orient-icon"><span class="wall-bar" style="width:4px;height:22px"></span></span></button>
-      </div>
+      <button class="orient-toggle" id="orient-toggle-p1" onclick="toggleOrientation()"><span class="orient-bar" id="orient-bar-p1" style="width:22px;height:4px"></span></button>
     </div>
   </div>
 </div>
@@ -900,14 +891,17 @@ function updateUI() {
     document.getElementById('controls' + sfx).classList.toggle('inactive', currentPlayer !== pIdx);
     document.getElementById('btn-move' + sfx).className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
     document.getElementById('btn-wall' + sfx).className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
-    document.getElementById('orient-group' + sfx).classList.toggle('visible', mode === 'wall');
-    document.getElementById('btn-h' + sfx).classList.toggle('active', orientation === 'h');
-    document.getElementById('btn-v' + sfx).classList.toggle('active', orientation === 'v');
+    var toggle = document.getElementById('orient-toggle' + sfx);
+    toggle.classList.toggle('visible', mode === 'wall');
+    var bar = document.getElementById('orient-bar' + sfx);
+    if (orientation === 'h') { bar.style.width = '22px'; bar.style.height = '4px'; }
+    else { bar.style.width = '4px'; bar.style.height = '22px'; }
   }
   updateTimerUI();
 }
 function setMode(m) { if (gameOver) return; mode = m; hoverWall = null; showMsg(''); updateUI(); draw(); }
 function setOrientation(o) { orientation = o; hoverWall = null; updateUI(); draw(); }
+function toggleOrientation() { orientation = orientation === 'h' ? 'v' : 'h'; hoverWall = null; updateUI(); draw(); }
 function showMsg(text) { document.getElementById('message').textContent = text; }
 
 function showWinner(p) {
@@ -919,7 +913,14 @@ function showWinner(p) {
   playerLabel.className = 'win-label';
   playerLabel.textContent = p === 0 ? T.p1name : T.p2name;
   playerLabel.style.color = p === 0 ? T.p1Light : T.p2Light;
-  requestAnimationFrame(function() { overlay.classList.add('show'); spawnConfetti(overlay); });
+  // Force layout flush then show overlay
+  overlay.offsetHeight;
+  overlay.classList.add('show');
+  overlay.style.pointerEvents = 'auto';
+  overlay.style.background = 'rgba(0,4,12,0.85)';
+  var box = overlay.querySelector('.winner-box');
+  if (box) { box.style.opacity = '1'; box.style.transform = 'scale(1) rotate(0deg)'; }
+  spawnConfetti(overlay);
 }
 
 function spawnConfetti(container) {
@@ -944,6 +945,8 @@ function startGame() {
 
 function resetGame() {
   var overlay = document.getElementById('winner-overlay'); overlay.classList.remove('show');
+  overlay.style.pointerEvents = ''; overlay.style.background = '';
+  var box = overlay.querySelector('.winner-box'); if (box) { box.style.opacity = ''; box.style.transform = ''; }
   var confetti = overlay.querySelectorAll('.confetti'); for (var i = 0; i < confetti.length; i++) confetti[i].remove();
   clearInterval(timerInterval); if (bgmTimeout) clearTimeout(bgmTimeout); bgmPlaying = false;
   if (audioCtx) { audioCtx.close().catch(function(){}); audioCtx = null; }
@@ -1004,7 +1007,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v12';
+  var CURRENT = 'quoridor-v13';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
