@@ -164,12 +164,29 @@ body::after {
 .ctrl-btn .kbd { display: inline-block; font-size: 8px; padding: 1px 4px; border-radius: 2px; background: rgba(255,255,255,0.05); color: #445; margin-left: 4px; font-weight: 400; vertical-align: 1px; }
 @media (hover: none) and (pointer: coarse) { .ctrl-btn .kbd { display: none; } }
 .ctrl-divider { width: 1px; height: 24px; background: var(--panel-border); margin: 0 1px; }
-.orient-btn-inline { display: flex; align-items: center; gap: 4px; font-size: 10px; padding: 8px 10px; }
-.orient-btn-inline.orient-hidden { opacity: 0.15; pointer-events: none; }
-.orient-btn-inline.active-orient { border-color: var(--wall-ui-color); color: var(--wall-ui-color); background: var(--wall-ui-bg); box-shadow: 0 0 10px var(--wall-ui-glow), inset 0 0 8px var(--wall-ui-glow); }
-.orient-bar-h { display: inline-block; width: 18px; height: 3px; border-radius: 2px; background: currentColor; pointer-events: none; flex-shrink: 0; }
-.orient-bar-v { display: inline-block; width: 3px; height: 14px; border-radius: 2px; background: currentColor; pointer-events: none; flex-shrink: 0; }
 .controls.inactive { opacity: 0.25; pointer-events: none; }
+
+/* Wall orientation overlay */
+.wall-orient-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,4,12,0.85); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.wall-orient-overlay.show { opacity: 1; pointer-events: auto; }
+.wall-orient-box { text-align: center; padding: 24px; }
+.wall-orient-title { font-size: 16px; font-weight: 700; color: var(--wall-ui-color); margin-bottom: 24px; letter-spacing: 3px; }
+.wall-orient-choice {
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  width: 240px; padding: 20px; margin: 12px auto; border-radius: 8px;
+  border: 2px solid var(--wall-ui-color); background: var(--wall-ui-bg);
+  color: var(--wall-ui-color); font-family: inherit; font-size: 18px; font-weight: 700;
+  cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  min-height: 64px; letter-spacing: 2px; transition: all 0.2s;
+  box-shadow: 0 0 15px var(--wall-ui-glow);
+}
+.wall-orient-choice:active { transform: scale(0.95); }
+.wall-orient-icon { font-size: 28px; }
 
 #board-container {
   position: relative; -webkit-user-select: none; user-select: none; touch-action: none;
@@ -280,11 +297,8 @@ canvas#board {
 <div id="app">
   <div class="player-zone p2-zone">
     <div class="controls inactive" id="controls-p2">
-      <button class="ctrl-btn active-move" id="btn-move-p2" onclick="setMode('move')">MOVE<span class="kbd">M</span></button>
-      <button class="ctrl-btn" id="btn-wall-p2" onclick="setMode('wall')">WALL<span class="kbd">W</span></button>
-      <div class="ctrl-divider"></div>
-      <button class="ctrl-btn orient-btn-inline" id="btn-h-p2" onclick="setOrientation('h')"><span class="orient-bar-h"></span>横</button>
-      <button class="ctrl-btn orient-btn-inline" id="btn-v-p2" onclick="setOrientation('v')"><span class="orient-bar-v"></span>縦</button>
+      <button class="ctrl-btn active-move" id="btn-move-p2" onclick="setMode('move')">MOVE</button>
+      <button class="ctrl-btn" id="btn-wall-p2" onclick="setMode('wall')">WALL</button>
     </div>
     <div class="player-panel p2" id="p2-panel">
       <div class="panel-row">
@@ -322,12 +336,23 @@ canvas#board {
       </div>
     </div>
     <div class="controls" id="controls-p1">
-      <button class="ctrl-btn active-move" id="btn-move-p1" onclick="setMode('move')">MOVE<span class="kbd">M</span></button>
-      <button class="ctrl-btn" id="btn-wall-p1" onclick="setMode('wall')">WALL<span class="kbd">W</span></button>
-      <div class="ctrl-divider"></div>
-      <button class="ctrl-btn orient-btn-inline" id="btn-h-p1" onclick="setOrientation('h')"><span class="orient-bar-h"></span>横</button>
-      <button class="ctrl-btn orient-btn-inline" id="btn-v-p1" onclick="setOrientation('v')"><span class="orient-bar-v"></span>縦</button>
+      <button class="ctrl-btn active-move" id="btn-move-p1" onclick="setMode('move')">MOVE</button>
+      <button class="ctrl-btn" id="btn-wall-p1" onclick="setMode('wall')">WALL</button>
     </div>
+  </div>
+</div>
+
+<div class="wall-orient-overlay" id="wall-orient-overlay">
+  <div class="wall-orient-box">
+    <div class="wall-orient-title">壁の向きを選択</div>
+    <button class="wall-orient-choice" onclick="pickOrient('h')">
+      <span class="wall-orient-icon">━━━</span>
+      <span>横に置く</span>
+    </button>
+    <button class="wall-orient-choice" onclick="pickOrient('v')">
+      <span class="wall-orient-icon wall-orient-icon-v">┃</span>
+      <span>縦に置く</span>
+    </button>
   </div>
 </div>
 
@@ -898,15 +923,22 @@ function updateUI() {
     document.getElementById('controls' + sfx).classList.toggle('inactive', !isActive);
     document.getElementById('btn-move' + sfx).className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
     document.getElementById('btn-wall' + sfx).className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
-    var inWall = mode === 'wall' && isActive;
-    var btnH = document.getElementById('btn-h' + sfx);
-    var btnV = document.getElementById('btn-v' + sfx);
-    btnH.className = 'ctrl-btn orient-btn-inline' + (inWall ? '' : ' orient-hidden') + (inWall && orientation === 'h' ? ' active-orient' : '');
-    btnV.className = 'ctrl-btn orient-btn-inline' + (inWall ? '' : ' orient-hidden') + (inWall && orientation === 'v' ? ' active-orient' : '');
   }
   updateTimerUI();
 }
-function setMode(m) { if (gameOver) return; mode = m; hoverWall = null; showMsg(''); updateUI(); draw(); }
+function setMode(m) {
+  if (gameOver) return;
+  mode = m; hoverWall = null; showMsg('');
+  if (m === 'wall') {
+    document.getElementById('wall-orient-overlay').classList.add('show');
+  }
+  updateUI(); draw();
+}
+function pickOrient(o) {
+  orientation = o;
+  document.getElementById('wall-orient-overlay').classList.remove('show');
+  hoverWall = null; updateUI(); draw();
+}
 function setOrientation(o) { if (gameOver) return; orientation = o; hoverWall = null; updateUI(); draw(); }
 function showMsg(text) { document.getElementById('message').textContent = text; }
 
@@ -943,6 +975,7 @@ function startGame() {
 }
 
 function resetGame() {
+  document.getElementById('wall-orient-overlay').classList.remove('show');
   var overlay = document.getElementById('winner-overlay'); overlay.classList.remove('show');
   var confetti = overlay.querySelectorAll('.confetti'); for (var i = 0; i < confetti.length; i++) confetti[i].remove();
   clearInterval(timerInterval); if (bgmTimeout) clearTimeout(bgmTimeout); bgmPlaying = false;
@@ -998,10 +1031,8 @@ var resizeTimer;
 window.addEventListener('resize', function() { clearTimeout(resizeTimer); resizeTimer = setTimeout(function() { if (gameStarted) resizeBoard(); }, 150); });
 window.addEventListener('orientationchange', function() { setTimeout(function() { if (gameStarted) resizeBoard(); }, 300); });
 
-// Orient buttons now use same onclick pattern as MOVE/WALL (inside .controls div)
-
 // ============ INIT ============
-// Force-clear winner overlay on page load (prevents stale PWA state)
+// Force-clear overlays on page load (prevents stale PWA state)
 (function() {
   var wo = document.getElementById('winner-overlay');
   wo.classList.remove('show');
@@ -1010,13 +1041,14 @@ window.addEventListener('orientationchange', function() { setTimeout(function() 
   if (wb) wb.removeAttribute('style');
   var cf = wo.querySelectorAll('.confetti');
   for (var i = 0; i < cf.length; i++) cf[i].remove();
+  document.getElementById('wall-orient-overlay').classList.remove('show');
 })();
 initState(); resizeBoard(); updateUI(); draw();
 
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v18';
+  var CURRENT = 'quoridor-v19';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
