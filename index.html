@@ -166,28 +166,6 @@ body::after {
 .ctrl-divider { width: 1px; height: 24px; background: var(--panel-border); margin: 0 1px; }
 .controls.inactive { opacity: 0.25; pointer-events: none; }
 
-/* Wall orientation overlay */
-.wall-orient-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,4,12,0.85); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-  display: flex; justify-content: center; align-items: center;
-  z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.3s;
-}
-.wall-orient-overlay.show { opacity: 1; pointer-events: auto; }
-.wall-orient-box { text-align: center; padding: 24px; }
-.wall-orient-title { font-size: 16px; font-weight: 700; color: var(--wall-ui-color); margin-bottom: 24px; letter-spacing: 3px; }
-.wall-orient-choice {
-  display: flex; align-items: center; justify-content: center; gap: 16px;
-  width: 240px; padding: 20px; margin: 12px auto; border-radius: 8px;
-  border: 2px solid var(--wall-ui-color); background: var(--wall-ui-bg);
-  color: var(--wall-ui-color); font-family: inherit; font-size: 18px; font-weight: 700;
-  cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-  min-height: 64px; letter-spacing: 2px; transition: all 0.2s;
-  box-shadow: 0 0 15px var(--wall-ui-glow);
-}
-.wall-orient-choice:active { transform: scale(0.95); }
-.wall-orient-icon { font-size: 28px; }
-
 #board-container {
   position: relative; -webkit-user-select: none; user-select: none; touch-action: none;
   width: 100%; display: flex; justify-content: center; flex: 1; align-items: center; min-height: 0;
@@ -298,7 +276,8 @@ canvas#board {
   <div class="player-zone p2-zone">
     <div class="controls inactive" id="controls-p2">
       <button class="ctrl-btn active-move" id="btn-move-p2" onclick="setMode('move')">MOVE</button>
-      <button class="ctrl-btn" id="btn-wall-p2" onclick="setMode('wall')">WALL</button>
+      <button class="ctrl-btn" id="btn-wh-p2" onclick="setWall('h')">WALL ━</button>
+      <button class="ctrl-btn" id="btn-wv-p2" onclick="setWall('v')">WALL ┃</button>
     </div>
     <div class="player-panel p2" id="p2-panel">
       <div class="panel-row">
@@ -337,22 +316,9 @@ canvas#board {
     </div>
     <div class="controls" id="controls-p1">
       <button class="ctrl-btn active-move" id="btn-move-p1" onclick="setMode('move')">MOVE</button>
-      <button class="ctrl-btn" id="btn-wall-p1" onclick="setMode('wall')">WALL</button>
+      <button class="ctrl-btn" id="btn-wh-p1" onclick="setWall('h')">WALL ━</button>
+      <button class="ctrl-btn" id="btn-wv-p1" onclick="setWall('v')">WALL ┃</button>
     </div>
-  </div>
-</div>
-
-<div class="wall-orient-overlay" id="wall-orient-overlay">
-  <div class="wall-orient-box">
-    <div class="wall-orient-title">壁の向きを選択</div>
-    <button class="wall-orient-choice" onclick="pickOrient('h')">
-      <span class="wall-orient-icon">━━━</span>
-      <span>横に置く</span>
-    </button>
-    <button class="wall-orient-choice" onclick="pickOrient('v')">
-      <span class="wall-orient-icon wall-orient-icon-v">┃</span>
-      <span>縦に置く</span>
-    </button>
   </div>
 </div>
 
@@ -922,22 +888,20 @@ function updateUI() {
     var isActive = currentPlayer === pIdx;
     document.getElementById('controls' + sfx).classList.toggle('inactive', !isActive);
     document.getElementById('btn-move' + sfx).className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
-    document.getElementById('btn-wall' + sfx).className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
+    document.getElementById('btn-wh' + sfx).className = 'ctrl-btn' + (mode === 'wall' && orientation === 'h' ? ' active-wall' : '');
+    document.getElementById('btn-wv' + sfx).className = 'ctrl-btn' + (mode === 'wall' && orientation === 'v' ? ' active-wall' : '');
   }
   updateTimerUI();
 }
 function setMode(m) {
   if (gameOver) return;
   mode = m; hoverWall = null; showMsg('');
-  if (m === 'wall') {
-    document.getElementById('wall-orient-overlay').classList.add('show');
-  }
   updateUI(); draw();
 }
-function pickOrient(o) {
-  orientation = o;
-  document.getElementById('wall-orient-overlay').classList.remove('show');
-  hoverWall = null; updateUI(); draw();
+function setWall(o) {
+  if (gameOver) return;
+  mode = 'wall'; orientation = o; hoverWall = null; showMsg('');
+  updateUI(); draw();
 }
 function setOrientation(o) { if (gameOver) return; orientation = o; hoverWall = null; updateUI(); draw(); }
 function showMsg(text) { document.getElementById('message').textContent = text; }
@@ -975,7 +939,6 @@ function startGame() {
 }
 
 function resetGame() {
-  document.getElementById('wall-orient-overlay').classList.remove('show');
   var overlay = document.getElementById('winner-overlay'); overlay.classList.remove('show');
   var confetti = overlay.querySelectorAll('.confetti'); for (var i = 0; i < confetti.length; i++) confetti[i].remove();
   clearInterval(timerInterval); if (bgmTimeout) clearTimeout(bgmTimeout); bgmPlaying = false;
@@ -1041,14 +1004,13 @@ window.addEventListener('orientationchange', function() { setTimeout(function() 
   if (wb) wb.removeAttribute('style');
   var cf = wo.querySelectorAll('.confetti');
   for (var i = 0; i < cf.length; i++) cf[i].remove();
-  document.getElementById('wall-orient-overlay').classList.remove('show');
 })();
 initState(); resizeBoard(); updateUI(); draw();
 
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v19';
+  var CURRENT = 'quoridor-v20';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
