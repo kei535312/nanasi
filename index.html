@@ -83,7 +83,7 @@ body::after {
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
+  gap: 2px;
   padding: calc(8px + env(safe-area-inset-top)) calc(4px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(4px + env(safe-area-inset-left));
   width: 100%;
   max-width: 600px;
@@ -98,7 +98,7 @@ body::after {
 .player-zone.p2-zone { transform: rotate(180deg); }
 
 .player-panel {
-  width: 100%; padding: 6px 10px; border-radius: 6px;
+  width: 100%; padding: 4px 8px; border-radius: 6px;
   background: var(--panel-bg); border: 1px solid var(--panel-border);
   transition: all 0.4s cubic-bezier(.4,0,.2,1);
   position: relative; overflow: hidden;
@@ -140,8 +140,8 @@ body::after {
 .wall-pip.used + .wall-label { }
 .wall-count-zero .wall-label { color: #ff2222 !important; text-shadow: 0 0 8px rgba(255,0,0,0.3) !important; animation: pulse-urgent 0.5s ease-in-out infinite; }
 
-.timer-area { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
-.timer-bar-bg { flex: 1; height: 3px; border-radius: 1px; background: rgba(255,255,255,0.04); overflow: hidden; }
+.timer-area { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.timer-bar-bg { flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.04); overflow: hidden; }
 .timer-bar-fill { height: 100%; border-radius: 1px; transition: width 0.25s linear, background 0.5s; width: 100%; }
 .player-panel.p1 .timer-bar-fill { background: linear-gradient(90deg, var(--p1), var(--p1-light)); box-shadow: 0 0 6px var(--p1-dim); }
 .player-panel.p2 .timer-bar-fill { background: linear-gradient(90deg, var(--p2), var(--p2-light)); box-shadow: 0 0 6px var(--p2-dim); }
@@ -153,10 +153,10 @@ body::after {
 
 .controls { display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%; }
 .ctrl-btn {
-  position: relative; flex: 1; padding: 10px 6px; border: 1px solid var(--panel-border); border-radius: 4px;
+  position: relative; flex: 1; padding: 6px 4px; border: 1px solid var(--panel-border); border-radius: 4px;
   background: var(--panel-bg); color: var(--text-dim); font-family: inherit;
   font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.25s; letter-spacing: 1px;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 44px;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 36px;
   text-align: center;
 }
 .ctrl-btn:active { transform: scale(0.95); }
@@ -179,7 +179,7 @@ canvas#board {
 
 .center-controls { display: flex; gap: 8px; align-items: center; justify-content: center; flex-shrink: 0; }
 .sound-btn {
-  width: 38px; height: 38px; border: 1px solid var(--panel-border); border-radius: 4px;
+  width: 32px; height: 32px; border: 1px solid var(--panel-border); border-radius: 4px;
   background: var(--panel-bg); color: var(--text-dim); font-size: 16px; cursor: pointer;
   transition: all 0.2s; display: flex; align-items: center; justify-content: center;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation; position: relative;
@@ -188,15 +188,15 @@ canvas#board {
 .sound-btn.muted { color: #ff2222; }
 
 #reset-btn {
-  padding: 8px 20px; border: 1px solid var(--panel-border); border-radius: 4px;
+  padding: 4px 14px; border: 1px solid var(--panel-border); border-radius: 4px;
   background: var(--panel-bg); color: var(--text-dim); font-family: inherit;
   font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.25s;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-  min-height: 38px; letter-spacing: 2px; text-transform: uppercase;
+  min-height: 32px; letter-spacing: 2px; text-transform: uppercase;
 }
 #reset-btn:active { transform: scale(0.95); background: rgba(255,0,0,0.1); }
 
-#message { font-size: 12px; min-height: 18px; text-align: center; color: var(--wall-ui-color); font-weight: 700; letter-spacing: 1px; flex-shrink: 0; }
+#message { font-size: 10px; min-height: 14px; text-align: center; color: var(--wall-ui-color); font-weight: 700; letter-spacing: 1px; flex-shrink: 0; }
 
 .winner-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0);
@@ -573,7 +573,7 @@ var TURN_TIME = 30;
 function calcBoardSize() {
   var vw = window.innerWidth;
   var vh = window.innerHeight;
-  var maxBoard = Math.min(vw - 16, vh * 0.42, 520);
+  var maxBoard = Math.min(vw - 16, vh * 0.55, 560);
   var cellAndGap = maxBoard / (GRID + (GRID - 1) * 0.16 + 0.6);
   var cell = Math.floor(cellAndGap);
   var gap = Math.max(4, Math.round(cell * 0.16));
@@ -1032,7 +1032,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v24';
+  var CURRENT = 'quoridor-v25';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
@@ -1049,7 +1049,7 @@ initState(); resizeBoard(); updateUI(); draw();
     });
   }
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=24').then(function(reg) {
+    navigator.serviceWorker.register('sw.js?v=25').then(function(reg) {
       reg.addEventListener('updatefound', function() {
         var newWorker = reg.installing;
         if (newWorker) {
