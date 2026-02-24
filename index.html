@@ -296,6 +296,7 @@ canvas#board.guest-flip { transform: rotate(180deg); }
     <div id="mode-select">
       <button onclick="startGame()">ローカル対戦</button>
       <button onclick="showOnlineMenu()">オンライン対戦</button>
+      <button onclick="startAIGame()">AI対戦</button>
     </div>
     <div id="online-menu" style="display:none">
       <button onclick="createRoom()">部屋をつくる</button>
@@ -425,12 +426,28 @@ var THEMES = [
     title: '#00ff88', confetti: ['#7b2d8e','#c466ff','#cc3300','#ff6644','#00ff88','#ff00ff','#ffcc00','#ffffff'],
     bgm: {
       melody: [
+        // A section
         {n:'A3',d:1},{n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:1},{n:'B3',d:0.5},{n:'C4',d:0.5},
         {n:'A3',d:1.5},{n:'A3',d:0.5},{n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:0.5},{n:'B3',d:0.5},
-        {n:'A3',d:0.75},{n:'G3',d:0.75},{n:'A3',d:1.5}
+        {n:'A3',d:0.75},{n:'G3',d:0.75},{n:'A3',d:1.5},
+        // B section
+        {n:'E4',d:1},{n:'F4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:1},{n:'C4',d:0.5},{n:'D4',d:0.5},
+        {n:'E4',d:1.5},{n:'E4',d:0.5},{n:'A4',d:0.5},{n:'G4',d:0.5},{n:'F4',d:0.5},{n:'E4',d:0.5},
+        {n:'D4',d:0.75},{n:'C4',d:0.75},{n:'D4',d:1.5},
+        // A' section (variation)
+        {n:'A3',d:1},{n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:0.75},{n:'D4',d:0.25},{n:'B3',d:0.5},{n:'C4',d:0.5},
+        {n:'A3',d:1},{n:'E4',d:0.5},{n:'F4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:0.5},{n:'B3',d:0.5},
+        {n:'A3',d:1},{n:'G3',d:0.5},{n:'A3',d:1.5},
+        // C section (climax)
+        {n:'A4',d:1},{n:'G4',d:0.5},{n:'F4',d:0.5},{n:'E4',d:1},{n:'D4',d:0.5},{n:'E4',d:0.5},
+        {n:'C4',d:1},{n:'B3',d:0.5},{n:'A3',d:0.5},{n:'G3',d:0.5},{n:'A3',d:0.5},{n:'B3',d:0.5},{n:'C4',d:0.5},
+        {n:'A3',d:2}
       ],
       bass: [
-        {n:'A2',d:2},{n:'C3',d:2},{n:'A2',d:2},{n:'A2',d:2},{n:'C3',d:1},{n:'D3',d:1},{n:'A2',d:2}
+        {n:'A2',d:2},{n:'C3',d:2},{n:'A2',d:2},{n:'A2',d:2},{n:'C3',d:1},{n:'D3',d:1},{n:'A2',d:2},
+        {n:'E2',d:2},{n:'F2',d:2},{n:'E2',d:2},{n:'A2',d:2},{n:'D3',d:1},{n:'C3',d:1},{n:'D3',d:2},
+        {n:'A2',d:2},{n:'C3',d:2},{n:'A2',d:2},{n:'E2',d:2},{n:'A2',d:1},{n:'G2',d:1},{n:'A2',d:2},
+        {n:'A2',d:2},{n:'F2',d:2},{n:'E2',d:2},{n:'A2',d:1},{n:'G2',d:1},{n:'A2',d:2}
       ],
       tempo: 0.42, type: 'sawtooth'
     }
@@ -447,13 +464,32 @@ var THEMES = [
     title: '#44aaff', confetti: ['#0066cc','#44aaff','#cc2200','#ff5533','#ffdd00','#ffffff','#ff8800','#88ddff'],
     bgm: {
       melody: [
+        // A section
         {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.75},{n:'E4',d:0.25},
         {n:'F4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:1},
         {n:'C4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:0.75},{n:'G4',d:0.25},
-        {n:'F4',d:0.5},{n:'E4',d:0.5},{n:'C4',d:1}
+        {n:'F4',d:0.5},{n:'E4',d:0.5},{n:'C4',d:1},
+        // B section
+        {n:'G4',d:0.5},{n:'A4',d:0.5},{n:'G4',d:0.5},{n:'E4',d:0.75},{n:'D4',d:0.25},
+        {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:1},
+        {n:'F4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:0.75},{n:'D4',d:0.25},
+        {n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:1},
+        // A' section
+        {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.5},
+        {n:'A4',d:0.5},{n:'G4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:0.5},
+        {n:'C4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:0.5},
+        {n:'G4',d:0.5},{n:'F4',d:0.5},{n:'E4',d:0.5},{n:'C4',d:0.5},
+        // C section
+        {n:'A4',d:0.75},{n:'G4',d:0.25},{n:'E4',d:0.5},{n:'D4',d:0.5},
+        {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.5},
+        {n:'A4',d:0.75},{n:'G4',d:0.75},{n:'E4',d:0.5},
+        {n:'D4',d:0.5},{n:'C4',d:1.5}
       ],
       bass: [
-        {n:'C3',d:2},{n:'F3',d:2},{n:'C3',d:2},{n:'G2',d:1},{n:'C3',d:1}
+        {n:'C3',d:2},{n:'F3',d:2},{n:'C3',d:2},{n:'G2',d:1},{n:'C3',d:1},
+        {n:'E3',d:2},{n:'A2',d:2},{n:'F3',d:2},{n:'G2',d:1},{n:'C3',d:1},
+        {n:'C3',d:2},{n:'F3',d:2},{n:'C3',d:2},{n:'G2',d:1},{n:'C3',d:1},
+        {n:'A2',d:2},{n:'F3',d:2},{n:'G2',d:2},{n:'C3',d:2}
       ],
       tempo: 0.38, type: 'triangle'
     }
@@ -470,13 +506,31 @@ var THEMES = [
     title: '#ff8833', confetti: ['#cc4400','#ff7733','#6622aa','#9955dd','#ffcc00','#ffffff','#ff4400','#88ff44'],
     bgm: {
       melody: [
+        // A section
         {n:'F4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:1},{n:'G4',d:0.5},{n:'F4',d:0.5},
         {n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:1},
         {n:'D4',d:0.5},{n:'E4',d:0.5},{n:'F4',d:0.75},{n:'E4',d:0.25},{n:'D4',d:0.5},{n:'E4',d:0.5},
-        {n:'C4',d:1.5}
+        {n:'C4',d:1.5},
+        // B section
+        {n:'A4',d:0.5},{n:'G4',d:0.5},{n:'F4',d:0.5},{n:'E4',d:0.5},
+        {n:'D4',d:0.5},{n:'E4',d:0.5},{n:'F4',d:1},
+        {n:'G4',d:0.5},{n:'A4',d:0.5},{n:'G4',d:0.75},{n:'F4',d:0.25},{n:'E4',d:0.5},{n:'D4',d:0.5},
+        {n:'C4',d:1.5},
+        // A' section
+        {n:'F4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:0.75},{n:'G4',d:0.25},{n:'F4',d:0.5},{n:'E4',d:0.5},
+        {n:'D4',d:0.5},{n:'C4',d:0.5},{n:'D4',d:1},
+        {n:'E4',d:0.5},{n:'F4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:0.5},{n:'G4',d:0.5},{n:'F4',d:0.5},
+        {n:'E4',d:0.5},{n:'C4',d:1.5},
+        // C section (climax)
+        {n:'A4',d:1},{n:'G4',d:0.5},{n:'A4',d:0.5},{n:'F4',d:1},
+        {n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'F4',d:0.5},
+        {n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:2}
       ],
       bass: [
-        {n:'F2',d:2},{n:'C3',d:2},{n:'D3',d:2},{n:'C3',d:2}
+        {n:'F2',d:2},{n:'C3',d:2},{n:'D3',d:2},{n:'C3',d:2},
+        {n:'A2',d:2},{n:'D3',d:2},{n:'G2',d:2},{n:'C3',d:2},
+        {n:'F2',d:2},{n:'C3',d:2},{n:'D3',d:2},{n:'E3',d:1},{n:'C3',d:1},
+        {n:'F2',d:2},{n:'G2',d:2},{n:'C3',d:2},{n:'C3',d:2}
       ],
       tempo: 0.35, type: 'triangle'
     }
@@ -493,6 +547,7 @@ var THEMES = [
     title: '#ffcc00', confetti: ['#ff0000','#ff4444','#0066ff','#44aaff','#ffcc00','#ffffff','#ff6600','#00ff88'],
     bgm: {
       melody: [
+        // A section (Imperial March theme)
         {n:'G3',d:0.75},{n:'G3',d:0.75},{n:'G3',d:0.75},
         {n:'Eb3',d:0.5},{n:'Bb3',d:0.25},
         {n:'G3',d:0.75},{n:'Eb3',d:0.5},{n:'Bb3',d:0.25},
@@ -500,12 +555,30 @@ var THEMES = [
         {n:'D4',d:0.75},{n:'D4',d:0.75},{n:'D4',d:0.75},
         {n:'Eb4',d:0.5},{n:'Bb3',d:0.25},
         {n:'F#3',d:0.75},{n:'Eb3',d:0.5},{n:'Bb3',d:0.25},
+        {n:'G3',d:1.5},
+        // B section
+        {n:'G4',d:0.75},{n:'G3',d:0.5},{n:'G3',d:0.25},
+        {n:'G4',d:0.75},{n:'F#4',d:0.5},{n:'F4',d:0.25},
+        {n:'E4',d:0.25},{n:'Eb4',d:0.25},{n:'E4',d:0.5},
+        {n:'A3',d:0.5},{n:'D4',d:0.75},
+        {n:'C4',d:0.5},{n:'B3',d:0.25},
+        {n:'Bb3',d:0.25},{n:'A3',d:0.25},{n:'Bb3',d:0.5},
+        {n:'Eb3',d:0.5},{n:'F#3',d:0.75},
+        {n:'Eb3',d:0.5},{n:'Bb3',d:0.25},{n:'G3',d:1.5},
+        // A' section (reprise)
+        {n:'G3',d:0.75},{n:'G3',d:0.75},{n:'G3',d:0.75},
+        {n:'Eb3',d:0.5},{n:'Bb3',d:0.25},
+        {n:'G3',d:0.75},{n:'Eb3',d:0.5},{n:'Bb3',d:0.25},
         {n:'G3',d:1.5}
       ],
       bass: [
         {n:'G2',d:3},{n:'Eb2',d:1.5},{n:'G2',d:1.5},
         {n:'G2',d:3},
         {n:'D3',d:3},{n:'Eb3',d:1.5},{n:'Bb2',d:1.5},
+        {n:'G2',d:3},
+        {n:'G2',d:1.5},{n:'G2',d:1.5},{n:'G2',d:1.5},{n:'A2',d:1.5},
+        {n:'D3',d:1.5},{n:'Eb3',d:1.5},{n:'Bb2',d:1.5},{n:'G2',d:1.5},
+        {n:'G2',d:3},{n:'Eb2',d:1.5},{n:'G2',d:1.5},
         {n:'G2',d:3}
       ],
       tempo: 0.45, type: 'sawtooth'
@@ -523,13 +596,32 @@ var THEMES = [
     title: '#ffaa00', confetti: ['#dd8800','#ffbb33','#0055bb','#3399ee','#ff4400','#ffff00','#ff6600','#ffffff'],
     bgm: {
       melody: [
+        // A section
         {n:'E4',d:0.5},{n:'E4',d:0.25},{n:'E4',d:0.25},{n:'G4',d:0.5},{n:'E4',d:0.5},
         {n:'D4',d:0.5},{n:'C4',d:0.5},{n:'D4',d:1},
         {n:'E4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:0.5},{n:'G4',d:0.25},{n:'E4',d:0.25},
-        {n:'D4',d:0.5},{n:'E4',d:0.5},{n:'C4',d:1}
+        {n:'D4',d:0.5},{n:'E4',d:0.5},{n:'C4',d:1},
+        // B section
+        {n:'G4',d:0.5},{n:'G4',d:0.25},{n:'A4',d:0.25},{n:'G4',d:0.5},{n:'E4',d:0.5},
+        {n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:1},
+        {n:'A4',d:0.5},{n:'G4',d:0.25},{n:'E4',d:0.25},{n:'D4',d:0.5},{n:'C4',d:0.5},
+        {n:'D4',d:0.5},{n:'E4',d:0.5},{n:'C4',d:1},
+        // A' section
+        {n:'E4',d:0.5},{n:'E4',d:0.25},{n:'E4',d:0.25},{n:'G4',d:0.5},{n:'A4',d:0.5},
+        {n:'G4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:1},
+        {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.25},{n:'E4',d:0.25},
+        {n:'D4',d:0.5},{n:'C4',d:0.5},{n:'D4',d:1},
+        // C section (power-up)
+        {n:'A4',d:0.5},{n:'A4',d:0.25},{n:'G4',d:0.25},{n:'A4',d:0.5},{n:'G4',d:0.5},
+        {n:'E4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.5},
+        {n:'A4',d:0.5},{n:'G4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:0.5},
+        {n:'C4',d:1},{n:'C4',d:1}
       ],
       bass: [
-        {n:'C3',d:1},{n:'C3',d:1},{n:'G2',d:2},{n:'C3',d:1},{n:'E3',d:1},{n:'G2',d:1},{n:'C3',d:1}
+        {n:'C3',d:1},{n:'C3',d:1},{n:'G2',d:2},{n:'C3',d:1},{n:'E3',d:1},{n:'G2',d:1},{n:'C3',d:1},
+        {n:'E3',d:1},{n:'E3',d:1},{n:'C3',d:2},{n:'A2',d:1},{n:'C3',d:1},{n:'G2',d:1},{n:'C3',d:1},
+        {n:'C3',d:1},{n:'C3',d:1},{n:'G2',d:2},{n:'C3',d:1},{n:'E3',d:1},{n:'G2',d:1},{n:'C3',d:1},
+        {n:'A2',d:2},{n:'C3',d:1},{n:'E3',d:1},{n:'G2',d:2},{n:'C3',d:2}
       ],
       tempo: 0.32, type: 'sawtooth'
     }
@@ -546,16 +638,38 @@ var THEMES = [
     title: '#ff4444', confetti: ['#cc0000','#ff4444','#008800','#44cc44','#ffcc00','#ffffff','#ff8800','#00aaff'],
     bgm: {
       melody: [
+        // A section (overworld)
         {n:'E5',d:0.25},{n:'E5',d:0.25},{n:'E5',d:0.5},{n:'C5',d:0.25},{n:'E5',d:0.25},
         {n:'G5',d:0.5},{n:'G4',d:0.5},
         {n:'C5',d:0.5},{n:'G4',d:0.5},{n:'E4',d:0.5},
         {n:'A4',d:0.5},{n:'B4',d:0.5},{n:'Bb4',d:0.25},{n:'A4',d:0.75},
         {n:'G4',d:0.33},{n:'E5',d:0.33},{n:'G5',d:0.34},{n:'A5',d:0.5},{n:'F5',d:0.25},{n:'G5',d:0.25},
-        {n:'E5',d:0.5},{n:'C5',d:0.25},{n:'D5',d:0.25},{n:'B4',d:0.5}
+        {n:'E5',d:0.5},{n:'C5',d:0.25},{n:'D5',d:0.25},{n:'B4',d:0.5},
+        // B section
+        {n:'C5',d:0.5},{n:'G4',d:0.5},{n:'E4',d:0.5},
+        {n:'A4',d:0.5},{n:'B4',d:0.5},{n:'Bb4',d:0.25},{n:'A4',d:0.75},
+        {n:'G4',d:0.33},{n:'E5',d:0.33},{n:'G5',d:0.34},{n:'A5',d:0.5},{n:'F5',d:0.25},{n:'G5',d:0.25},
+        {n:'E5',d:0.5},{n:'C5',d:0.25},{n:'D5',d:0.25},{n:'B4',d:0.5},
+        // C section (underground riff)
+        {n:'C4',d:0.25},{n:'C4',d:0.25},{n:'C4',d:0.25},{n:'C4',d:0.25},{n:'D4',d:0.25},{n:'E4',d:0.25},{n:'C4',d:0.25},{n:'A3',d:0.25},
+        {n:'G3',d:0.5},{n:'G4',d:0.5},{n:'A4',d:0.5},{n:'F4',d:0.25},{n:'G4',d:0.25},
+        {n:'E4',d:0.5},{n:'C4',d:0.5},{n:'D4',d:0.25},{n:'B3',d:0.25},{n:'C4',d:0.5},
+        // A' section (reprise)
+        {n:'E5',d:0.25},{n:'E5',d:0.25},{n:'E5',d:0.5},{n:'C5',d:0.25},{n:'E5',d:0.25},
+        {n:'G5',d:0.5},{n:'G4',d:0.5},
+        {n:'C5',d:0.5},{n:'G4',d:0.5},{n:'E4',d:0.5},
+        {n:'A4',d:0.5},{n:'B4',d:0.5},{n:'A4',d:0.5},{n:'G4',d:0.5},
+        {n:'C5',d:1}
       ],
       bass: [
         {n:'C3',d:1},{n:'G3',d:0.5},{n:'E3',d:0.5},{n:'C3',d:1},{n:'G2',d:1},
-        {n:'C3',d:1},{n:'F3',d:1},{n:'G3',d:1},{n:'C3',d:1}
+        {n:'C3',d:1},{n:'F3',d:1},{n:'G3',d:1},{n:'C3',d:1},
+        {n:'C3',d:1},{n:'F3',d:1},{n:'G3',d:1},{n:'C3',d:1},
+        {n:'C3',d:1},{n:'G3',d:0.5},{n:'E3',d:0.5},{n:'C3',d:1},{n:'G2',d:1},
+        {n:'A2',d:1},{n:'E3',d:1},{n:'G3',d:1},{n:'C3',d:1},
+        {n:'F2',d:1},{n:'C3',d:1},{n:'G2',d:1},{n:'C3',d:1},
+        {n:'C3',d:1},{n:'G3',d:0.5},{n:'E3',d:0.5},{n:'C3',d:1},{n:'G2',d:1},
+        {n:'F2',d:1},{n:'G2',d:1},{n:'C3',d:2}
       ],
       tempo: 0.28, type: 'square'
     }
@@ -572,13 +686,32 @@ var THEMES = [
     title: '#bb66ff', confetti: ['#1a1aff','#6666ff','#cc0044','#ff4477','#bb66ff','#ffffff','#ff0066','#00ccff'],
     bgm: {
       melody: [
+        // A section (dark, tense)
         {n:'E3',d:0.5},{n:'G3',d:0.25},{n:'A3',d:0.25},{n:'B3',d:0.5},{n:'D4',d:0.5},
         {n:'C4',d:0.5},{n:'B3',d:0.25},{n:'A3',d:0.25},{n:'G3',d:1},
         {n:'A3',d:0.5},{n:'B3',d:0.5},{n:'C4',d:0.5},{n:'E4',d:0.5},
-        {n:'D4',d:0.5},{n:'C4',d:0.25},{n:'B3',d:0.25},{n:'A3',d:0.5},{n:'E3',d:0.5}
+        {n:'D4',d:0.5},{n:'C4',d:0.25},{n:'B3',d:0.25},{n:'A3',d:0.5},{n:'E3',d:0.5},
+        // B section (domain expansion)
+        {n:'E4',d:0.5},{n:'D4',d:0.25},{n:'E4',d:0.25},{n:'G4',d:0.5},{n:'E4',d:0.5},
+        {n:'D4',d:0.5},{n:'C4',d:0.5},{n:'B3',d:1},
+        {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.5},
+        {n:'A4',d:0.5},{n:'G4',d:0.25},{n:'E4',d:0.25},{n:'D4',d:0.5},{n:'E4',d:0.5},
+        // A' section (variation)
+        {n:'E3',d:0.5},{n:'G3',d:0.25},{n:'A3',d:0.25},{n:'B3',d:0.5},{n:'D4',d:0.5},
+        {n:'E4',d:0.5},{n:'D4',d:0.25},{n:'C4',d:0.25},{n:'B3',d:1},
+        {n:'A3',d:0.5},{n:'B3',d:0.5},{n:'C4',d:0.5},{n:'D4',d:0.5},
+        {n:'E4',d:0.5},{n:'D4',d:0.25},{n:'C4',d:0.25},{n:'B3',d:0.5},{n:'A3',d:0.5},
+        // C section (cursed energy)
+        {n:'G4',d:0.5},{n:'E4',d:0.25},{n:'D4',d:0.25},{n:'E4',d:0.5},{n:'B3',d:0.5},
+        {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:0.5},
+        {n:'C4',d:0.5},{n:'B3',d:0.5},{n:'A3',d:0.5},{n:'G3',d:0.5},
+        {n:'A3',d:0.5},{n:'E3',d:0.5},{n:'E3',d:1}
       ],
       bass: [
-        {n:'E2',d:2},{n:'A2',d:2},{n:'E2',d:1},{n:'G2',d:1},{n:'A2',d:1},{n:'E2',d:1}
+        {n:'E2',d:2},{n:'A2',d:2},{n:'E2',d:1},{n:'G2',d:1},{n:'A2',d:1},{n:'E2',d:1},
+        {n:'C3',d:2},{n:'G2',d:2},{n:'A2',d:2},{n:'E2',d:1},{n:'A2',d:1},
+        {n:'E2',d:2},{n:'A2',d:2},{n:'E2',d:1},{n:'G2',d:1},{n:'A2',d:1},{n:'E2',d:1},
+        {n:'E2',d:2},{n:'A2',d:1},{n:'G2',d:1},{n:'E2',d:2},{n:'E2',d:2}
       ],
       tempo: 0.38, type: 'sawtooth'
     }
@@ -766,13 +899,16 @@ function playWinSFX() { if (!audioCtx) return; var now = audioCtx.currentTime; [
 var players, walls, wallCounts, currentPlayer, mode, orientation, gameOver, hoverWall;
 var turnTimeLeft, timerInterval, gameStarted;
 var undoSnapshot = null;
-var undoUsed = [false, false];
+var aiMode = false;
+var aiPlayer = 1;
+var aiThinking = false;
 
 function initState() {
   players = [{ row: 8, col: 4 }, { row: 0, col: 4 }];
   walls = []; wallCounts = [10, 10]; currentPlayer = 0; mode = 'move';
   orientation = 'h'; gameOver = false; hoverWall = null; turnTimeLeft = TURN_TIME; gameStarted = false;
-  undoSnapshot = null; undoUsed = [false, false];
+  undoSnapshot = null;
+  aiThinking = false;
 }
 
 function saveSnapshot() {
@@ -799,10 +935,12 @@ function startTurnTimer() {
 }
 function onTimeout() {
   if (gameMode === 'online' && currentPlayer !== myPlayerIndex) return;
+  if (aiMode && currentPlayer === aiPlayer) return; // AI doesn't timeout
   playTimeoutSFX(); showMsg('TIME OUT');
   currentPlayer = 1 - currentPlayer; mode = 'move'; hoverWall = null;
   updateUI(); draw(); startTurnTimer();
   if (gameMode === 'online') syncStateToFirebase();
+  if (aiMode && currentPlayer === aiPlayer) { setTimeout(function() { aiTurn(); }, 100); }
 }
 
 function updateTimerUI() {
@@ -996,13 +1134,31 @@ function renderWallPips(id, count) {
 }
 
 function updateUI() {
-  document.getElementById('p1-panel').classList.toggle('active', currentPlayer === 0);
-  document.getElementById('p2-panel').classList.toggle('active', currentPlayer === 1);
-  renderWallPips('p1-walls', wallCounts[0]); renderWallPips('p2-walls', wallCounts[1]);
+  if (gameMode === 'online' && myPlayerIndex === 1) {
+    // ゲスト: 下パネル=自分(P2)、上パネル=相手(P1)
+    document.getElementById('p1-panel').classList.toggle('active', currentPlayer === 1);
+    document.getElementById('p2-panel').classList.toggle('active', currentPlayer === 0);
+    renderWallPips('p1-walls', wallCounts[1]);
+    renderWallPips('p2-walls', wallCounts[0]);
+  } else {
+    document.getElementById('p1-panel').classList.toggle('active', currentPlayer === 0);
+    document.getElementById('p2-panel').classList.toggle('active', currentPlayer === 1);
+    renderWallPips('p1-walls', wallCounts[0]);
+    renderWallPips('p2-walls', wallCounts[1]);
+  }
   if (gameMode === 'online') {
     // オンライン: 常に画面下部(controls-p1)を使う。上部(controls-p2)は常にinactive
     var isMyTurn = currentPlayer === myPlayerIndex;
     document.getElementById('controls-p1').classList.toggle('inactive', !isMyTurn);
+    document.getElementById('controls-p2').classList.toggle('inactive', true);
+    document.getElementById('btn-move-p1').className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
+    document.getElementById('btn-wall-p1').className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
+    document.getElementById('btn-move-p2').className = 'ctrl-btn';
+    document.getElementById('btn-wall-p2').className = 'ctrl-btn';
+  } else if (aiMode) {
+    // AI対戦: P1(人間)のみ操作可能、P2(AI)は常にinactive
+    var isHumanTurn = currentPlayer !== aiPlayer;
+    document.getElementById('controls-p1').classList.toggle('inactive', !isHumanTurn || aiThinking);
     document.getElementById('controls-p2').classList.toggle('inactive', true);
     document.getElementById('btn-move-p1').className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
     document.getElementById('btn-wall-p1').className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
@@ -1023,7 +1179,7 @@ function updateUI() {
   if (undoBtn) {
     var canUndo = undoSnapshot && !gameOver && gameStarted;
     if (canUndo && gameMode === 'online') { canUndo = undoSnapshot.currentPlayer === myPlayerIndex; }
-    if (canUndo) { canUndo = !undoUsed[undoSnapshot.currentPlayer]; }
+    if (canUndo && aiMode) { canUndo = undoSnapshot.currentPlayer !== aiPlayer && !aiThinking; }
     undoBtn.disabled = !canUndo;
   }
   updateTimerUI();
@@ -1031,6 +1187,7 @@ function updateUI() {
 function setMode(m) {
   if (gameOver) return;
   if (gameMode === 'online' && currentPlayer !== myPlayerIndex) return;
+  if (aiMode && (currentPlayer === aiPlayer || aiThinking)) return;
   mode = m; hoverWall = null;
   showMsg(m === 'wall' ? '交差点の近くをタップ：左右→横壁、上下→縦壁' : '');
   updateUI(); draw();
@@ -1069,9 +1226,11 @@ function spawnConfetti(container) {
 
 function startGame() {
   gameMode = 'local';
+  aiMode = false;
   document.getElementById('start-overlay').classList.add('hidden');
   canvas.classList.remove('guest-flip');
   initAudio(); initState(); gameStarted = true;
+  document.getElementById('p2-name').textContent = T.p2name;
   resizeBoard(); showMsg(''); updateUI(); draw(); startBGM(); startTurnTimer();
 }
 
@@ -1093,7 +1252,13 @@ function resetGame() {
   var confetti = overlay.querySelectorAll('.confetti'); for (var i = 0; i < confetti.length; i++) confetti[i].remove();
   clearInterval(timerInterval); if (bgmTimeout) clearTimeout(bgmTimeout); bgmPlaying = false;
   if (audioCtx) { audioCtx.close().catch(function(){}); audioCtx = null; }
-  initState(); gameStarted = true; showMsg(''); updateUI(); draw(); initAudio(); startBGM(); startTurnTimer();
+  var wasAI = aiMode;
+  initState(); gameStarted = true;
+  if (wasAI) {
+    aiMode = true;
+    document.getElementById('p2-name').textContent = 'AI';
+  }
+  showMsg(''); updateUI(); draw(); initAudio(); startBGM(); startTurnTimer();
 }
 
 // ============ ONLINE ROOM MANAGEMENT ============
@@ -1385,20 +1550,329 @@ function exitOnlineGame() {
 // ============ UNDO ============
 function undo() {
   if (!undoSnapshot || gameOver || !gameStarted) return;
+  if (aiMode && aiThinking) return; // Can't undo while AI is thinking
   var whoMoved = undoSnapshot.currentPlayer;
-  if (undoUsed[whoMoved]) { showMsg('UNDOは1回まで'); return; }
   if (gameMode === 'online' && whoMoved !== myPlayerIndex) { showMsg('相手の手は戻せません'); return; }
+  if (aiMode && whoMoved === aiPlayer) { showMsg('AIの手は戻せません'); return; }
   players = undoSnapshot.players;
   walls = undoSnapshot.walls;
   wallCounts = undoSnapshot.wallCounts;
   currentPlayer = undoSnapshot.currentPlayer;
   mode = undoSnapshot.mode;
   hoverWall = null;
-  undoUsed[whoMoved] = true;
   undoSnapshot = null;
   showMsg('UNDO!');
   updateUI(); draw(); startTurnTimer();
   if (gameMode === 'online') syncStateToFirebase();
+}
+
+// ============ AI OPPONENT ============
+function startAIGame() {
+  gameMode = 'local';
+  aiMode = true;
+  aiPlayer = 1;
+  document.getElementById('start-overlay').classList.add('hidden');
+  canvas.classList.remove('guest-flip');
+  initAudio(); initState(); gameStarted = true;
+  aiMode = true; // re-set after initState
+  document.getElementById('p2-name').textContent = 'AI';
+  resizeBoard(); showMsg(''); updateUI(); draw(); startBGM(); startTurnTimer();
+}
+
+// BFS shortest path for a given player with a given wall list
+function aiShortestPath(pRow, pCol, goalRow, wallList) {
+  var visited = [];
+  for (var i = 0; i < GRID; i++) { visited[i] = []; for (var j = 0; j < GRID; j++) visited[i][j] = false; }
+  var queue = [{ row: pRow, col: pCol, dist: 0 }];
+  visited[pRow][pCol] = true;
+  var dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  while (queue.length) {
+    var cur = queue.shift();
+    if (cur.row === goalRow) return cur.dist;
+    for (var d = 0; d < 4; d++) {
+      var nr = cur.row + dirs[d][0], nc = cur.col + dirs[d][1];
+      if (nr < 0 || nr >= GRID || nc < 0 || nc >= GRID) continue;
+      if (visited[nr][nc]) continue;
+      var dr = nr - cur.row, dc = nc - cur.col, blocked = false;
+      for (var k = 0; k < wallList.length; k++) {
+        var w = wallList[k];
+        if (dr===-1&&dc===0&&w.orient==='h'&&w.row===cur.row-1&&(w.col===cur.col||w.col===cur.col-1)){blocked=true;break;}
+        if (dr===1&&dc===0&&w.orient==='h'&&w.row===cur.row&&(w.col===cur.col||w.col===cur.col-1)){blocked=true;break;}
+        if (dc===-1&&dr===0&&w.orient==='v'&&w.col===cur.col-1&&(w.row===cur.row||w.row===cur.row-1)){blocked=true;break;}
+        if (dc===1&&dr===0&&w.orient==='v'&&w.col===cur.col&&(w.row===cur.row||w.row===cur.row-1)){blocked=true;break;}
+      }
+      if (blocked) continue;
+      visited[nr][nc] = true;
+      queue.push({ row: nr, col: nc, dist: cur.dist + 1 });
+    }
+  }
+  return 999;
+}
+
+// BFS path (returns array of cells from start to goal)
+function bfsPath(pIdx, wallList) {
+  var goalRow = pIdx === 0 ? 0 : 8;
+  var start = players[pIdx];
+  var visited = [];
+  var prev = [];
+  for (var i = 0; i < GRID; i++) { visited[i] = []; prev[i] = []; for (var j = 0; j < GRID; j++) { visited[i][j] = false; prev[i][j] = null; } }
+  var queue = [{ row: start.row, col: start.col }];
+  visited[start.row][start.col] = true;
+  var dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  var found = null;
+  while (queue.length) {
+    var cur = queue.shift();
+    if (cur.row === goalRow) { found = cur; break; }
+    for (var d = 0; d < 4; d++) {
+      var nr = cur.row + dirs[d][0], nc = cur.col + dirs[d][1];
+      if (nr < 0 || nr >= GRID || nc < 0 || nc >= GRID) continue;
+      if (visited[nr][nc]) continue;
+      var dr = nr - cur.row, dc = nc - cur.col, blocked = false;
+      for (var k = 0; k < wallList.length; k++) {
+        var w = wallList[k];
+        if (dr===-1&&dc===0&&w.orient==='h'&&w.row===cur.row-1&&(w.col===cur.col||w.col===cur.col-1)){blocked=true;break;}
+        if (dr===1&&dc===0&&w.orient==='h'&&w.row===cur.row&&(w.col===cur.col||w.col===cur.col-1)){blocked=true;break;}
+        if (dc===-1&&dr===0&&w.orient==='v'&&w.col===cur.col-1&&(w.row===cur.row||w.row===cur.row-1)){blocked=true;break;}
+        if (dc===1&&dr===0&&w.orient==='v'&&w.col===cur.col&&(w.row===cur.row||w.row===cur.row-1)){blocked=true;break;}
+      }
+      if (blocked) continue;
+      visited[nr][nc] = true;
+      prev[nr][nc] = { row: cur.row, col: cur.col };
+      queue.push({ row: nr, col: nc });
+    }
+  }
+  if (!found) return [];
+  var path = [];
+  var c = found;
+  while (c) { path.unshift({ row: c.row, col: c.col }); c = prev[c.row][c.col]; }
+  return path;
+}
+
+// Get smart wall candidates - walls near opponent's shortest path
+function getSmartWallCandidates() {
+  var humanIdx = 1 - aiPlayer;
+  var path = bfsPath(humanIdx, walls);
+  var candidates = [];
+  var seen = {};
+  for (var i = 0; i < path.length - 1; i++) {
+    var r1 = path[i].row, c1 = path[i].col;
+    var r2 = path[i+1].row, c2 = path[i+1].col;
+    var dr = r2 - r1, dc = c2 - c1;
+    // moving vertically (up or down) -> horizontal wall blocks
+    if (dc === 0) {
+      var wr = dr === 1 ? r1 : r2; // wall row: between the two cells
+      for (var wc = Math.max(0, c1 - 1); wc <= Math.min(GRID - 2, c1); wc++) {
+        var key = wr + ',' + wc + ',h';
+        if (!seen[key]) { seen[key] = true; candidates.push({ row: wr, col: wc, orient: 'h' }); }
+      }
+    }
+    // moving horizontally (left or right) -> vertical wall blocks
+    if (dr === 0) {
+      var wc2 = dc === 1 ? c1 : c2;
+      for (var wr2 = Math.max(0, r1 - 1); wr2 <= Math.min(GRID - 2, r1); wr2++) {
+        var key2 = wr2 + ',' + wc2 + ',v';
+        if (!seen[key2]) { seen[key2] = true; candidates.push({ row: wr2, col: wc2, orient: 'v' }); }
+      }
+    }
+  }
+  // Also add walls near AI's path for defensive play
+  var aiPath = bfsPath(aiPlayer, walls);
+  for (var j = 0; j < aiPath.length - 1; j++) {
+    var ar1 = aiPath[j].row, ac1 = aiPath[j].col;
+    var ar2 = aiPath[j+1].row, ac2 = aiPath[j+1].col;
+    // Add nearby intersections
+    for (var or2 = Math.max(0, Math.min(ar1,ar2) - 1); or2 <= Math.min(GRID - 2, Math.max(ar1,ar2)); or2++) {
+      for (var oc2 = Math.max(0, Math.min(ac1,ac2) - 1); oc2 <= Math.min(GRID - 2, Math.max(ac1,ac2)); oc2++) {
+        var keyH = or2 + ',' + oc2 + ',h';
+        var keyV = or2 + ',' + oc2 + ',v';
+        if (!seen[keyH]) { seen[keyH] = true; candidates.push({ row: or2, col: oc2, orient: 'h' }); }
+        if (!seen[keyV]) { seen[keyV] = true; candidates.push({ row: or2, col: oc2, orient: 'v' }); }
+      }
+    }
+  }
+  return candidates;
+}
+
+// AI evaluation function
+function aiEvaluate(wallList, wCounts, plyrs) {
+  var aiGoal = aiPlayer === 0 ? 0 : 8;
+  var humanGoal = aiPlayer === 0 ? 8 : 0;
+  var humanIdx = 1 - aiPlayer;
+  var aiDist = aiShortestPath(plyrs[aiPlayer].row, plyrs[aiPlayer].col, aiGoal, wallList);
+  var humanDist = aiShortestPath(plyrs[humanIdx].row, plyrs[humanIdx].col, humanGoal, wallList);
+  return (humanDist - aiDist) + (wCounts[aiPlayer] - wCounts[humanIdx]) * 0.3;
+}
+
+// Minimax with alpha-beta pruning (depth 2)
+function aiMinimax(depth, isMaximizing, alpha, beta, wallList, wCounts, plyrs) {
+  var aiGoal = aiPlayer === 0 ? 0 : 8;
+  var humanGoal = aiPlayer === 0 ? 8 : 0;
+  var humanIdx = 1 - aiPlayer;
+  // Terminal check
+  if (plyrs[aiPlayer].row === aiGoal) return 9999;
+  if (plyrs[humanIdx].row === humanGoal) return -9999;
+  if (depth === 0) return aiEvaluate(wallList, wCounts, plyrs);
+
+  var currentIdx = isMaximizing ? aiPlayer : humanIdx;
+  var oppIdx = 1 - currentIdx;
+  var bestScore = isMaximizing ? -Infinity : Infinity;
+
+  // Move candidates
+  var row = plyrs[currentIdx].row, col = plyrs[currentIdx].col;
+  var opp = plyrs[oppIdx];
+  var dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  var moves = [];
+  for (var d = 0; d < 4; d++) {
+    var dr = dirs[d][0], dc = dirs[d][1], nr = row + dr, nc = col + dc;
+    if (nr < 0 || nr >= GRID || nc < 0 || nc >= GRID) continue;
+    // Check wall blocking
+    var bk = false;
+    for (var k = 0; k < wallList.length; k++) {
+      var w = wallList[k];
+      if (dr===-1&&dc===0&&w.orient==='h'&&w.row===row-1&&(w.col===col||w.col===col-1)){bk=true;break;}
+      if (dr===1&&dc===0&&w.orient==='h'&&w.row===row&&(w.col===col||w.col===col-1)){bk=true;break;}
+      if (dc===-1&&dr===0&&w.orient==='v'&&w.col===col-1&&(w.row===row||w.row===row-1)){bk=true;break;}
+      if (dc===1&&dr===0&&w.orient==='v'&&w.col===col&&(w.row===row||w.row===row-1)){bk=true;break;}
+    }
+    if (bk) continue;
+    if (opp.row === nr && opp.col === nc) {
+      var jr = nr + dr, jc = nc + dc;
+      if (jr >= 0 && jr < GRID && jc >= 0 && jc < GRID) {
+        var jbk = false;
+        for (var k2 = 0; k2 < wallList.length; k2++) {
+          var w2 = wallList[k2]; var jdr = jr-nr, jdc = jc-nc;
+          if (jdr===-1&&jdc===0&&w2.orient==='h'&&w2.row===nr-1&&(w2.col===nc||w2.col===nc-1)){jbk=true;break;}
+          if (jdr===1&&jdc===0&&w2.orient==='h'&&w2.row===nr&&(w2.col===nc||w2.col===nc-1)){jbk=true;break;}
+          if (jdc===-1&&jdr===0&&w2.orient==='v'&&w2.col===nc-1&&(w2.row===nr||w2.row===nr-1)){jbk=true;break;}
+          if (jdc===1&&jdr===0&&w2.orient==='v'&&w2.col===nc&&(w2.row===nr||w2.row===nr-1)){jbk=true;break;}
+        }
+        if (!jbk) moves.push({ row: jr, col: jc });
+        else {
+          for (var d2 = 0; d2 < 4; d2++) {
+            if (dirs[d2][0]===-dr && dirs[d2][1]===-dc) continue;
+            var djr=nr+dirs[d2][0],djc=nc+dirs[d2][1];
+            if (djr<0||djr>=GRID||djc<0||djc>=GRID) continue;
+            var djbk=false;
+            for (var k3=0;k3<wallList.length;k3++){var w3=wallList[k3];var ddr=djr-nr,ddc=djc-nc;
+              if(ddr===-1&&ddc===0&&w3.orient==='h'&&w3.row===nr-1&&(w3.col===nc||w3.col===nc-1)){djbk=true;break;}
+              if(ddr===1&&ddc===0&&w3.orient==='h'&&w3.row===nr&&(w3.col===nc||w3.col===nc-1)){djbk=true;break;}
+              if(ddc===-1&&ddr===0&&w3.orient==='v'&&w3.col===nc-1&&(w3.row===nr||w3.row===nr-1)){djbk=true;break;}
+              if(ddc===1&&ddr===0&&w3.orient==='v'&&w3.col===nc&&(w3.row===nr||w3.row===nr-1)){djbk=true;break;}
+            }
+            if (!djbk) moves.push({ row: djr, col: djc });
+          }
+        }
+      } else {
+        for (var d3 = 0; d3 < 4; d3++) {
+          if (dirs[d3][0]===-dr && dirs[d3][1]===-dc) continue;
+          var djr2=nr+dirs[d3][0],djc2=nc+dirs[d3][1];
+          if (djr2<0||djr2>=GRID||djc2<0||djc2>=GRID) continue;
+          var djbk2=false;
+          for (var k4=0;k4<wallList.length;k4++){var w4=wallList[k4];var ddr2=djr2-nr,ddc2=djc2-nc;
+            if(ddr2===-1&&ddc2===0&&w4.orient==='h'&&w4.row===nr-1&&(w4.col===nc||w4.col===nc-1)){djbk2=true;break;}
+            if(ddr2===1&&ddc2===0&&w4.orient==='h'&&w4.row===nr&&(w4.col===nc||w4.col===nc-1)){djbk2=true;break;}
+            if(ddc2===-1&&ddr2===0&&w4.orient==='v'&&w4.col===nc-1&&(w4.row===nr||w4.row===nr-1)){djbk2=true;break;}
+            if(ddc2===1&&ddr2===0&&w4.orient==='v'&&w4.col===nc&&(w4.row===nr||w4.row===nr-1)){djbk2=true;break;}
+          }
+          if (!djbk2) moves.push({ row: djr2, col: djc2 });
+        }
+      }
+    } else { moves.push({ row: nr, col: nc }); }
+  }
+
+  // Evaluate moves
+  for (var mi = 0; mi < moves.length; mi++) {
+    var savedRow = plyrs[currentIdx].row, savedCol = plyrs[currentIdx].col;
+    plyrs[currentIdx] = { row: moves[mi].row, col: moves[mi].col };
+    var score = aiMinimax(depth - 1, !isMaximizing, alpha, beta, wallList, wCounts, plyrs);
+    plyrs[currentIdx] = { row: savedRow, col: savedCol };
+    if (isMaximizing) {
+      if (score > bestScore) bestScore = score;
+      if (bestScore > alpha) alpha = bestScore;
+    } else {
+      if (score < bestScore) bestScore = score;
+      if (bestScore < beta) beta = bestScore;
+    }
+    if (beta <= alpha) break;
+  }
+
+  return bestScore;
+}
+
+// AI main turn function
+function aiTurn() {
+  if (!aiMode || currentPlayer !== aiPlayer || gameOver) return;
+  aiThinking = true;
+  showMsg('AI思考中...');
+
+  setTimeout(function() {
+    var bestScore = -Infinity;
+    var bestAction = null;
+    var aiGoal = aiPlayer === 0 ? 0 : 8;
+
+    // 1. Evaluate move candidates with minimax depth 2
+    var moves = getValidMoves(aiPlayer);
+    for (var i = 0; i < moves.length; i++) {
+      var savedPos = { row: players[aiPlayer].row, col: players[aiPlayer].col };
+      var plyrs = [{ row: players[0].row, col: players[0].col }, { row: players[1].row, col: players[1].col }];
+      plyrs[aiPlayer] = { row: moves[i].row, col: moves[i].col };
+      // Instant win
+      if (moves[i].row === aiGoal) {
+        bestScore = 99999;
+        bestAction = { type: 'move', row: moves[i].row, col: moves[i].col };
+        break;
+      }
+      var score = aiMinimax(1, false, -Infinity, Infinity, walls, wallCounts, plyrs);
+      if (score > bestScore) {
+        bestScore = score;
+        bestAction = { type: 'move', row: moves[i].row, col: moves[i].col };
+      }
+    }
+
+    // 2. Evaluate wall candidates (only if walls remaining and no instant win)
+    if (wallCounts[aiPlayer] > 0 && bestScore < 99999) {
+      var wallCands = getSmartWallCandidates();
+      for (var j = 0; j < wallCands.length; j++) {
+        var wc = wallCands[j];
+        if (!canPlaceWall(wc.row, wc.col, wc.orient)) continue;
+        // Simulate wall placement
+        walls.push(wc);
+        var wCounts = [wallCounts[0], wallCounts[1]];
+        wCounts[aiPlayer]--;
+        var plyrs2 = [{ row: players[0].row, col: players[0].col }, { row: players[1].row, col: players[1].col }];
+        var wScore = aiMinimax(1, false, -Infinity, Infinity, walls, wCounts, plyrs2);
+        walls.pop();
+        if (wScore > bestScore) {
+          bestScore = wScore;
+          bestAction = { type: 'wall', row: wc.row, col: wc.col, orient: wc.orient };
+        }
+      }
+    }
+
+    // 3. Execute best action
+    executeAIAction(bestAction);
+    aiThinking = false;
+  }, 300);
+}
+
+function executeAIAction(action) {
+  if (!action) return;
+  saveSnapshot();
+  if (action.type === 'move') {
+    players[aiPlayer].row = action.row;
+    players[aiPlayer].col = action.col;
+    playMoveSFX(); showMsg('');
+    var aiGoal = aiPlayer === 0 ? 0 : 8;
+    if (players[aiPlayer].row === aiGoal) {
+      gameOver = true; draw(); updateUI(); showWinner(aiPlayer); return;
+    }
+  } else {
+    walls.push({ row: action.row, col: action.col, orient: action.orient });
+    wallCounts[aiPlayer]--;
+    playWallSFX(); showMsg(''); mode = 'move'; hoverWall = null;
+  }
+  currentPlayer = 1 - currentPlayer;
+  updateUI(); draw(); startTurnTimer();
 }
 
 // ============ TOUCH & POINTER ============
@@ -1419,6 +1893,7 @@ function getCanvasPos(e) {
 function handleBoardAction(px, py) {
   if (gameOver || !gameStarted) return; ensureAudioResumed();
   if (gameMode === 'online' && currentPlayer !== myPlayerIndex) { showMsg('相手のターンです'); return; }
+  if (aiMode && (currentPlayer === aiPlayer || aiThinking)) { showMsg('AIのターンです'); return; }
   if (mode === 'move') {
     var cell = pixelToCell(px, py); if (!cell) return;
     var moves = getValidMoves(currentPlayer);
@@ -1430,6 +1905,7 @@ function handleBoardAction(px, py) {
     if (currentPlayer === 1 && players[1].row === 8) { gameOver = true; draw(); updateUI(); if (gameMode === 'online') syncStateToFirebase(); showWinner(1); return; }
     currentPlayer = 1 - currentPlayer; updateUI(); draw(); startTurnTimer();
     if (gameMode === 'online') syncStateToFirebase();
+    if (aiMode && currentPlayer === aiPlayer) { setTimeout(function() { aiTurn(); }, 100); }
   } else {
     var slot = pixelToWallSlot(px, py); if (!slot) { showMsg('交差点の近くをタップ'); return; }
     if (wallCounts[currentPlayer] <= 0) { showMsg('NO WALLS LEFT'); return; }
@@ -1449,6 +1925,7 @@ function handleBoardAction(px, py) {
     playWallSFX(); showMsg(''); mode = 'move'; hoverWall = null;
     currentPlayer = 1 - currentPlayer; updateUI(); draw(); startTurnTimer();
     if (gameMode === 'online') syncStateToFirebase();
+    if (aiMode && currentPlayer === aiPlayer) { setTimeout(function() { aiTurn(); }, 100); }
   }
 }
 
@@ -1485,7 +1962,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v28';
+  var CURRENT = 'quoridor-v30';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
@@ -1502,7 +1979,7 @@ initState(); resizeBoard(); updateUI(); draw();
     });
   }
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=28').then(function(reg) {
+    navigator.serviceWorker.register('sw.js?v=30').then(function(reg) {
       reg.addEventListener('updatefound', function() {
         var newWorker = reg.installing;
         if (newWorker) {
