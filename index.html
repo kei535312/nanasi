@@ -1850,8 +1850,8 @@ function aiTurn() {
     }
 
     // 3. Execute best action
-    executeAIAction(bestAction);
     aiThinking = false;
+    executeAIAction(bestAction);
   }, 300);
 }
 
@@ -1962,7 +1962,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v30';
+  var CURRENT = 'quoridor-v31';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
@@ -1979,7 +1979,7 @@ initState(); resizeBoard(); updateUI(); draw();
     });
   }
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=30').then(function(reg) {
+    navigator.serviceWorker.register('sw.js?v=31').then(function(reg) {
       reg.addEventListener('updatefound', function() {
         var newWorker = reg.installing;
         if (newWorker) {

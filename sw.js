@@ -1,5 +1,5 @@
 // Service Worker for コリドール PWA
-const CACHE_NAME = 'quoridor-v30';
+const CACHE_NAME = 'quoridor-v31';
 const ASSETS = [
   '/nanasi/',
   '/nanasi/index.html',
