@@ -1,5 +1,5 @@
 // Service Worker for コリドール PWA
-const CACHE_NAME = 'quoridor-v25';
+const CACHE_NAME = 'quoridor-v26';
 const ASSETS = [
   '/nanasi/',
   '/nanasi/index.html',
@@ -41,7 +41,10 @@ self.addEventListener('activate', function(event) {
 // Skip caching for /bp/ and /docs/ paths
 self.addEventListener('fetch', function(event) {
   var url = event.request.url;
-  if (url.indexOf('/bp/') !== -1 || url.indexOf('/docs/') !== -1) {
+  if (url.indexOf('/bp/') !== -1 || url.indexOf('/docs/') !== -1
+      || url.indexOf('firebaseio.com') !== -1
+      || url.indexOf('googleapis.com') !== -1
+      || url.indexOf('gstatic.com/firebasejs') !== -1) {
     return;
   }
   event.respondWith(

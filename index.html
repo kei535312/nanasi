@@ -11,6 +11,9 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <title>コリドール</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@400;600;700;900&family=Zen+Maru+Gothic:wght@400;700;900&family=DotGothic16&display=swap');
@@ -258,18 +261,62 @@ canvas#board {
   position: fixed; top: 8px; right: 8px; font-size: 8px; color: rgba(255,255,255,0.15);
   letter-spacing: 2px; z-index: 2; pointer-events: none;
 }
+
+/* Online mode */
+#room-code-input {
+  text-align: center; font-size: 24px; letter-spacing: 6px; width: 140px; padding: 10px;
+  border-radius: 6px; border: 1px solid var(--panel-border); background: rgba(10,20,40,0.8);
+  color: var(--title-color); font-family: 'Orbitron', monospace; outline: none;
+}
+#room-code-input:focus { border-color: var(--title-color); box-shadow: 0 0 12px var(--title-glow); }
+.start-box .back-btn {
+  padding: 8px 16px !important; font-size: 11px !important; min-height: 32px !important;
+  letter-spacing: 1px !important; opacity: 0.6; box-shadow: none !important;
+}
+.disconnect-banner {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: #e53e3e; color: #fff; text-align: center;
+  padding: 6px; font-size: 12px; z-index: 9999; letter-spacing: 1px;
+}
+canvas#board.guest-flip { transform: rotate(180deg); }
 </style>
 </head>
 <body>
 
 <div id="theme-name"></div>
 
+<div id="disconnect-banner" class="disconnect-banner" style="display:none">接続が切れました…再接続中</div>
+
 <div class="start-overlay" id="start-overlay">
   <div class="start-box">
     <div class="start-subtitle" id="start-subtitle"></div>
     <h2>QUORIDOR</h2>
     <p class="tagline">2 PLAYER DUEL</p>
-    <button onclick="startGame()">START</button>
+    <div id="mode-select">
+      <button onclick="startGame()">ローカル対戦</button>
+      <button onclick="showOnlineMenu()">オンライン対戦</button>
+    </div>
+    <div id="online-menu" style="display:none">
+      <button onclick="createRoom()">部屋をつくる</button>
+      <button onclick="showJoinInput()">部屋に入る</button>
+      <div style="margin-top:10px"><button class="back-btn" onclick="backToModeSelect()">← もどる</button></div>
+    </div>
+    <div id="join-input" style="display:none">
+      <input type="text" id="room-code-input" maxlength="4" placeholder="4桁のコード" inputmode="numeric" pattern="[0-9]*">
+      <div style="margin-top:8px">
+        <button onclick="joinRoom()">参加</button>
+      </div>
+      <div style="margin-top:4px"><button class="back-btn" onclick="showOnlineMenu()">← もどる</button></div>
+    </div>
+    <div id="waiting-room" style="display:none">
+      <p style="font-size:14px;letter-spacing:2px;color:var(--text-dim)">ルームコード</p>
+      <p id="display-room-code" style="font-size:32px;font-weight:900;letter-spacing:8px;margin:8px 0;color:var(--title-color);text-shadow:0 0 20px var(--title-glow)"></p>
+      <p style="font-size:11px;color:var(--text-dim);letter-spacing:1px">相手の参加を待っています...</p>
+      <div style="margin-top:12px"><button onclick="cancelRoom()">キャンセル</button></div>
+    </div>
+    <div id="online-error" style="display:none">
+      <p id="online-error-msg" style="color:#ff4444;font-size:12px;margin-bottom:8px"></p>
+    </div>
   </div>
 </div>
 
@@ -332,6 +379,29 @@ canvas#board {
 </div>
 
 <script>
+// ============ FIREBASE ============
+var firebaseConfig = {
+  apiKey: "AIzaSyAQrtJxPS5JT1IoiZQK0bYfxXAnF47BzTs",
+  authDomain: "quoridor-game-66f9f.firebaseapp.com",
+  databaseURL: "https://quoridor-game-66f9f-default-rtdb.firebaseio.com",
+  projectId: "quoridor-game-66f9f",
+  storageBucket: "quoridor-game-66f9f.firebasestorage.app",
+  messagingSenderId: "871331494857",
+  appId: "1:871331494857:web:a28c143065cedbcc898618"
+};
+firebase.initializeApp(firebaseConfig);
+var db = firebase.database();
+var auth = firebase.auth();
+
+// ============ ONLINE STATE ============
+var gameMode = 'local'; // 'local' | 'online'
+var myPlayerIndex = -1;  // 0=host, 1=guest
+var roomCode = '';
+var roomRef = null;
+var stateListener = null;
+var presenceListener = null;
+var myUid = null;
+
 // ============ THEME SYSTEM ============
 var THEMES = [
   { // Sunday - EVANGELION
@@ -705,7 +775,13 @@ function startTurnTimer() {
     updateTimerUI();
   }, 250);
 }
-function onTimeout() { playTimeoutSFX(); showMsg('TIME OUT'); currentPlayer = 1 - currentPlayer; mode = 'move'; hoverWall = null; updateUI(); draw(); startTurnTimer(); }
+function onTimeout() {
+  if (gameMode === 'online' && currentPlayer !== myPlayerIndex) return;
+  playTimeoutSFX(); showMsg('TIME OUT');
+  currentPlayer = 1 - currentPlayer; mode = 'move'; hoverWall = null;
+  updateUI(); draw(); startTurnTimer();
+  if (gameMode === 'online') syncStateToFirebase();
+}
 
 function updateTimerUI() {
   var sec = Math.ceil(turnTimeLeft), pct = (turnTimeLeft / TURN_TIME) * 100, urgent = turnTimeLeft <= 5;
@@ -912,6 +988,7 @@ function updateUI() {
 }
 function setMode(m) {
   if (gameOver) return;
+  if (gameMode === 'online' && currentPlayer !== myPlayerIndex) return;
   mode = m; hoverWall = null;
   showMsg(m === 'wall' ? '交差点の近くをタップ：左右→横壁、上下→縦壁' : '');
   updateUI(); draw();
@@ -945,17 +1022,260 @@ function spawnConfetti(container) {
 }
 
 function startGame() {
+  gameMode = 'local';
   document.getElementById('start-overlay').classList.add('hidden');
+  canvas.classList.remove('guest-flip');
   initAudio(); initState(); gameStarted = true;
   resizeBoard(); showMsg(''); updateUI(); draw(); startBGM(); startTurnTimer();
 }
 
 function resetGame() {
+  if (gameMode === 'online') {
+    leaveRoom();
+    var overlay2 = document.getElementById('winner-overlay'); overlay2.classList.remove('show');
+    var cf2 = overlay2.querySelectorAll('.confetti'); for (var k = 0; k < cf2.length; k++) cf2[k].remove();
+    clearInterval(timerInterval); if (bgmTimeout) clearTimeout(bgmTimeout); bgmPlaying = false;
+    if (audioCtx) { audioCtx.close().catch(function(){}); audioCtx = null; }
+    canvas.classList.remove('guest-flip');
+    initState();
+    document.getElementById('start-overlay').classList.remove('hidden');
+    backToModeSelect();
+    showMsg(''); updateUI(); draw();
+    return;
+  }
   var overlay = document.getElementById('winner-overlay'); overlay.classList.remove('show');
   var confetti = overlay.querySelectorAll('.confetti'); for (var i = 0; i < confetti.length; i++) confetti[i].remove();
   clearInterval(timerInterval); if (bgmTimeout) clearTimeout(bgmTimeout); bgmPlaying = false;
   if (audioCtx) { audioCtx.close().catch(function(){}); audioCtx = null; }
   initState(); gameStarted = true; showMsg(''); updateUI(); draw(); initAudio(); startBGM(); startTurnTimer();
+}
+
+// ============ ONLINE ROOM MANAGEMENT ============
+function showOnlineMenu() {
+  document.getElementById('mode-select').style.display = 'none';
+  document.getElementById('online-menu').style.display = '';
+  document.getElementById('join-input').style.display = 'none';
+  document.getElementById('waiting-room').style.display = 'none';
+  document.getElementById('online-error').style.display = 'none';
+  // Firebase anonymous auth
+  if (!myUid) {
+    auth.signInAnonymously().then(function(cred) {
+      myUid = cred.user.uid;
+    }).catch(function(err) {
+      showOnlineError('認証に失敗しました: ' + err.message);
+    });
+  }
+}
+
+function showJoinInput() {
+  document.getElementById('online-menu').style.display = 'none';
+  document.getElementById('join-input').style.display = '';
+  document.getElementById('online-error').style.display = 'none';
+  document.getElementById('room-code-input').value = '';
+  document.getElementById('room-code-input').focus();
+}
+
+function backToModeSelect() {
+  document.getElementById('mode-select').style.display = '';
+  document.getElementById('online-menu').style.display = 'none';
+  document.getElementById('join-input').style.display = 'none';
+  document.getElementById('waiting-room').style.display = 'none';
+  document.getElementById('online-error').style.display = 'none';
+}
+
+function showOnlineError(msg) {
+  document.getElementById('online-error').style.display = '';
+  document.getElementById('online-error-msg').textContent = msg;
+}
+
+function createRoom() {
+  if (!myUid) { showOnlineError('認証中…少し待ってください'); return; }
+  var code = String(Math.floor(1000 + Math.random() * 9000));
+  db.ref('rooms/' + code).once('value').then(function(snap) {
+    if (snap.exists()) {
+      // Collision, try again
+      createRoom();
+      return;
+    }
+    roomCode = code;
+    db.ref('rooms/' + code).set({
+      host: myUid,
+      guest: null,
+      state: null,
+      status: 'waiting',
+      createdAt: firebase.database.ServerValue.TIMESTAMP
+    }).then(function() {
+      // Auto-remove room on disconnect
+      db.ref('rooms/' + code).onDisconnect().remove();
+      document.getElementById('online-menu').style.display = 'none';
+      document.getElementById('waiting-room').style.display = '';
+      document.getElementById('display-room-code').textContent = code;
+      // Listen for guest joining
+      presenceListener = db.ref('rooms/' + code + '/guest').on('value', function(gSnap) {
+        if (gSnap.val()) {
+          db.ref('rooms/' + code + '/guest').off('value', presenceListener);
+          presenceListener = null;
+          startOnlineGame(0);
+        }
+      });
+    }).catch(function(err) {
+      showOnlineError('部屋の作成に失敗: ' + err.message);
+    });
+  });
+}
+
+function joinRoom() {
+  if (!myUid) { showOnlineError('認証中…少し待ってください'); return; }
+  var code = document.getElementById('room-code-input').value.trim();
+  if (code.length !== 4 || !/^\d{4}$/.test(code)) {
+    showOnlineError('4桁の数字を入力してください');
+    return;
+  }
+  db.ref('rooms/' + code).once('value').then(function(snap) {
+    if (!snap.exists()) {
+      showOnlineError('この部屋は存在しません');
+      return;
+    }
+    var room = snap.val();
+    if (room.status !== 'waiting') {
+      showOnlineError('この部屋は既にゲーム中です');
+      return;
+    }
+    roomCode = code;
+    db.ref('rooms/' + code).update({
+      guest: myUid,
+      status: 'playing'
+    }).then(function() {
+      startOnlineGame(1);
+    }).catch(function(err) {
+      showOnlineError('参加に失敗: ' + err.message);
+    });
+  });
+}
+
+function cancelRoom() {
+  if (presenceListener) {
+    db.ref('rooms/' + roomCode + '/guest').off('value', presenceListener);
+    presenceListener = null;
+  }
+  if (roomCode) {
+    db.ref('rooms/' + roomCode).onDisconnect().cancel();
+    db.ref('rooms/' + roomCode).remove();
+    roomCode = '';
+  }
+  showOnlineMenu();
+}
+
+function leaveRoom() {
+  if (stateListener) {
+    if (roomRef) roomRef.child('state').off('value', stateListener);
+    stateListener = null;
+  }
+  if (presenceListener) {
+    if (roomCode) db.ref('rooms/' + roomCode + '/guest').off('value', presenceListener);
+    presenceListener = null;
+  }
+  if (roomRef) {
+    roomRef.onDisconnect().cancel();
+    roomRef.child('status').set('ended');
+    roomRef = null;
+  }
+  document.getElementById('disconnect-banner').style.display = 'none';
+  gameMode = 'local';
+  myPlayerIndex = -1;
+  roomCode = '';
+}
+
+// ============ ONLINE GAME START & SYNC ============
+function startOnlineGame(playerIndex) {
+  gameMode = 'online';
+  myPlayerIndex = playerIndex;
+  roomRef = db.ref('rooms/' + roomCode);
+  document.getElementById('start-overlay').classList.add('hidden');
+  initAudio(); initState(); gameStarted = true;
+  // Guest sees the board flipped
+  if (myPlayerIndex === 1) {
+    canvas.classList.add('guest-flip');
+  } else {
+    canvas.classList.remove('guest-flip');
+  }
+  resizeBoard(); showMsg(''); updateUI(); draw(); startBGM();
+  // Host writes initial state, then both listen
+  if (myPlayerIndex === 0) {
+    syncStateToFirebase();
+    // Cancel auto-remove since game started
+    roomRef.onDisconnect().cancel();
+  }
+  startStateListener();
+  startTurnTimer();
+  monitorConnection();
+  monitorOpponent();
+}
+
+function syncStateToFirebase() {
+  if (gameMode !== 'online' || !roomRef) return;
+  roomRef.child('state').set({
+    players: players,
+    walls: walls,
+    wallCounts: wallCounts,
+    currentPlayer: currentPlayer,
+    gameOver: gameOver,
+    winner: gameOver ? (players[0].row === 0 ? 0 : 1) : -1,
+    timestamp: firebase.database.ServerValue.TIMESTAMP
+  });
+}
+
+function startStateListener() {
+  stateListener = roomRef.child('state').on('value', function(snap) {
+    var s = snap.val();
+    if (!s) return;
+    // Apply remote state when it's my turn (opponent just played) or game over
+    if (s.currentPlayer === myPlayerIndex || s.gameOver) {
+      applyRemoteState(s);
+    }
+  });
+}
+
+function applyRemoteState(s) {
+  players = s.players;
+  walls = s.walls || [];
+  wallCounts = s.wallCounts;
+  var prevPlayer = currentPlayer;
+  currentPlayer = s.currentPlayer;
+  mode = 'move'; hoverWall = null;
+  updateUI(); draw();
+  if (s.gameOver && s.winner >= 0) {
+    gameOver = true;
+    showWinner(s.winner);
+  } else if (prevPlayer !== currentPlayer) {
+    clearInterval(timerInterval);
+    startTurnTimer();
+  }
+}
+
+function monitorConnection() {
+  var connRef = db.ref('.info/connected');
+  connRef.on('value', function(snap) {
+    if (gameMode !== 'online') return;
+    var banner = document.getElementById('disconnect-banner');
+    if (snap.val() === true) {
+      banner.style.display = 'none';
+    } else {
+      banner.style.display = '';
+    }
+  });
+}
+
+function monitorOpponent() {
+  if (!roomRef) return;
+  roomRef.child('status').on('value', function(snap) {
+    var status = snap.val();
+    if (status === 'ended' && gameMode === 'online' && !gameOver) {
+      showMsg('相手が退出しました');
+      gameOver = true;
+      clearInterval(timerInterval);
+    }
+  });
 }
 
 // ============ TOUCH & POINTER ============
@@ -965,20 +1285,27 @@ function getCanvasPos(e) {
   if (e.touches && e.touches.length > 0) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
   else if (e.changedTouches && e.changedTouches.length > 0) { clientX = e.changedTouches[0].clientX; clientY = e.changedTouches[0].clientY; }
   else { clientX = e.clientX; clientY = e.clientY; }
-  return { px: (clientX - rect.left) * scaleX, py: (clientY - rect.top) * scaleY };
+  var px = (clientX - rect.left) * scaleX, py = (clientY - rect.top) * scaleY;
+  // Guest side: invert coords because canvas is CSS-rotated 180deg
+  if (gameMode === 'online' && myPlayerIndex === 1) {
+    px = BOARD_PX - px; py = BOARD_PX - py;
+  }
+  return { px: px, py: py };
 }
 
 function handleBoardAction(px, py) {
   if (gameOver || !gameStarted) return; ensureAudioResumed();
+  if (gameMode === 'online' && currentPlayer !== myPlayerIndex) { showMsg('相手のターンです'); return; }
   if (mode === 'move') {
     var cell = pixelToCell(px, py); if (!cell) return;
     var moves = getValidMoves(currentPlayer);
     var match = null; for (var i = 0; i < moves.length; i++) { if (moves[i].row === cell.row && moves[i].col === cell.col) { match = moves[i]; break; } }
     if (!match) { showMsg('INVALID MOVE'); return; }
     players[currentPlayer].row = match.row; players[currentPlayer].col = match.col; playMoveSFX(); showMsg('');
-    if (currentPlayer === 0 && players[0].row === 0) { draw(); updateUI(); showWinner(0); return; }
-    if (currentPlayer === 1 && players[1].row === 8) { draw(); updateUI(); showWinner(1); return; }
+    if (currentPlayer === 0 && players[0].row === 0) { gameOver = true; draw(); updateUI(); if (gameMode === 'online') syncStateToFirebase(); showWinner(0); return; }
+    if (currentPlayer === 1 && players[1].row === 8) { gameOver = true; draw(); updateUI(); if (gameMode === 'online') syncStateToFirebase(); showWinner(1); return; }
     currentPlayer = 1 - currentPlayer; updateUI(); draw(); startTurnTimer();
+    if (gameMode === 'online') syncStateToFirebase();
   } else {
     var slot = pixelToWallSlot(px, py); if (!slot) { showMsg('交差点の近くをタップ'); return; }
     if (wallCounts[currentPlayer] <= 0) { showMsg('NO WALLS LEFT'); return; }
@@ -996,6 +1323,7 @@ function handleBoardAction(px, py) {
     walls.push({ row: slot.row, col: slot.col, orient: autoOrient }); wallCounts[currentPlayer]--;
     playWallSFX(); showMsg(''); mode = 'move'; hoverWall = null;
     currentPlayer = 1 - currentPlayer; updateUI(); draw(); startTurnTimer();
+    if (gameMode === 'online') syncStateToFirebase();
   }
 }
 
@@ -1032,7 +1360,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v25';
+  var CURRENT = 'quoridor-v26';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
@@ -1049,7 +1377,7 @@ initState(); resizeBoard(); updateUI(); draw();
     });
   }
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=25').then(function(reg) {
+    navigator.serviceWorker.register('sw.js?v=26').then(function(reg) {
       reg.addEventListener('updatefound', function() {
         var newWorker = reg.installing;
         if (newWorker) {
