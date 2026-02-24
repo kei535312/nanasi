@@ -190,14 +190,15 @@ canvas#board {
 .sound-btn:active { transform: scale(0.9); }
 .sound-btn.muted { color: #ff2222; }
 
-#reset-btn {
+#reset-btn, #undo-btn {
   padding: 4px 14px; border: 1px solid var(--panel-border); border-radius: 4px;
   background: var(--panel-bg); color: var(--text-dim); font-family: inherit;
   font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.25s;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   min-height: 32px; letter-spacing: 2px; text-transform: uppercase;
 }
-#reset-btn:active { transform: scale(0.95); background: rgba(255,0,0,0.1); }
+#reset-btn:active, #undo-btn:active { transform: scale(0.95); }
+#undo-btn:disabled { opacity: 0.2; pointer-events: none; }
 
 #message { font-size: 10px; min-height: 14px; text-align: center; color: var(--wall-ui-color); font-weight: 700; letter-spacing: 1px; flex-shrink: 0; }
 
@@ -345,6 +346,7 @@ canvas#board.guest-flip { transform: rotate(180deg); }
 
   <div class="center-controls">
     <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="BGM ON/OFF">&#9835;</button>
+    <button id="undo-btn" onclick="undo()" disabled>UNDO</button>
     <button id="reset-btn" onclick="resetGame()">RESET</button>
   </div>
 
@@ -763,11 +765,24 @@ function playWinSFX() { if (!audioCtx) return; var now = audioCtx.currentTime; [
 // ============ STATE ============
 var players, walls, wallCounts, currentPlayer, mode, orientation, gameOver, hoverWall;
 var turnTimeLeft, timerInterval, gameStarted;
+var undoSnapshot = null;
+var undoUsed = [false, false];
 
 function initState() {
   players = [{ row: 8, col: 4 }, { row: 0, col: 4 }];
   walls = []; wallCounts = [10, 10]; currentPlayer = 0; mode = 'move';
   orientation = 'h'; gameOver = false; hoverWall = null; turnTimeLeft = TURN_TIME; gameStarted = false;
+  undoSnapshot = null; undoUsed = [false, false];
+}
+
+function saveSnapshot() {
+  undoSnapshot = {
+    players: [{ row: players[0].row, col: players[0].col }, { row: players[1].row, col: players[1].col }],
+    walls: walls.map(function(w) { return { row: w.row, col: w.col, orient: w.orient }; }),
+    wallCounts: [wallCounts[0], wallCounts[1]],
+    currentPlayer: currentPlayer,
+    mode: mode
+  };
 }
 
 // ============ TIMER ============
@@ -1002,6 +1017,14 @@ function updateUI() {
       document.getElementById('btn-move' + sfx).className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
       document.getElementById('btn-wall' + sfx).className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
     }
+  }
+  // UNDOボタンの状態
+  var undoBtn = document.getElementById('undo-btn');
+  if (undoBtn) {
+    var canUndo = undoSnapshot && !gameOver && gameStarted;
+    if (canUndo && gameMode === 'online') { canUndo = undoSnapshot.currentPlayer === myPlayerIndex; }
+    if (canUndo) { canUndo = !undoUsed[undoSnapshot.currentPlayer]; }
+    undoBtn.disabled = !canUndo;
   }
   updateTimerUI();
 }
@@ -1266,6 +1289,7 @@ function applyRemoteState(s) {
   var prevPlayer = currentPlayer;
   currentPlayer = s.currentPlayer;
   mode = 'move'; hoverWall = null;
+  undoSnapshot = null; // 相手が動いたのでUNDOできない
   updateUI(); draw();
   if (s.gameOver && s.winner >= 0) {
     gameOver = true;
@@ -1358,6 +1382,25 @@ function exitOnlineGame() {
   showMsg(''); updateUI(); draw();
 }
 
+// ============ UNDO ============
+function undo() {
+  if (!undoSnapshot || gameOver || !gameStarted) return;
+  var whoMoved = undoSnapshot.currentPlayer;
+  if (undoUsed[whoMoved]) { showMsg('UNDOは1回まで'); return; }
+  if (gameMode === 'online' && whoMoved !== myPlayerIndex) { showMsg('相手の手は戻せません'); return; }
+  players = undoSnapshot.players;
+  walls = undoSnapshot.walls;
+  wallCounts = undoSnapshot.wallCounts;
+  currentPlayer = undoSnapshot.currentPlayer;
+  mode = undoSnapshot.mode;
+  hoverWall = null;
+  undoUsed[whoMoved] = true;
+  undoSnapshot = null;
+  showMsg('UNDO!');
+  updateUI(); draw(); startTurnTimer();
+  if (gameMode === 'online') syncStateToFirebase();
+}
+
 // ============ TOUCH & POINTER ============
 function getCanvasPos(e) {
   var rect = canvas.getBoundingClientRect(), scaleX = BOARD_PX / rect.width, scaleY = BOARD_PX / rect.height;
@@ -1381,6 +1424,7 @@ function handleBoardAction(px, py) {
     var moves = getValidMoves(currentPlayer);
     var match = null; for (var i = 0; i < moves.length; i++) { if (moves[i].row === cell.row && moves[i].col === cell.col) { match = moves[i]; break; } }
     if (!match) { showMsg('INVALID MOVE'); return; }
+    saveSnapshot();
     players[currentPlayer].row = match.row; players[currentPlayer].col = match.col; playMoveSFX(); showMsg('');
     if (currentPlayer === 0 && players[0].row === 0) { gameOver = true; draw(); updateUI(); if (gameMode === 'online') syncStateToFirebase(); showWinner(0); return; }
     if (currentPlayer === 1 && players[1].row === 8) { gameOver = true; draw(); updateUI(); if (gameMode === 'online') syncStateToFirebase(); showWinner(1); return; }
@@ -1400,6 +1444,7 @@ function handleBoardAction(px, py) {
         showMsg('CANNOT PLACE'); return;
       }
     }
+    saveSnapshot();
     walls.push({ row: slot.row, col: slot.col, orient: autoOrient }); wallCounts[currentPlayer]--;
     playWallSFX(); showMsg(''); mode = 'move'; hoverWall = null;
     currentPlayer = 1 - currentPlayer; updateUI(); draw(); startTurnTimer();
@@ -1418,7 +1463,7 @@ canvas.addEventListener('touchend', function(e) { e.preventDefault(); if (!touch
 canvas.addEventListener('touchcancel', function() { hoverWall = null; touchStartPos = null; draw(); });
 document.addEventListener('touchmove', function(e) { if (e.target === canvas || canvas.contains(e.target)) e.preventDefault(); }, { passive: false });
 
-document.addEventListener('keydown', function(e) { if (!gameStarted) return; if (e.key === 'm' || e.key === 'M') setMode('move'); if (e.key === 'w' || e.key === 'W') setMode('wall'); if (e.key === 'r' || e.key === 'R') resetGame(); });
+document.addEventListener('keydown', function(e) { if (!gameStarted) return; if (e.key === 'm' || e.key === 'M') setMode('move'); if (e.key === 'w' || e.key === 'W') setMode('wall'); if (e.key === 'r' || e.key === 'R') resetGame(); if (e.key === 'u' || e.key === 'U') undo(); });
 
 var resizeTimer;
 window.addEventListener('resize', function() { clearTimeout(resizeTimer); resizeTimer = setTimeout(function() { if (gameStarted) resizeBoard(); }, 150); });
@@ -1440,7 +1485,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v27';
+  var CURRENT = 'quoridor-v28';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
@@ -1457,7 +1502,7 @@ initState(); resizeBoard(); updateUI(); draw();
     });
   }
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=27').then(function(reg) {
+    navigator.serviceWorker.register('sw.js?v=28').then(function(reg) {
       reg.addEventListener('updatefound', function() {
         var newWorker = reg.installing;
         if (newWorker) {
