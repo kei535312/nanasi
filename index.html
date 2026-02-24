@@ -374,7 +374,14 @@ canvas#board.guest-flip { transform: rotate(180deg); }
     <h2 id="winner-text">VICTORY</h2>
     <div class="win-label" id="winner-player"></div>
     <p id="winner-msg">WELL PLAYED</p>
-    <button onclick="resetGame()">REMATCH</button>
+    <div id="winner-btns-local">
+      <button onclick="resetGame()">REMATCH</button>
+    </div>
+    <div id="winner-btns-online" style="display:none">
+      <button onclick="requestRematch()">もう一度</button>
+      <button onclick="exitOnlineGame()" style="margin-top:8px;background:linear-gradient(135deg,rgba(150,0,0,0.4),rgba(200,0,0,0.3));color:#ff8888;border-color:rgba(255,100,100,0.3)">退出</button>
+      <p id="rematch-status" style="font-size:11px;color:var(--text-dim);margin-top:10px;letter-spacing:1px"></p>
+    </div>
   </div>
 </div>
 
@@ -977,12 +984,24 @@ function updateUI() {
   document.getElementById('p1-panel').classList.toggle('active', currentPlayer === 0);
   document.getElementById('p2-panel').classList.toggle('active', currentPlayer === 1);
   renderWallPips('p1-walls', wallCounts[0]); renderWallPips('p2-walls', wallCounts[1]);
-  for (var pIdx = 0; pIdx < 2; pIdx++) {
-    var sfx = pIdx === 0 ? '-p1' : '-p2';
-    var isActive = currentPlayer === pIdx;
-    document.getElementById('controls' + sfx).classList.toggle('inactive', !isActive);
-    document.getElementById('btn-move' + sfx).className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
-    document.getElementById('btn-wall' + sfx).className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
+  if (gameMode === 'online') {
+    // オンライン: 常に画面下部(controls-p1)を使う。上部(controls-p2)は常にinactive
+    var isMyTurn = currentPlayer === myPlayerIndex;
+    document.getElementById('controls-p1').classList.toggle('inactive', !isMyTurn);
+    document.getElementById('controls-p2').classList.toggle('inactive', true);
+    document.getElementById('btn-move-p1').className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
+    document.getElementById('btn-wall-p1').className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
+    document.getElementById('btn-move-p2').className = 'ctrl-btn';
+    document.getElementById('btn-wall-p2').className = 'ctrl-btn';
+  } else {
+    // ローカル: 従来通り
+    for (var pIdx = 0; pIdx < 2; pIdx++) {
+      var sfx = pIdx === 0 ? '-p1' : '-p2';
+      var isActive = currentPlayer === pIdx;
+      document.getElementById('controls' + sfx).classList.toggle('inactive', !isActive);
+      document.getElementById('btn-move' + sfx).className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
+      document.getElementById('btn-wall' + sfx).className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
+    }
   }
   updateTimerUI();
 }
@@ -1004,6 +1023,10 @@ function showWinner(p) {
   playerLabel.className = 'win-label';
   playerLabel.textContent = p === 0 ? T.p1name : T.p2name;
   playerLabel.style.color = p === 0 ? T.p1Light : T.p2Light;
+  // オンライン/ローカルでボタンを切替
+  document.getElementById('winner-btns-local').style.display = gameMode === 'online' ? 'none' : '';
+  document.getElementById('winner-btns-online').style.display = gameMode === 'online' ? '' : 'none';
+  if (gameMode === 'online') document.getElementById('rematch-status').textContent = '';
   setTimeout(function() { overlay.classList.add('show'); spawnConfetti(overlay); }, 50);
 }
 
@@ -1278,6 +1301,63 @@ function monitorOpponent() {
   });
 }
 
+// ============ REMATCH ============
+var rematchListener = null;
+
+function requestRematch() {
+  if (!roomRef) return;
+  roomRef.child('rematch/' + myPlayerIndex).set(true);
+  document.getElementById('rematch-status').textContent = '相手の応答を待っています...';
+  // Listen for opponent's rematch flag
+  var opponentIdx = 1 - myPlayerIndex;
+  if (rematchListener) { roomRef.child('rematch').off('value', rematchListener); }
+  rematchListener = roomRef.child('rematch').on('value', function(snap) {
+    var rm = snap.val();
+    if (rm && rm[0] === true && rm[1] === true) {
+      roomRef.child('rematch').off('value', rematchListener);
+      rematchListener = null;
+      startRematch();
+    }
+  });
+}
+
+function startRematch() {
+  // Clear rematch flags
+  roomRef.child('rematch').remove();
+  // Close winner overlay
+  var overlay = document.getElementById('winner-overlay'); overlay.classList.remove('show');
+  var confetti = overlay.querySelectorAll('.confetti'); for (var i = 0; i < confetti.length; i++) confetti[i].remove();
+  // Reset game state
+  clearInterval(timerInterval);
+  initState(); gameStarted = true; gameOver = false;
+  mode = 'move'; hoverWall = null;
+  showMsg(''); updateUI(); draw();
+  // Host syncs the fresh state
+  if (myPlayerIndex === 0) {
+    syncStateToFirebase();
+  }
+  startTurnTimer();
+  if (!bgmPlaying) { initAudio(); startBGM(); }
+}
+
+function exitOnlineGame() {
+  // Close winner overlay
+  var overlay = document.getElementById('winner-overlay'); overlay.classList.remove('show');
+  var confetti = overlay.querySelectorAll('.confetti'); for (var i = 0; i < confetti.length; i++) confetti[i].remove();
+  // Clean up rematch listener
+  if (rematchListener && roomRef) { roomRef.child('rematch').off('value', rematchListener); rematchListener = null; }
+  // Leave room
+  leaveRoom();
+  clearInterval(timerInterval); if (bgmTimeout) clearTimeout(bgmTimeout); bgmPlaying = false;
+  if (audioCtx) { audioCtx.close().catch(function(){}); audioCtx = null; }
+  canvas.classList.remove('guest-flip');
+  initState();
+  // Show start screen
+  document.getElementById('start-overlay').classList.remove('hidden');
+  backToModeSelect();
+  showMsg(''); updateUI(); draw();
+}
+
 // ============ TOUCH & POINTER ============
 function getCanvasPos(e) {
   var rect = canvas.getBoundingClientRect(), scaleX = BOARD_PX / rect.width, scaleY = BOARD_PX / rect.height;
@@ -1360,7 +1440,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v26';
+  var CURRENT = 'quoridor-v27';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
@@ -1377,7 +1457,7 @@ initState(); resizeBoard(); updateUI(); draw();
     });
   }
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=26').then(function(reg) {
+    navigator.serviceWorker.register('sw.js?v=27').then(function(reg) {
       reg.addEventListener('updatefound', function() {
         var newWorker = reg.installing;
         if (newWorker) {
