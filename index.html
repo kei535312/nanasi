@@ -16,7 +16,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <title>コリドール</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@400;600;700;900&family=Zen+Maru+Gothic:wght@400;700;900&family=DotGothic16&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@400;600;700;900&family=Zen+Maru+Gothic:wght@400;700;900&family=Zen+Kaku+Gothic+New:wght@400;700&family=DotGothic16&display=swap');
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -101,9 +101,9 @@ body::after {
 .player-zone.p2-zone { transform: rotate(180deg); }
 
 .player-panel {
-  width: 100%; padding: 4px 8px; border-radius: 6px;
+  width: 100%; padding: 8px 12px; border-radius: var(--radius-lg, 16px);
   background: var(--panel-bg); border: 1px solid var(--panel-border);
-  transition: all 0.4s cubic-bezier(.4,0,.2,1);
+  transition: all 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
   position: relative; overflow: hidden;
 }
 .player-panel::before {
@@ -113,12 +113,12 @@ body::after {
 .player-panel.p1::before { background: linear-gradient(90deg, var(--p1), var(--p1-light), var(--p1)); box-shadow: 0 0 10px var(--p1); }
 .player-panel.p2::before { background: linear-gradient(90deg, var(--p2), var(--p2-light), var(--p2)); box-shadow: 0 0 10px var(--p2); }
 .player-panel.active::before { opacity: 1; }
-.player-panel.active.p1 { border-color: var(--p1-dim); box-shadow: 0 0 20px var(--p1-glow); }
-.player-panel.active.p2 { border-color: var(--p2-dim); box-shadow: 0 0 20px var(--p2-glow); }
+.player-panel.active.p1 { border-color: var(--p1-dim); box-shadow: 0 0 12px var(--p1-glow); }
+.player-panel.active.p2 { border-color: var(--p2-dim); box-shadow: 0 0 12px var(--p2-glow); }
 
 .panel-row { display: flex; align-items: center; gap: 6px; }
 .player-icon {
-  width: 24px; height: 24px; border-radius: 4px;
+  width: 24px; height: 24px; border-radius: var(--radius-sm, 8px);
   display: flex; align-items: center; justify-content: center;
   font-size: 11px; font-weight: 900; color: white; flex-shrink: 0; letter-spacing: 0;
 }
@@ -126,14 +126,14 @@ body::after {
 .player-icon.p2 { background: linear-gradient(135deg, var(--p2), var(--p2-light)); box-shadow: 0 0 8px var(--p2-dim); }
 .player-name { font-size: clamp(10px, 2.2vw, 12px); font-weight: 700; color: var(--text-dim); white-space: nowrap; letter-spacing: 2px; text-transform: uppercase; }
 .turn-badge {
-  display: inline-block; font-size: 8px; font-weight: 700; padding: 2px 6px;
-  border-radius: 3px; margin-left: 4px; opacity: 0; transition: opacity 0.3s; letter-spacing: 2px; flex-shrink: 0;
+  display: inline-block; font-size: 8px; font-weight: 600; padding: 2px 8px;
+  border-radius: 12px; margin-left: 4px; opacity: 0; transition: opacity 0.2s cubic-bezier(0.17,0.67,0.83,0.67); letter-spacing: 1px; flex-shrink: 0;
 }
 .player-panel.active .turn-badge { opacity: 1; }
 .player-panel.p1 .turn-badge { background: var(--p1-glow); color: var(--p1-light); border: 1px solid var(--p1-dim); }
 .player-panel.p2 .turn-badge { background: var(--p2-glow); color: var(--p2-light); border: 1px solid var(--p2-dim); }
 .wall-indicators { display: flex; gap: 2px; align-items: center; margin-left: auto; }
-.wall-pip { width: 6px; height: 16px; border-radius: 2px; transition: all 0.3s; }
+.wall-pip { width: 4px; height: 14px; border-radius: 3px; transition: all 0.2s cubic-bezier(0.17,0.67,0.83,0.67); }
 .player-panel.p1 .wall-pip { background: var(--p1); box-shadow: 0 0 6px var(--p1-dim); }
 .player-panel.p2 .wall-pip { background: var(--p2); box-shadow: 0 0 6px var(--p2-dim); }
 .wall-pip.used { background: rgba(255,255,255,0.06) !important; box-shadow: none !important; }
@@ -154,21 +154,31 @@ body::after {
 .timer-text.urgent { color: #ff2222; }
 .player-panel:not(.active) .timer-area { opacity: 0.3; }
 
-.controls { display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%; }
-.ctrl-btn {
-  position: relative; flex: 1; padding: 6px 4px; border: 1px solid var(--panel-border); border-radius: 4px;
-  background: var(--panel-bg); color: var(--text-dim); font-family: inherit;
-  font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.25s; letter-spacing: 1px;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 36px;
-  text-align: center;
+.controls {
+  display: flex; align-items: center; gap: 0; justify-content: center; width: 100%;
+  background: rgba(255,255,255,0.03); border-radius: var(--radius-xl, 24px);
+  padding: 4px; border: 1px solid rgba(255,255,255,0.06);
 }
+.ctrl-btn {
+  position: relative; flex: 1; padding: 8px 4px; border: none; border-radius: 20px;
+  background: transparent; color: rgba(255,255,255,0.25);
+  font-family: 'Zen Kaku Gothic New', 'Inter', sans-serif;
+  font-size: 9px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.17,0.67,0.83,0.67);
+  letter-spacing: 1px;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  min-height: 48px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  overflow: hidden;
+}
+.ctrl-btn svg { flex-shrink: 0; pointer-events: none; }
+.ctrl-label { font-size: 9px; letter-spacing: 1px; opacity: 0.7; pointer-events: none; }
 .ctrl-btn:active { transform: scale(0.95); }
-.ctrl-btn.active-move { border-color: var(--move-color); color: var(--move-color); background: var(--move-bg); box-shadow: 0 0 12px var(--move-glow); }
-.ctrl-btn.active-wall { border-color: var(--wall-ui-color); border-width: 2px; color: var(--wall-ui-color); background: rgba(255,200,0,0.2); box-shadow: 0 0 16px var(--wall-ui-color), inset 0 0 8px rgba(255,200,0,0.15); text-shadow: 0 0 6px var(--wall-ui-color); }
-.ctrl-btn .kbd { display: inline-block; font-size: 8px; padding: 1px 4px; border-radius: 2px; background: rgba(255,255,255,0.05); color: #445; margin-left: 4px; font-weight: 400; vertical-align: 1px; }
-@media (hover: none) and (pointer: coarse) { .ctrl-btn .kbd { display: none; } }
+.ctrl-btn.active-move { background: rgba(255,255,255,0.08); color: var(--move-color); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.ctrl-btn.active-wall { background: rgba(255,255,255,0.08); color: var(--wall-ui-color); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.ctrl-btn .kbd { display: none; }
 .ctrl-divider { width: 1px; height: 24px; background: var(--panel-border); margin: 0 1px; }
-.controls.inactive { opacity: 0.25; pointer-events: none; }
+.controls.inactive { opacity: 0.2; pointer-events: none; }
 
 #board-container {
   position: relative; -webkit-user-select: none; user-select: none; touch-action: none;
@@ -182,18 +192,20 @@ canvas#board {
 
 .center-controls { display: flex; gap: 8px; align-items: center; justify-content: center; flex-shrink: 0; }
 .sound-btn {
-  width: 32px; height: 32px; border: 1px solid var(--panel-border); border-radius: 4px;
+  width: 32px; height: 32px; border: 1px solid var(--panel-border); border-radius: var(--radius-sm, 8px);
   background: var(--panel-bg); color: var(--text-dim); font-size: 16px; cursor: pointer;
-  transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s cubic-bezier(0.17,0.67,0.83,0.67); display: flex; align-items: center; justify-content: center;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation; position: relative;
 }
 .sound-btn:active { transform: scale(0.9); }
 .sound-btn.muted { color: #ff2222; }
 
 #reset-btn, #undo-btn {
-  padding: 4px 14px; border: 1px solid var(--panel-border); border-radius: 4px;
-  background: var(--panel-bg); color: var(--text-dim); font-family: inherit;
-  font-size: 10px; font-weight: 600; cursor: pointer; transition: all 0.25s;
+  padding: 4px 14px; border: 1px solid var(--panel-border); border-radius: var(--radius-sm, 8px);
+  background: var(--panel-bg); color: var(--text-dim);
+  font-family: 'Zen Kaku Gothic New', 'Inter', sans-serif;
+  font-size: 10px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.17,0.67,0.83,0.67);
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   min-height: 32px; letter-spacing: 2px; text-transform: uppercase;
 }
@@ -209,9 +221,10 @@ canvas#board {
 }
 .winner-overlay.show { background: rgba(0,4,12,0.85); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); pointer-events: auto; }
 .winner-box {
-  background: linear-gradient(145deg, rgba(10,20,40,0.95), rgba(5,10,25,0.95)); border-radius: 12px; padding: 40px 44px; text-align: center;
+  background: linear-gradient(145deg, rgba(10,20,40,0.95), rgba(5,10,25,0.95));
+  border-radius: var(--radius-2xl, 32px); padding: 40px 32px; text-align: center;
   border: 1px solid var(--panel-border);
-  box-shadow: 0 20px 80px rgba(0,0,0,0.8), 0 0 60px var(--board-glow);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
   transform: scale(0.5) rotate(-5deg); opacity: 0;
   transition: all 0.6s cubic-bezier(.2,.8,.3,1.2); margin: 16px; max-width: 340px; width: 90%;
 }
@@ -225,12 +238,16 @@ canvas#board {
 .winner-box .win-label { font-size: clamp(12px, 3vw, 16px); font-weight: 700; margin-bottom: 16px; letter-spacing: 3px; }
 .winner-box p { color: #445566; font-size: 12px; margin-bottom: 24px; letter-spacing: 1px; }
 .winner-box button {
-  padding: 16px 44px; border: 1px solid var(--panel-border); border-radius: 6px;
-  background: linear-gradient(135deg, rgba(0,50,150,0.4), rgba(0,80,200,0.3)); color: #88bbff; font-family: inherit;
-  font-size: 13px; font-weight: 700; cursor: pointer; letter-spacing: 2px;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 52px;
-  transition: all 0.2s; text-transform: uppercase;
+  width: 100%; padding: 14px 24px; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-xl, 24px);
+  background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8);
+  font-family: 'Zen Kaku Gothic New', 'Inter', sans-serif;
+  font-size: 13px; font-weight: 600; cursor: pointer; letter-spacing: 2px;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 48px;
+  transition: all 0.2s cubic-bezier(0.17,0.67,0.83,0.67); text-transform: uppercase;
+  position: relative; overflow: hidden;
 }
+.winner-box button:hover { background: rgba(255,255,255,0.1); }
 .winner-box button:active { transform: scale(0.93); }
 .confetti { position: absolute; width: 10px; height: 10px; border-radius: 2px; animation: confetti-fall linear forwards; pointer-events: none; }
 @keyframes confetti-fall { 0% { transform: translateY(-10px) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
@@ -249,12 +266,20 @@ canvas#board {
 }
 .start-box .tagline { color: var(--text-dim); font-size: clamp(10px, 2.5vw, 12px); margin-bottom: 40px; letter-spacing: 3px; }
 .start-box button {
-  padding: 16px 48px; border: 1px solid var(--title-glow); border-radius: 6px;
+  width: 100%; max-width: 260px; padding: 14px 32px;
+  border: 1px solid var(--title-glow); border-radius: var(--radius-xl, 24px);
   background: var(--start-btn-bg, rgba(0,0,0,0.3)); color: var(--title-color); font-family: inherit;
-  font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: 3px;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 52px;
-  text-transform: uppercase; transition: all 0.3s; box-shadow: 0 0 20px var(--title-glow);
+  font-size: 13px; font-weight: 600; cursor: pointer; letter-spacing: 2px;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 48px;
+  text-transform: uppercase; transition: all 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+  box-shadow: none; position: relative; overflow: hidden;
 }
+.start-box button::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.06); transform: translateX(-100%);
+  transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94); border-radius: inherit;
+}
+.start-box button:hover::before { transform: translateX(0); }
 .start-box button:active { transform: scale(0.95); }
 .hidden { display: none; }
 
@@ -266,7 +291,7 @@ canvas#board {
 /* Online mode */
 #room-code-input {
   text-align: center; font-size: 24px; letter-spacing: 6px; width: 140px; padding: 10px;
-  border-radius: 6px; border: 1px solid var(--panel-border); background: rgba(10,20,40,0.8);
+  border-radius: var(--radius-md, 12px); border: 1px solid var(--panel-border); background: rgba(10,20,40,0.8);
   color: var(--title-color); font-family: 'Orbitron', monospace; outline: none;
 }
 #room-code-input:focus { border-color: var(--title-color); box-shadow: 0 0 12px var(--title-glow); }
@@ -280,6 +305,20 @@ canvas#board {
   padding: 6px; font-size: 12px; z-index: 9999; letter-spacing: 1px;
 }
 canvas#board.guest-flip { transform: rotate(180deg); }
+
+/* Grain texture overlay */
+#grain-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none; z-index: 9998; opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat; background-size: 256px 256px;
+}
+
+/* UI font override */
+.ctrl-btn, #reset-btn, #undo-btn, .turn-badge, .wall-label,
+.timer-text, .ctrl-label, #message {
+  font-family: 'Zen Kaku Gothic New', 'Inter', sans-serif;
+}
 </style>
 </head>
 <body>
@@ -293,7 +332,7 @@ canvas#board.guest-flip { transform: rotate(180deg); }
     <div class="start-subtitle" id="start-subtitle"></div>
     <h2>QUORIDOR</h2>
     <p class="tagline">2 PLAYER DUEL</p>
-    <div id="mode-select">
+    <div id="mode-select" style="display:flex;flex-direction:column;align-items:center;gap:8px;">
       <button onclick="startGame()">ローカル対戦</button>
       <button onclick="showOnlineMenu()">オンライン対戦</button>
       <button onclick="startAIGame()">AI対戦</button>
@@ -325,9 +364,9 @@ canvas#board.guest-flip { transform: rotate(180deg); }
 <div id="app">
   <div class="player-zone p2-zone">
     <div class="controls inactive" id="controls-p2">
-      <button class="ctrl-btn active-move" id="btn-move-p2" onclick="setMode('move')">MOVE</button>
-      <button class="ctrl-btn" id="btn-wall-h-p2" onclick="setMode('wall-h')">横</button>
-      <button class="ctrl-btn" id="btn-wall-v-p2" onclick="setMode('wall-v')">縦</button>
+      <button class="ctrl-btn active-move" id="btn-move-p2" onclick="setMode('move')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg><span class="ctrl-label">MOVE</span></button>
+      <button class="ctrl-btn" id="btn-wall-h-p2" onclick="setMode('wall-h')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><circle cx="6" cy="7" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/><circle cx="6" cy="17" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/><circle cx="18" cy="7" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/><circle cx="18" cy="17" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/></svg><span class="ctrl-label">WALL</span></button>
+      <button class="ctrl-btn" id="btn-wall-v-p2" onclick="setMode('wall-v')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="3" x2="12" y2="21"/><circle cx="7" cy="6" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/><circle cx="17" cy="6" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/><circle cx="7" cy="18" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/><circle cx="17" cy="18" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/></svg><span class="ctrl-label">WALL</span></button>
     </div>
     <div class="player-panel p2" id="p2-panel">
       <div class="panel-row">
@@ -366,9 +405,9 @@ canvas#board.guest-flip { transform: rotate(180deg); }
       </div>
     </div>
     <div class="controls" id="controls-p1">
-      <button class="ctrl-btn active-move" id="btn-move-p1" onclick="setMode('move')">MOVE</button>
-      <button class="ctrl-btn" id="btn-wall-h-p1" onclick="setMode('wall-h')">横</button>
-      <button class="ctrl-btn" id="btn-wall-v-p1" onclick="setMode('wall-v')">縦</button>
+      <button class="ctrl-btn active-move" id="btn-move-p1" onclick="setMode('move')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg><span class="ctrl-label">MOVE</span></button>
+      <button class="ctrl-btn" id="btn-wall-h-p1" onclick="setMode('wall-h')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><circle cx="6" cy="7" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/><circle cx="6" cy="17" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/><circle cx="18" cy="7" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/><circle cx="18" cy="17" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/></svg><span class="ctrl-label">WALL</span></button>
+      <button class="ctrl-btn" id="btn-wall-v-p1" onclick="setMode('wall-v')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="3" x2="12" y2="21"/><circle cx="7" cy="6" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/><circle cx="17" cy="6" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/><circle cx="7" cy="18" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/><circle cx="17" cy="18" r="1.5" fill="currentColor" stroke="none" opacity="0.25"/></svg><span class="ctrl-label">WALL</span></button>
     </div>
   </div>
 </div>
@@ -746,6 +785,13 @@ function applyTheme() {
   s.setProperty('--title-color', T.title);
   s.setProperty('--title-glow', T.title + '33');
   s.setProperty('--start-btn-bg', 'linear-gradient(135deg, ' + T.title + '26, ' + T.title + '1a)');
+  s.setProperty('--radius-sm', '8px');
+  s.setProperty('--radius-md', '12px');
+  s.setProperty('--radius-lg', '16px');
+  s.setProperty('--radius-xl', '24px');
+  s.setProperty('--radius-2xl', '32px');
+  s.setProperty('--transition-smooth', '0.4s cubic-bezier(0.25,0.46,0.45,0.94)');
+  s.setProperty('--transition-snappy', '0.2s cubic-bezier(0.17,0.67,0.83,0.67)');
   s.setProperty('--star1', T.star1); s.setProperty('--star2', T.star2); s.setProperty('--star3', T.star3);
   s.setProperty('--nebula1', T.nebula1); s.setProperty('--nebula2', T.nebula2);
   document.getElementById('theme-name').textContent = T.name;
@@ -1199,7 +1245,7 @@ function setMode(m) {
   else if (m === 'wall-v') { mode = 'wall'; orientation = 'v'; }
   else { mode = 'move'; }
   hoverWall = null;
-  showMsg(mode === 'wall' ? (orientation === 'h' ? '横壁モード：交差点をタップ' : '縦壁モード：交差点をタップ') : '');
+  showMsg(mode === 'wall' ? (orientation === 'h' ? '━ 横壁：交差点をタップ' : '┃ 縦壁：交差点をタップ') : '');
   updateUI(); draw();
 }
 function showMsg(text) { document.getElementById('message').textContent = text; }
@@ -1945,6 +1991,24 @@ canvas.addEventListener('touchcancel', function() { hoverWall = null; touchStart
 document.addEventListener('touchmove', function(e) { if (e.target === canvas || canvas.contains(e.target)) e.preventDefault(); }, { passive: false });
 
 document.addEventListener('keydown', function(e) { if (!gameStarted) return; if (e.key === 'm' || e.key === 'M') setMode('move'); if (e.key === 'h' || e.key === 'H') setMode('wall-h'); if (e.key === 'v' || e.key === 'V') setMode('wall-v'); if (e.key === 'r' || e.key === 'R') resetGame(); if (e.key === 'u' || e.key === 'U') undo(); });
+(function() {
+  var modes = [
+    { suffix: 'move', mode: 'move' },
+    { suffix: 'wall-h', mode: 'wall-h' },
+    { suffix: 'wall-v', mode: 'wall-v' }
+  ];
+  ['p1', 'p2'].forEach(function(p) {
+    modes.forEach(function(m) {
+      var el = document.getElementById('btn-' + m.suffix + '-' + p);
+      if (el) {
+        el.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          setMode(m.mode);
+        }, { passive: false });
+      }
+    });
+  });
+})();
 
 var resizeTimer;
 window.addEventListener('resize', function() { clearTimeout(resizeTimer); resizeTimer = setTimeout(function() { if (gameStarted) resizeBoard(); }, 150); });
@@ -1966,7 +2030,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v32';
+  var CURRENT = 'quoridor-v33';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
@@ -1983,7 +2047,7 @@ initState(); resizeBoard(); updateUI(); draw();
     });
   }
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=32').then(function(reg) {
+    navigator.serviceWorker.register('sw.js?v=33').then(function(reg) {
       reg.addEventListener('updatefound', function() {
         var newWorker = reg.installing;
         if (newWorker) {
@@ -1999,5 +2063,6 @@ initState(); resizeBoard(); updateUI(); draw();
   }
 })();
 </script>
+<div id="grain-overlay"></div>
 </body>
 </html>
