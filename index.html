@@ -317,6 +317,42 @@ canvas#board {
   font-size: 0.7rem; font-weight: 700; z-index: 9999; letter-spacing: 2px;
 }
 canvas#board.guest-flip { transform: rotate(180deg); }
+
+/* --- v36 micro-interactions --- */
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.75; }
+}
+.player-panel.active .turn-badge { animation: badge-pulse 1.2s ease-in-out infinite; }
+
+@keyframes bounce-count {
+  0% { transform: scale(1.4); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+.wall-label.updated { animation: bounce-count 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+
+@keyframes micro-shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-3px); }
+  40% { transform: translateX(3px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(1px); }
+}
+canvas#board.shake-invalid { animation: micro-shake 0.25s ease-out; }
+
+.ctrl-btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  border-radius: inherit; transform: scale(0); opacity: 0;
+  transition: transform 0.3s, opacity 0.3s;
+}
+.ctrl-btn:active::after { transform: scale(2.5); opacity: 1; transition: transform 0s, opacity 0s; }
+
+#bg-blobs.p1-active .blob-1 { opacity: 0.22; transition: opacity 0.6s; }
+#bg-blobs.p1-active .blob-2 { opacity: 0.08; transition: opacity 0.6s; }
+#bg-blobs.p2-active .blob-2 { opacity: 0.22; transition: opacity 0.6s; }
+#bg-blobs.p2-active .blob-1 { opacity: 0.08; transition: opacity 0.6s; }
 </style>
 </head>
 <body>
@@ -567,23 +603,49 @@ function createNoiseBuffer(dur) { if (!audioCtx) return null; var len = audioCtx
 
 function playMoveSFX() {
   if (!audioCtx) return; ensureAudioResumed(); var now = audioCtx.currentTime;
-  var o = audioCtx.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(180, now); o.frequency.exponentialRampToValueAtTime(120, now + 0.15);
+  var pm = 0.85 + Math.random() * 0.3;
+  var o = audioCtx.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(180 * pm, now); o.frequency.exponentialRampToValueAtTime(120 * pm, now + 0.15);
   var e = audioCtx.createGain(); e.gain.setValueAtTime(0.15, now); e.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
   o.connect(e); e.connect(audioCtx.destination); o.start(now); o.stop(now + 0.15);
-  var o2 = audioCtx.createOscillator(); o2.type = 'sine'; o2.frequency.setValueAtTime(600, now); o2.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+  var o2 = audioCtx.createOscillator(); o2.type = 'sine'; o2.frequency.setValueAtTime(600 * pm, now); o2.frequency.exponentialRampToValueAtTime(300 * pm, now + 0.1);
   var e2 = audioCtx.createGain(); e2.gain.setValueAtTime(0.08, now); e2.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
   o2.connect(e2); e2.connect(audioCtx.destination); o2.start(now); o2.stop(now + 0.1);
 }
 
 function playWallSFX() {
   if (!audioCtx) return; ensureAudioResumed(); var now = audioCtx.currentTime;
+  var pm = 0.85 + Math.random() * 0.3;
   var ns = audioCtx.createBufferSource(); ns.buffer = createNoiseBuffer(0.3);
-  var lp = audioCtx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(3000, now); lp.frequency.exponentialRampToValueAtTime(200, now + 0.2);
+  var lp = audioCtx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(3000 * pm, now); lp.frequency.exponentialRampToValueAtTime(200 * pm, now + 0.2);
   var ne = audioCtx.createGain(); ne.gain.setValueAtTime(0.35, now); ne.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
   ns.connect(lp); lp.connect(ne); ne.connect(audioCtx.destination); ns.start(now); ns.stop(now + 0.3);
-  var o = audioCtx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(150, now); o.frequency.exponentialRampToValueAtTime(60, now + 0.2);
+  var o = audioCtx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(150 * pm, now); o.frequency.exponentialRampToValueAtTime(60 * pm, now + 0.2);
   var oe = audioCtx.createGain(); oe.gain.setValueAtTime(0.2, now); oe.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
   o.connect(oe); oe.connect(audioCtx.destination); o.start(now); o.stop(now + 0.2);
+}
+
+function playInvalidSFX() {
+  if (!audioCtx) return; ensureAudioResumed(); var now = audioCtx.currentTime;
+  var o = audioCtx.createOscillator(); o.type = 'square';
+  o.frequency.setValueAtTime(200, now); o.frequency.exponentialRampToValueAtTime(100, now + 0.15);
+  var e = audioCtx.createGain(); e.gain.setValueAtTime(0.1, now); e.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+  o.connect(e); e.connect(audioCtx.destination); o.start(now); o.stop(now + 0.15);
+}
+
+function playTurnChangeSFX() {
+  if (!audioCtx) return; ensureAudioResumed(); var now = audioCtx.currentTime;
+  var notes = [523.3, 659.3];
+  for (var i = 0; i < 2; i++) {
+    var o = audioCtx.createOscillator(); o.type = 'sine'; o.frequency.value = notes[i];
+    var e = audioCtx.createGain(); var t = now + i * 0.08;
+    e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(0.06, t + 0.02);
+    e.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+    o.connect(e); e.connect(audioCtx.destination); o.start(t); o.stop(t + 0.2);
+  }
+}
+
+function haptic(pattern) {
+  if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch(e) {} }
 }
 function playTimerWarnSFX() { if (!audioCtx) return; var now = audioCtx.currentTime; var o = audioCtx.createOscillator(); var e = audioCtx.createGain(); o.type = 'square'; o.frequency.value = 440; e.gain.setValueAtTime(0.08, now); e.gain.exponentialRampToValueAtTime(0.001, now + 0.1); o.connect(e); e.connect(audioCtx.destination); o.start(now); o.stop(now + 0.1); }
 function playTimeoutSFX() { if (!audioCtx) return; var now = audioCtx.currentTime; for (var i = 0; i < 3; i++) { var o = audioCtx.createOscillator(); var e = audioCtx.createGain(); o.type = 'sawtooth'; o.frequency.value = 300 - i * 80; e.gain.setValueAtTime(0.12, now + i * 0.15); e.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.14); o.connect(e); e.connect(audioCtx.destination); o.start(now + i * 0.15); o.stop(now + i * 0.15 + 0.15); } }
@@ -597,12 +659,72 @@ var aiMode = false;
 var aiPlayer = 1;
 var aiThinking = false;
 
+var hoverCell = null;
+
 function initState() {
   players = [{ row: 8, col: 4 }, { row: 0, col: 4 }];
   walls = []; wallCounts = [10, 10]; currentPlayer = 0; mode = 'move';
-  orientation = 'h'; gameOver = false; hoverWall = null; turnTimeLeft = TURN_TIME; gameStarted = false;
+  orientation = 'h'; gameOver = false; hoverWall = null; hoverCell = null; turnTimeLeft = TURN_TIME; gameStarted = false;
   undoSnapshot = null;
   aiThinking = false;
+  particles = [];
+}
+
+// ============ PARTICLE SYSTEM ============
+var particles = [];
+var MAX_PARTICLES = 120;
+
+function spawnParticle(x, y, vx, vy, life, color, size, gravity) {
+  if (particles.length >= MAX_PARTICLES) return;
+  particles.push({ x: x, y: y, vx: vx, vy: vy, life: life, maxLife: life, color: color, size: size || 3, gravity: gravity || 0 });
+}
+
+function updateParticles() {
+  for (var i = particles.length - 1; i >= 0; i--) {
+    var p = particles[i];
+    p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.life--;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+}
+
+function drawParticles() {
+  for (var i = 0; i < particles.length; i++) {
+    var p = particles[i];
+    var alpha = p.life / p.maxLife;
+    var s = p.size * (0.5 + alpha * 0.5);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x - s / 2, p.y - s / 2, s, s);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function spawnMoveTrail(col, row, playerIdx) {
+  var px = cellX(col) + CELL / 2;
+  var py = cellY(row) + CELL / 2;
+  var color = playerIdx === 0 ? T.p1 : T.p2;
+  for (var i = 0; i < 8; i++) {
+    var angle = Math.random() * Math.PI * 2;
+    var speed = 0.5 + Math.random() * 1.5;
+    spawnParticle(px + (Math.random() - 0.5) * CELL * 0.3, py + (Math.random() - 0.5) * CELL * 0.3, Math.cos(angle) * speed, Math.sin(angle) * speed, 20 + Math.floor(Math.random() * 15), color, 2 + Math.random() * 3, 0);
+  }
+}
+
+function spawnWallImpact(wallObj) {
+  var wcx, wcy;
+  if (wallObj.orient === 'h') {
+    wcx = cellX(wallObj.col) + CELL + GAP / 2;
+    wcy = cellY(wallObj.row) + CELL + GAP / 2;
+  } else {
+    wcx = cellX(wallObj.col) + CELL + GAP / 2;
+    wcy = cellY(wallObj.row) + CELL + GAP / 2;
+  }
+  var wColor = 'rgb(' + T.wallColor[0] + ',' + T.wallColor[1] + ',' + T.wallColor[2] + ')';
+  for (var i = 0; i < 12; i++) {
+    var angle = Math.random() * Math.PI * 2;
+    var speed = 1 + Math.random() * 3;
+    spawnParticle(wcx, wcy, Math.cos(angle) * speed, Math.sin(angle) * speed, 15 + Math.floor(Math.random() * 10), wColor, 2 + Math.random() * 4, 0.05);
+  }
 }
 
 function saveSnapshot() {
@@ -631,8 +753,8 @@ function onTimeout() {
   if (gameMode === 'online' && currentPlayer !== myPlayerIndex) return;
   if (aiMode && currentPlayer === aiPlayer) return; // AI doesn't timeout
   playTimeoutSFX(); showMsg('TIME OUT');
-  currentPlayer = 1 - currentPlayer; mode = 'move'; hoverWall = null;
-  updateUI(); draw(); startTurnTimer();
+  currentPlayer = 1 - currentPlayer; mode = 'move'; hoverWall = null; hoverCell = null;
+  playTurnChangeSFX(); updateUI(); draw(); startTurnTimer();
   if (gameMode === 'online') syncStateToFirebase();
   if (aiMode && currentPlayer === aiPlayer) { setTimeout(function() { aiTurn(); }, 100); }
 }
@@ -708,6 +830,7 @@ function getValidMoves(p) {
 // ============ DRAWING ============
 function draw() {
   ctx.clearRect(0, 0, BOARD_PX, BOARD_PX);
+  updateParticles();
   // Dark translucent board bg (blobs show through)
   ctx.fillStyle = T.boardBg;
   ctx.fillRect(0, 0, BOARD_PX, BOARD_PX);
@@ -768,6 +891,22 @@ function draw() {
 
   for (var wi = 0; wi < walls.length; wi++) drawWall(walls[wi].row, walls[wi].col, walls[wi].orient);
   if (hoverWall && !gameOver) drawWallPreview(hoverWall.row, hoverWall.col, hoverWall.orient, canPlaceWall(hoverWall.row, hoverWall.col, hoverWall.orient));
+
+  // Hovered valid cell glow (desktop only)
+  if (hoverCell && !gameOver && mode === 'move') {
+    var hx = cellX(hoverCell.col), hy = cellY(hoverCell.row);
+    ctx.save();
+    ctx.shadowColor = currentPlayer === 0 ? T.p1 : T.p2;
+    ctx.shadowBlur = 15;
+    ctx.strokeStyle = currentPlayer === 0 ? T.p1 : T.p2;
+    ctx.lineWidth = 2.5;
+    var hPulse = 1 + Math.sin(pulsePhase * 0.1) * 0.08;
+    var hOff = (CELL * (1 - hPulse)) / 2;
+    ctx.strokeRect(hx + hOff, hy + hOff, CELL * hPulse, CELL * hPulse);
+    ctx.restore();
+  }
+
+  drawParticles();
   drawPlayer(players[0], 0); drawPlayer(players[1], 1);
 }
 
@@ -850,6 +989,18 @@ function drawPlayer(p, idx) {
   ctx.moveTo(0, -chSize); ctx.lineTo(0, chSize);
   ctx.stroke();
 
+  // Pulsing glow ring for active player
+  if (isActive) {
+    var ringRadius = CELL * 0.5 + Math.sin(pulsePhase * 0.08) * 4;
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = 0.15 + Math.sin(pulsePhase * 0.06) * 0.05;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, ringRadius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
   ctx.restore();
 }
 
@@ -858,6 +1009,8 @@ function renderWallPips(id, count) {
   var el = document.getElementById(id);
   el.innerHTML = '<span class="wall-label">' + count + '</span>';
   el.classList.toggle('wall-count-zero', count === 0);
+  var label = el.querySelector('.wall-label');
+  if (label) { label.classList.add('updated'); setTimeout(function() { label.classList.remove('updated'); }, 350); }
 }
 
 function updateUI() {
@@ -915,6 +1068,7 @@ function updateUI() {
     undoBtn.disabled = !canUndo;
   }
   updateTimerUI();
+  updateBlobGlow();
 }
 function setMode(m) {
   if (gameOver) return;
@@ -923,14 +1077,40 @@ function setMode(m) {
   if (m === 'wall-h') { mode = 'wall'; orientation = 'h'; }
   else if (m === 'wall-v') { mode = 'wall'; orientation = 'v'; }
   else { mode = 'move'; }
-  hoverWall = null;
+  hoverWall = null; hoverCell = null;
   showMsg(mode === 'wall' ? (orientation === 'h' ? '━ 横壁：交差点をタップ' : '┃ 縦壁：交差点をタップ') : '');
   updateUI(); draw();
 }
 function showMsg(text) { document.getElementById('message').textContent = text; }
 
+var boardFlashTimeout = null;
+function flashBoardInvalid() {
+  canvas.classList.remove('shake-invalid');
+  void canvas.offsetWidth;
+  canvas.classList.add('shake-invalid');
+  canvas.style.boxShadow = '0 0 30px rgba(255,0,0,0.4), inset 0 0 30px rgba(255,0,0,0.1)';
+  canvas.style.transition = 'box-shadow 0s';
+  clearTimeout(boardFlashTimeout);
+  boardFlashTimeout = setTimeout(function() {
+    canvas.style.transition = 'box-shadow 0.3s';
+    canvas.style.boxShadow = '0 0 40px rgba(0,0,0,0.3)';
+    canvas.classList.remove('shake-invalid');
+  }, 250);
+}
+
+function updateBlobGlow() {
+  var blobs = document.getElementById('bg-blobs');
+  if (blobs) {
+    blobs.classList.toggle('p1-active', currentPlayer === 0);
+    blobs.classList.toggle('p2-active', currentPlayer === 1);
+  }
+}
+
 function showWinner(p) {
-  gameOver = true; clearInterval(timerInterval); stopAnimLoop(); playWinSFX();
+  gameOver = true; clearInterval(timerInterval); playWinSFX(); haptic([100,50,100,50,200]);
+  spawnConfetti(p);
+  // Keep anim loop alive for 2s so confetti particles render
+  setTimeout(function() { stopAnimLoop(); }, 2000);
   var overlay = document.getElementById('winner-overlay');
   var text = document.getElementById('winner-text');
   var playerLabel = document.getElementById('winner-player');
@@ -951,7 +1131,16 @@ function showWinner(p) {
   }, 120);
 }
 
-function spawnConfetti() { /* disabled in RAW PULSE */ }
+function spawnConfetti(winnerIdx) {
+  var px = cellX(players[winnerIdx].col) + CELL / 2;
+  var py = cellY(players[winnerIdx].row) + CELL / 2;
+  var colors = T.confetti;
+  for (var i = 0; i < 35; i++) {
+    var angle = Math.random() * Math.PI * 2;
+    var speed = 2 + Math.random() * 4;
+    spawnParticle(px + (Math.random() - 0.5) * CELL, py + (Math.random() - 0.5) * CELL, Math.cos(angle) * speed, Math.sin(angle) * speed - 1, 40 + Math.floor(Math.random() * 30), colors[Math.floor(Math.random() * colors.length)], 3 + Math.random() * 5, 0.08);
+  }
+}
 
 function startGame() {
   gameMode = 'local';
@@ -1592,9 +1781,10 @@ function executeAIAction(action) {
   if (!action) return;
   saveSnapshot();
   if (action.type === 'move') {
+    spawnMoveTrail(players[aiPlayer].col, players[aiPlayer].row, aiPlayer);
     players[aiPlayer].row = action.row;
     players[aiPlayer].col = action.col;
-    playMoveSFX(); showMsg('');
+    playMoveSFX(); haptic(30); showMsg('');
     var aiGoal = aiPlayer === 0 ? 0 : 8;
     if (players[aiPlayer].row === aiGoal) {
       gameOver = true; draw(); updateUI(); showWinner(aiPlayer); return;
@@ -1602,9 +1792,10 @@ function executeAIAction(action) {
   } else {
     walls.push({ row: action.row, col: action.col, orient: action.orient });
     wallCounts[aiPlayer]--;
-    playWallSFX(); showMsg(''); mode = 'move'; hoverWall = null;
+    spawnWallImpact(walls[walls.length - 1]);
+    playWallSFX(); haptic([50,30,50]); showMsg(''); mode = 'move'; hoverWall = null;
   }
-  currentPlayer = 1 - currentPlayer;
+  currentPlayer = 1 - currentPlayer; playTurnChangeSFX();
   updateUI(); draw(); startTurnTimer();
 }
 
@@ -1631,34 +1822,54 @@ function handleBoardAction(px, py) {
     var cell = pixelToCell(px, py); if (!cell) return;
     var moves = getValidMoves(currentPlayer);
     var match = null; for (var i = 0; i < moves.length; i++) { if (moves[i].row === cell.row && moves[i].col === cell.col) { match = moves[i]; break; } }
-    if (!match) { showMsg('INVALID MOVE'); return; }
+    if (!match) { showMsg('INVALID MOVE'); playInvalidSFX(); flashBoardInvalid(); haptic(100); return; }
     saveSnapshot();
-    players[currentPlayer].row = match.row; players[currentPlayer].col = match.col; playMoveSFX(); showMsg('');
+    spawnMoveTrail(players[currentPlayer].col, players[currentPlayer].row, currentPlayer);
+    players[currentPlayer].row = match.row; players[currentPlayer].col = match.col; playMoveSFX(); haptic(30); showMsg('');
     if (currentPlayer === 0 && players[0].row === 0) { gameOver = true; draw(); updateUI(); if (gameMode === 'online') syncStateToFirebase(); showWinner(0); return; }
     if (currentPlayer === 1 && players[1].row === 8) { gameOver = true; draw(); updateUI(); if (gameMode === 'online') syncStateToFirebase(); showWinner(1); return; }
-    currentPlayer = 1 - currentPlayer; updateUI(); draw(); startTurnTimer();
+    currentPlayer = 1 - currentPlayer; playTurnChangeSFX(); updateUI(); draw(); startTurnTimer();
     if (gameMode === 'online') syncStateToFirebase();
     if (aiMode && currentPlayer === aiPlayer) { setTimeout(function() { aiTurn(); }, 100); }
   } else {
-    var slot = pixelToWallSlot(px, py); if (!slot) { showMsg('交差点の近くをタップ'); return; }
-    if (wallCounts[currentPlayer] <= 0) { showMsg('NO WALLS LEFT'); return; }
-    // Use pre-selected orientation
+    var slot = pixelToWallSlot(px, py); if (!slot) { showMsg('交差点の近くをタップ'); playInvalidSFX(); flashBoardInvalid(); haptic(100); return; }
+    if (wallCounts[currentPlayer] <= 0) { showMsg('NO WALLS LEFT'); playInvalidSFX(); flashBoardInvalid(); haptic(100); return; }
     var autoOrient = orientation;
     if (!canPlaceWall(slot.row, slot.col, autoOrient)) {
-      showMsg('CANNOT PLACE'); return;
+      showMsg('CANNOT PLACE'); playInvalidSFX(); flashBoardInvalid(); haptic(100); return;
     }
     saveSnapshot();
     walls.push({ row: slot.row, col: slot.col, orient: autoOrient }); wallCounts[currentPlayer]--;
-    playWallSFX(); showMsg(''); mode = 'move'; hoverWall = null;
-    currentPlayer = 1 - currentPlayer; updateUI(); draw(); startTurnTimer();
+    spawnWallImpact(walls[walls.length - 1]);
+    playWallSFX(); haptic([50,30,50]); showMsg(''); mode = 'move'; hoverWall = null;
+    currentPlayer = 1 - currentPlayer; playTurnChangeSFX(); updateUI(); draw(); startTurnTimer();
     if (gameMode === 'online') syncStateToFirebase();
     if (aiMode && currentPlayer === aiPlayer) { setTimeout(function() { aiTurn(); }, 100); }
   }
 }
 
 canvas.addEventListener('click', function(e) { var pos = getCanvasPos(e); handleBoardAction(pos.px, pos.py); });
-canvas.addEventListener('mousemove', function(e) { if (gameOver || mode !== 'wall') { if (hoverWall) { hoverWall = null; draw(); } return; } var pos = getCanvasPos(e); var slot = pixelToWallSlot(pos.px, pos.py); if (slot) { hoverWall = { row: slot.row, col: slot.col, orient: orientation }; } else { hoverWall = null; } draw(); });
-canvas.addEventListener('mouseleave', function() { hoverWall = null; draw(); });
+canvas.addEventListener('mousemove', function(e) {
+  if (gameOver) { if (hoverWall || hoverCell) { hoverWall = null; hoverCell = null; draw(); } return; }
+  var pos = getCanvasPos(e);
+  if (mode === 'move') {
+    hoverWall = null;
+    var cell = pixelToCell(pos.px, pos.py);
+    if (cell) {
+      var moves = getValidMoves(currentPlayer);
+      var valid = false;
+      for (var i = 0; i < moves.length; i++) { if (moves[i].row === cell.row && moves[i].col === cell.col) { valid = true; break; } }
+      hoverCell = valid ? cell : null;
+    } else { hoverCell = null; }
+    draw();
+  } else if (mode === 'wall') {
+    hoverCell = null;
+    var slot = pixelToWallSlot(pos.px, pos.py);
+    if (slot) { hoverWall = { row: slot.row, col: slot.col, orient: orientation }; } else { hoverWall = null; }
+    draw();
+  }
+});
+canvas.addEventListener('mouseleave', function() { hoverWall = null; hoverCell = null; draw(); });
 
 var touchStartPos = null;
 canvas.addEventListener('touchstart', function(e) { e.preventDefault(); touchStartPos = getCanvasPos(e); }, { passive: false });
@@ -1707,7 +1918,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v35';
+  var CURRENT = 'quoridor-v36';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
@@ -1724,7 +1935,7 @@ initState(); resizeBoard(); updateUI(); draw();
     });
   }
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=35').then(function(reg) {
+    navigator.serviceWorker.register('sw.js?v=36').then(function(reg) {
       reg.addEventListener('updatefound', function() {
         var newWorker = reg.installing;
         if (newWorker) {
