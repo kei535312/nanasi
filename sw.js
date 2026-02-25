@@ -1,12 +1,12 @@
 // Service Worker for コリドール PWA
-const CACHE_NAME = 'quoridor-v36';
+const CACHE_NAME = 'quoridor-v37';
 const ASSETS = [
   '/nanasi/',
   '/nanasi/index.html',
   '/nanasi/manifest.json',
   '/nanasi/icon-192.png',
   '/nanasi/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap'
+  'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap'
 ];
 
 // Install: cache all assets
