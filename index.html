@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="コリドール">
-<meta name="theme-color" content="#020810">
+<meta name="theme-color" content="#faf9f5">
 <meta name="description" content="2人で遊べる戦略ボードゲーム コリドール">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -16,8 +16,24 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <title>コリドール</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@400;600;700;900&family=Zen+Maru+Gothic:wght@400;700;900&family=Zen+Kaku+Gothic+New:wght@400;700&family=DotGothic16&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700&f[]=satoshi@400,500,700&display=swap');
 
+:root {
+  --color-ink: #0b0b0d; --color-ink-muted: #666;
+  --color-cream: #faf9f5; --color-sand: #f0ebe3;
+  --color-green: #2d6a4f; --color-green-light: #40916c;
+  --color-red: #c1272d; --color-red-light: #d64045;
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
+  --radius-xl: 24px; --radius-2xl: 32px;
+  --transition-smooth: 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+  --transition-snappy: 0.2s cubic-bezier(0.17,0.67,0.83,0.67);
+  --bg: #faf9f5; --text: #0b0b0d; --text-dim: #888;
+  --panel-bg: rgba(255,255,255,0.75); --panel-border: rgba(11,11,13,0.08);
+  --p1: #2d6a4f; --p1-light: #40916c; --p2: #c1272d; --p2-light: #d64045;
+  --board-bg: #f0ebe3; --board-border: rgba(11,11,13,0.06);
+  --wall-color: #0b0b0d; --move-color: #2d6a4f; --title-color: #0b0b0d;
+}
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
@@ -30,7 +46,7 @@ html, body {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font);
+  font-family: 'Satoshi', 'Zen Kaku Gothic New', sans-serif;
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -45,293 +61,296 @@ body {
   overflow: hidden;
 }
 
-/* Star field */
+/* Grain texture */
 body::before {
   content: '';
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background:
-    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8), transparent),
-    radial-gradient(1px 1px at 25% 45%, rgba(255,255,255,0.6), transparent),
-    radial-gradient(1px 1px at 40% 15%, rgba(255,255,255,0.5), transparent),
-    radial-gradient(1px 1px at 55% 70%, rgba(255,255,255,0.7), transparent),
-    radial-gradient(1px 1px at 70% 35%, rgba(255,255,255,0.4), transparent),
-    radial-gradient(1px 1px at 85% 80%, rgba(255,255,255,0.6), transparent),
-    radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,0.5), transparent),
-    radial-gradient(1px 1px at 90% 10%, rgba(255,255,255,0.8), transparent),
-    radial-gradient(1px 1px at 33% 33%, rgba(255,255,255,0.7), transparent),
-    radial-gradient(1px 1px at 62% 52%, rgba(255,255,255,0.6), transparent),
-    radial-gradient(2px 2px at 20% 72%, var(--star1), transparent),
-    radial-gradient(2px 2px at 75% 22%, var(--star2), transparent),
-    radial-gradient(2px 2px at 50% 50%, var(--star3), transparent);
-  animation: twinkle 4s ease-in-out infinite alternate;
-  pointer-events: none;
-  z-index: 0;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat; background-size: 256px 256px;
+  opacity: 0.03; pointer-events: none; z-index: 9998;
 }
-@keyframes twinkle { 0% { opacity: 0.7; } 100% { opacity: 1; } }
-
+/* Subtle accent glow */
 body::after {
   content: '';
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background:
-    radial-gradient(ellipse at 15% 50%, var(--nebula1) 0%, transparent 50%),
-    radial-gradient(ellipse at 85% 50%, var(--nebula2) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 0;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at 30% 20%, rgba(45,106,79,0.04) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
 }
 
 #app {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 2px;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px;
   padding: calc(8px + env(safe-area-inset-top)) calc(4px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(4px + env(safe-area-inset-left));
-  width: 100%;
-  max-width: 600px;
-  height: 100vh;
-  height: 100dvh;
-  overflow: visible;
-  position: relative;
-  z-index: 1;
+  width: 100%; max-width: 600px; height: 100vh; height: 100dvh;
+  overflow: visible; position: relative; z-index: 1;
 }
 
 .player-zone { width: 100%; display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
 .player-zone.p2-zone { transform: rotate(180deg); }
 
+/* --- Player Panels --- */
 .player-panel {
-  width: 100%; padding: 8px 12px; border-radius: var(--radius-lg, 16px);
+  width: 100%; padding: 10px 14px; border-radius: var(--radius-lg);
   background: var(--panel-bg); border: 1px solid var(--panel-border);
-  transition: all 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
-  position: relative; overflow: hidden;
+  transition: all var(--transition-smooth); position: relative; overflow: hidden;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
 }
 .player-panel::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0;
-  height: 2px; opacity: 0; transition: opacity 0.4s;
+  content: ''; position: absolute; top: 8px; left: 0; bottom: 8px;
+  width: 3px; border-radius: 0 3px 3px 0; opacity: 0; transition: opacity var(--transition-smooth);
 }
-.player-panel.p1::before { background: linear-gradient(90deg, var(--p1), var(--p1-light), var(--p1)); box-shadow: 0 0 10px var(--p1); }
-.player-panel.p2::before { background: linear-gradient(90deg, var(--p2), var(--p2-light), var(--p2)); box-shadow: 0 0 10px var(--p2); }
+.player-panel.p1::before { background: var(--p1); }
+.player-panel.p2::before { background: var(--p2); }
 .player-panel.active::before { opacity: 1; }
-.player-panel.active.p1 { border-color: var(--p1-dim); box-shadow: 0 0 12px var(--p1-glow); }
-.player-panel.active.p2 { border-color: var(--p2-dim); box-shadow: 0 0 12px var(--p2-glow); }
+.player-panel.active.p1 { border-color: rgba(45,106,79,0.2); box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+.player-panel.active.p2 { border-color: rgba(193,39,45,0.2); box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
 
-.panel-row { display: flex; align-items: center; gap: 6px; }
+.panel-row { display: flex; align-items: center; gap: 8px; }
 .player-icon {
-  width: 24px; height: 24px; border-radius: var(--radius-sm, 8px);
+  width: 28px; height: 28px; border-radius: var(--radius-sm);
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 900; color: white; flex-shrink: 0; letter-spacing: 0;
+  font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+  font-family: 'Clash Display', sans-serif;
 }
-.player-icon.p1 { background: linear-gradient(135deg, var(--p1), var(--p1-light)); box-shadow: 0 0 8px var(--p1-dim); }
-.player-icon.p2 { background: linear-gradient(135deg, var(--p2), var(--p2-light)); box-shadow: 0 0 8px var(--p2-dim); }
-.player-name { font-size: clamp(10px, 2.2vw, 12px); font-weight: 700; color: var(--text-dim); white-space: nowrap; letter-spacing: 2px; text-transform: uppercase; }
+.player-icon.p1 { background: var(--p1); }
+.player-icon.p2 { background: var(--p2); }
+.player-name {
+  font-size: clamp(0.7rem, 2vw, 0.85rem); font-weight: 700; color: var(--text);
+  white-space: nowrap; letter-spacing: 2px; text-transform: uppercase;
+  font-family: 'Clash Display', sans-serif;
+}
 .turn-badge {
-  display: inline-block; font-size: 8px; font-weight: 600; padding: 2px 8px;
-  border-radius: 12px; margin-left: 4px; opacity: 0; transition: opacity 0.2s cubic-bezier(0.17,0.67,0.83,0.67); letter-spacing: 1px; flex-shrink: 0;
+  display: inline-block; font-size: 0.6rem; font-weight: 700; padding: 2px 8px;
+  border-radius: var(--radius-sm); margin-left: 4px; opacity: 0;
+  transition: opacity var(--transition-snappy); letter-spacing: 1px; flex-shrink: 0;
+  font-family: 'Satoshi', sans-serif;
 }
 .player-panel.active .turn-badge { opacity: 1; }
-.player-panel.p1 .turn-badge { background: var(--p1-glow); color: var(--p1-light); border: 1px solid var(--p1-dim); }
-.player-panel.p2 .turn-badge { background: var(--p2-glow); color: var(--p2-light); border: 1px solid var(--p2-dim); }
-.wall-indicators { display: flex; gap: 2px; align-items: center; margin-left: auto; }
-.wall-pip { width: 4px; height: 14px; border-radius: 3px; transition: all 0.2s cubic-bezier(0.17,0.67,0.83,0.67); }
-.player-panel.p1 .wall-pip { background: var(--p1); box-shadow: 0 0 6px var(--p1-dim); }
-.player-panel.p2 .wall-pip { background: var(--p2); box-shadow: 0 0 6px var(--p2-dim); }
-.wall-pip.used { background: rgba(255,255,255,0.06) !important; box-shadow: none !important; }
-.wall-label { font-size: 14px; font-weight: 900; margin-left: 6px; letter-spacing: 1px; }
-.player-panel.p1 .wall-label { color: var(--p1-light); text-shadow: 0 0 8px var(--p1-dim); }
-.player-panel.p2 .wall-label { color: var(--p2-light); text-shadow: 0 0 8px var(--p2-dim); }
-.wall-pip.used + .wall-label { }
-.wall-count-zero .wall-label { color: #ff2222 !important; text-shadow: 0 0 8px rgba(255,0,0,0.3) !important; animation: pulse-urgent 0.5s ease-in-out infinite; }
+.player-panel.p1 .turn-badge { background: rgba(45,106,79,0.1); color: var(--p1); border: none; }
+.player-panel.p2 .turn-badge { background: rgba(193,39,45,0.1); color: var(--p2); border: none; }
 
-.timer-area { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
-.timer-bar-bg { flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.04); overflow: hidden; }
-.timer-bar-fill { height: 100%; border-radius: 1px; transition: width 0.25s linear, background 0.5s; width: 100%; }
-.player-panel.p1 .timer-bar-fill { background: linear-gradient(90deg, var(--p1), var(--p1-light)); box-shadow: 0 0 6px var(--p1-dim); }
-.player-panel.p2 .timer-bar-fill { background: linear-gradient(90deg, var(--p2), var(--p2-light)); box-shadow: 0 0 6px var(--p2-dim); }
-.timer-bar-fill.urgent { background: linear-gradient(90deg, #ff0000, #ff4444) !important; animation: pulse-urgent 0.5s ease-in-out infinite; }
+.wall-indicators { display: flex; gap: 3px; align-items: center; margin-left: auto; }
+.wall-pip {
+  width: 6px; height: 6px; border-radius: 50%;
+  transition: all var(--transition-snappy);
+}
+.player-panel.p1 .wall-pip { background: var(--p1); }
+.player-panel.p2 .wall-pip { background: var(--p2); }
+.wall-pip.used { background: var(--panel-border) !important; opacity: 0.4; }
+.wall-label {
+  font-size: 12px; font-weight: 700; margin-left: 6px; letter-spacing: 1px;
+  font-family: 'Clash Display', sans-serif; color: var(--text-dim);
+}
+.wall-count-zero .wall-label { color: var(--color-red) !important; animation: pulse-urgent 0.5s ease-in-out infinite; }
+
+.timer-area { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+.timer-bar-bg { flex: 1; height: 3px; border-radius: 2px; background: var(--panel-border); overflow: hidden; }
+.timer-bar-fill { height: 100%; border-radius: 2px; transition: width 0.25s linear, background 0.5s; width: 100%; }
+.player-panel.p1 .timer-bar-fill { background: var(--p1); }
+.player-panel.p2 .timer-bar-fill { background: var(--p2); }
+.timer-bar-fill.urgent { background: var(--color-red) !important; animation: pulse-urgent 0.5s ease-in-out infinite; }
 @keyframes pulse-urgent { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-.timer-text { font-size: 10px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 22px; text-align: right; color: #556; transition: color 0.3s; letter-spacing: 1px; }
-.timer-text.urgent { color: #ff2222; }
+.timer-text {
+  font-size: 0.7rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  min-width: 22px; text-align: right; color: var(--text-dim);
+  transition: color 0.3s; letter-spacing: 1px; font-family: 'Satoshi', sans-serif;
+}
+.timer-text.urgent { color: var(--color-red); }
 .player-panel:not(.active) .timer-area { opacity: 0.3; }
 
+/* --- Controls (segmented) --- */
 .controls {
   display: flex; align-items: center; gap: 0; justify-content: center; width: 100%;
-  background: rgba(255,255,255,0.03); border-radius: var(--radius-xl, 24px);
-  padding: 4px; border: 1px solid rgba(255,255,255,0.06);
+  background: var(--panel-bg); border-radius: var(--radius-xl); padding: 4px;
+  border: 1px solid var(--panel-border);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
 .ctrl-btn {
   position: relative; flex: 1; padding: 8px 4px; border: none; border-radius: 20px;
-  background: transparent; color: rgba(255,255,255,0.25);
-  font-family: 'Zen Kaku Gothic New', 'Inter', sans-serif;
-  font-size: 9px; font-weight: 600; cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.17,0.67,0.83,0.67);
-  letter-spacing: 1px;
+  background: transparent; color: var(--text-dim);
+  font-family: 'Satoshi', 'Zen Kaku Gothic New', sans-serif;
+  font-size: 0.7rem; font-weight: 600; cursor: pointer;
+  transition: all var(--transition-snappy); letter-spacing: 1px;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   min-height: 48px; text-align: center;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   overflow: hidden;
 }
 .ctrl-btn svg { flex-shrink: 0; pointer-events: none; }
-.ctrl-label { font-size: 9px; letter-spacing: 1px; opacity: 0.7; pointer-events: none; }
+.ctrl-label { font-size: 0.65rem; letter-spacing: 1px; opacity: 0.6; pointer-events: none; }
 .ctrl-btn:active { transform: scale(0.95); }
-.ctrl-btn.active-move { background: rgba(255,255,255,0.08); color: var(--move-color); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-.ctrl-btn.active-wall { background: rgba(255,255,255,0.08); color: var(--wall-ui-color); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.ctrl-btn.active-move { background: var(--color-green); color: #fff; box-shadow: 0 2px 8px rgba(45,106,79,0.2); }
+.ctrl-btn.active-wall { background: var(--text); color: var(--bg); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .ctrl-btn .kbd { display: none; }
-.ctrl-divider { width: 1px; height: 24px; background: var(--panel-border); margin: 0 1px; }
 .controls.inactive { opacity: 0.2; pointer-events: none; }
 
+/* --- Board --- */
 #board-container {
   position: relative; -webkit-user-select: none; user-select: none; touch-action: none;
   width: 100%; display: flex; justify-content: center; flex: 1; align-items: center; min-height: 0;
 }
 canvas#board {
-  display: block; border-radius: 6px; cursor: pointer;
-  box-shadow: 0 4px 30px rgba(0,0,0,0.6), 0 0 40px var(--board-glow);
+  display: block; border-radius: var(--radius-md); cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
   max-width: 100%; max-height: 100%; touch-action: none;
 }
 
+/* --- Center controls --- */
 .center-controls { display: flex; gap: 8px; align-items: center; justify-content: center; flex-shrink: 0; }
-.sound-btn {
-  width: 32px; height: 32px; border: 1px solid var(--panel-border); border-radius: var(--radius-sm, 8px);
-  background: var(--panel-bg); color: var(--text-dim); font-size: 16px; cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.17,0.67,0.83,0.67); display: flex; align-items: center; justify-content: center;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation; position: relative;
-}
-.sound-btn:active { transform: scale(0.9); }
-.sound-btn.muted { color: #ff2222; }
-
 #reset-btn, #undo-btn {
-  padding: 4px 14px; border: 1px solid var(--panel-border); border-radius: var(--radius-sm, 8px);
+  padding: 6px 16px; border: 1px solid var(--panel-border); border-radius: var(--radius-sm);
   background: var(--panel-bg); color: var(--text-dim);
-  font-family: 'Zen Kaku Gothic New', 'Inter', sans-serif;
-  font-size: 10px; font-weight: 600; cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.17,0.67,0.83,0.67);
+  font-family: 'Satoshi', sans-serif; font-size: 0.7rem; font-weight: 600;
+  cursor: pointer; transition: all var(--transition-snappy);
   -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   min-height: 32px; letter-spacing: 2px; text-transform: uppercase;
+  backdrop-filter: blur(8px);
 }
+#reset-btn:hover, #undo-btn:hover { border-color: var(--text-dim); transform: translateY(-1px); }
 #reset-btn:active, #undo-btn:active { transform: scale(0.95); }
 #undo-btn:disabled { opacity: 0.2; pointer-events: none; }
 
-#message { font-size: 10px; min-height: 14px; text-align: center; color: var(--wall-ui-color); font-weight: 700; letter-spacing: 1px; flex-shrink: 0; }
+#message {
+  font-family: 'Zen Kaku Gothic New', sans-serif; font-size: 0.75rem;
+  min-height: 16px; text-align: center; color: var(--text-dim);
+  font-weight: 600; letter-spacing: 1px; flex-shrink: 0;
+}
 
+/* --- Winner overlay --- */
 .winner-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0);
   display: flex; justify-content: center; align-items: center; z-index: 100;
   pointer-events: none; transition: background 0.8s; overflow: hidden;
 }
-.winner-overlay.show { background: rgba(0,4,12,0.85); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); pointer-events: auto; }
+.winner-overlay.show {
+  background: rgba(11,11,13,0.5);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); pointer-events: auto;
+}
 .winner-box {
-  background: linear-gradient(145deg, rgba(10,20,40,0.95), rgba(5,10,25,0.95));
-  border-radius: var(--radius-2xl, 32px); padding: 40px 32px; text-align: center;
-  border: 1px solid var(--panel-border);
-  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
-  transform: scale(0.5) rotate(-5deg); opacity: 0;
-  transition: all 0.6s cubic-bezier(.2,.8,.3,1.2); margin: 16px; max-width: 340px; width: 90%;
+  background: var(--panel-bg); border-radius: var(--radius-2xl); padding: 48px 32px;
+  text-align: center; border: 1px solid var(--panel-border);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.1);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  transform: scale(0.9) translateY(20px); opacity: 0;
+  transition: all 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+  margin: 16px; max-width: 360px; width: 90%;
 }
-.winner-overlay.show .winner-box { transform: scale(1) rotate(0deg); opacity: 1; }
-.winner-box .trophy { font-size: 64px; margin-bottom: 12px; animation: trophy-bounce 0.8s ease-out 0.5s both; filter: drop-shadow(0 0 20px var(--wall-ui-color)); }
-@keyframes trophy-bounce { 0% { transform: scale(0) rotate(-30deg); } 50% { transform: scale(1.3) rotate(5deg); } 70% { transform: scale(0.9) rotate(-3deg); } 100% { transform: scale(1) rotate(0deg); } }
-.winner-box h2 { font-size: clamp(24px, 6vw, 32px); font-weight: 900; margin-bottom: 6px; letter-spacing: 6px; text-transform: uppercase; }
-.winner-box h2.win-p1 { color: var(--p1-light); text-shadow: 0 0 20px var(--p1-dim), 0 0 40px var(--p1-glow); animation: saber-glow 1.5s ease-in-out infinite alternate; }
-.winner-box h2.win-p2 { color: var(--p2-light); text-shadow: 0 0 20px var(--p2-dim), 0 0 40px var(--p2-glow); animation: saber-glow 1.5s ease-in-out infinite alternate; }
-@keyframes saber-glow { 0% { filter: brightness(1); } 100% { filter: brightness(1.3); } }
-.winner-box .win-label { font-size: clamp(12px, 3vw, 16px); font-weight: 700; margin-bottom: 16px; letter-spacing: 3px; }
-.winner-box p { color: #445566; font-size: 12px; margin-bottom: 24px; letter-spacing: 1px; }
+.winner-overlay.show .winner-box { transform: scale(1) translateY(0); opacity: 1; }
+.winner-box .trophy {
+  font-size: 56px; margin-bottom: 16px;
+  animation: trophy-bounce 0.6s cubic-bezier(0.25,0.46,0.45,0.94) 0.3s both;
+}
+@keyframes trophy-bounce { 0% { transform: scale(0) rotate(-20deg); } 60% { transform: scale(1.15) rotate(3deg); } 100% { transform: scale(1) rotate(0deg); } }
+.winner-box h2 {
+  font-family: 'Clash Display', sans-serif;
+  font-size: clamp(1.8rem, 5vw, 2.5rem); font-weight: 700;
+  margin-bottom: 8px; letter-spacing: 6px; text-transform: uppercase;
+}
+.winner-box h2.win-p1 { color: var(--p1); }
+.winner-box h2.win-p2 { color: var(--p2); }
+.winner-box .win-label { font-size: clamp(0.8rem, 3vw, 1rem); font-weight: 600; margin-bottom: 16px; letter-spacing: 3px; font-family: 'Satoshi', sans-serif; }
+.winner-box p { color: var(--text-dim); font-size: 0.8rem; margin-bottom: 24px; letter-spacing: 1px; }
 .winner-box button {
-  width: 100%; padding: 14px 24px; border: 1px solid rgba(255,255,255,0.08);
-  border-radius: var(--radius-xl, 24px);
-  background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8);
-  font-family: 'Zen Kaku Gothic New', 'Inter', sans-serif;
-  font-size: 13px; font-weight: 600; cursor: pointer; letter-spacing: 2px;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 48px;
-  transition: all 0.2s cubic-bezier(0.17,0.67,0.83,0.67); text-transform: uppercase;
-  position: relative; overflow: hidden;
+  width: 100%; padding: 14px 24px; border: none; border-radius: var(--radius-xl);
+  background: var(--color-green); color: #fff;
+  font-family: 'Satoshi', sans-serif; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; letter-spacing: 2px; text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  min-height: 48px; transition: all var(--transition-smooth);
 }
-.winner-box button:hover { background: rgba(255,255,255,0.1); }
-.winner-box button:active { transform: scale(0.93); }
-.confetti { position: absolute; width: 10px; height: 10px; border-radius: 2px; animation: confetti-fall linear forwards; pointer-events: none; }
+.winner-box button:hover { background: var(--color-green-light); transform: translateY(-2px); }
+.winner-box button:active { transform: scale(0.95); }
+.confetti { position: absolute; width: 7px; height: 7px; border-radius: 2px; animation: confetti-fall linear forwards; pointer-events: none; }
 @keyframes confetti-fall { 0% { transform: translateY(-10px) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
 
+/* --- Start screen --- */
 .start-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg);
   display: flex; justify-content: center; align-items: center; z-index: 200; flex-direction: column;
 }
-.start-box { text-align: center; padding: 20px; animation: fadeInUp 1.5s ease-out; }
-@keyframes fadeInUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
-.start-subtitle { font-size: clamp(10px, 2.5vw, 13px); color: var(--text-dim); letter-spacing: 4px; margin-bottom: 8px; font-weight: 400; }
+.start-box {
+  text-align: center; padding: 20px;
+  animation: fadeInUp 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+@keyframes fadeInUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+.start-subtitle {
+  font-size: clamp(0.65rem, 2vw, 0.8rem); color: var(--text-dim); letter-spacing: 4px;
+  margin-bottom: 8px; font-weight: 400;
+  font-family: 'Zen Kaku Gothic New', sans-serif; font-feature-settings: "palt" 1;
+}
 .start-box h2 {
-  font-size: clamp(28px, 8vw, 44px); font-weight: 900; letter-spacing: clamp(6px, 2vw, 14px);
-  color: var(--title-color); text-shadow: 0 0 30px var(--title-glow);
-  margin-bottom: 8px;
+  font-family: 'Clash Display', sans-serif;
+  font-size: clamp(2.2rem, 7vw, 4rem); font-weight: 600;
+  letter-spacing: clamp(4px, 1.5vw, 12px);
+  color: var(--text); margin-bottom: 4px; line-height: 1.1;
 }
-.start-box .tagline { color: var(--text-dim); font-size: clamp(10px, 2.5vw, 12px); margin-bottom: 40px; letter-spacing: 3px; }
+.start-box .tagline {
+  color: var(--text-dim); font-size: 0.8rem; margin-bottom: 32px;
+  letter-spacing: 4px; text-transform: uppercase; font-family: 'Satoshi', sans-serif;
+}
 .start-box button {
-  width: 100%; max-width: 260px; padding: 14px 32px;
-  border: 1px solid var(--title-glow); border-radius: var(--radius-xl, 24px);
-  background: var(--start-btn-bg, rgba(0,0,0,0.3)); color: var(--title-color); font-family: inherit;
-  font-size: 13px; font-weight: 600; cursor: pointer; letter-spacing: 2px;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 48px;
-  text-transform: uppercase; transition: all 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
-  box-shadow: none; position: relative; overflow: hidden;
+  width: 100%; max-width: 280px; padding: 14px 32px;
+  border: 1px solid var(--panel-border); border-radius: var(--radius-xl);
+  background: var(--panel-bg); color: var(--text);
+  font-family: 'Satoshi', 'Zen Kaku Gothic New', sans-serif;
+  font-size: 0.85rem; font-weight: 600; cursor: pointer; letter-spacing: 2px;
+  text-transform: uppercase; transition: all var(--transition-smooth);
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  min-height: 48px; position: relative; overflow: hidden;
+  backdrop-filter: blur(8px);
 }
-.start-box button::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(255,255,255,0.06); transform: translateX(-100%);
-  transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94); border-radius: inherit;
-}
-.start-box button:hover::before { transform: translateX(0); }
-.start-box button:active { transform: scale(0.95); }
+.start-box button:hover { border-color: var(--p1); transform: translateY(-2px); }
+.start-box button:active { transform: scale(0.97); }
 .hidden { display: none; }
 
-#theme-name {
-  position: fixed; top: 8px; right: 8px; font-size: 8px; color: rgba(255,255,255,0.15);
-  letter-spacing: 2px; z-index: 2; pointer-events: none;
+.name-inputs {
+  display: flex; gap: 12px; justify-content: center; margin-bottom: 24px; width: 100%; max-width: 280px; margin-left: auto; margin-right: auto;
 }
+.name-input {
+  flex: 1; padding: 10px 12px; border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md); background: var(--panel-bg);
+  color: var(--text); font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 0.85rem; font-weight: 500; outline: none; text-align: center;
+  transition: border-color var(--transition-smooth);
+  backdrop-filter: blur(8px);
+}
+.name-input:focus { border-color: var(--p1); }
+.name-input::placeholder { color: var(--text-dim); opacity: 0.5; }
 
 /* Online mode */
 #room-code-input {
-  text-align: center; font-size: 24px; letter-spacing: 6px; width: 140px; padding: 10px;
-  border-radius: var(--radius-md, 12px); border: 1px solid var(--panel-border); background: rgba(10,20,40,0.8);
-  color: var(--title-color); font-family: 'Orbitron', monospace; outline: none;
+  text-align: center; font-size: 1.5rem; letter-spacing: 8px; width: 160px; padding: 12px 16px;
+  border-radius: var(--radius-md); border: 1px solid var(--panel-border);
+  background: var(--panel-bg); color: var(--text);
+  font-family: 'Clash Display', monospace; font-weight: 500; outline: none;
+  backdrop-filter: blur(8px); transition: border-color var(--transition-smooth);
 }
-#room-code-input:focus { border-color: var(--title-color); box-shadow: 0 0 12px var(--title-glow); }
+#room-code-input:focus { border-color: var(--p1); box-shadow: 0 0 0 3px rgba(45,106,79,0.08); }
 .start-box .back-btn {
-  padding: 8px 16px !important; font-size: 11px !important; min-height: 32px !important;
-  letter-spacing: 1px !important; opacity: 0.6; box-shadow: none !important;
+  padding: 8px 16px !important; font-size: 0.75rem !important; min-height: 32px !important;
+  letter-spacing: 1px !important; opacity: 0.5;
 }
 .disconnect-banner {
   position: fixed; top: 0; left: 0; right: 0;
-  background: #e53e3e; color: #fff; text-align: center;
-  padding: 6px; font-size: 12px; z-index: 9999; letter-spacing: 1px;
+  background: var(--color-red); color: #fff; text-align: center;
+  padding: 8px 16px; font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 0.75rem; font-weight: 600; z-index: 9999; letter-spacing: 1px;
 }
 canvas#board.guest-flip { transform: rotate(180deg); }
-
-/* Grain texture overlay */
-#grain-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  pointer-events: none; z-index: 9998; opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat; background-size: 256px 256px;
-}
-
-/* UI font override */
-.ctrl-btn, #reset-btn, #undo-btn, .turn-badge, .wall-label,
-.timer-text, .ctrl-label, #message {
-  font-family: 'Zen Kaku Gothic New', 'Inter', sans-serif;
-}
 </style>
 </head>
 <body>
-
-<div id="theme-name"></div>
 
 <div id="disconnect-banner" class="disconnect-banner" style="display:none">接続が切れました…再接続中</div>
 
 <div class="start-overlay" id="start-overlay">
   <div class="start-box">
-    <div class="start-subtitle" id="start-subtitle"></div>
+    <div class="start-subtitle">戦略ボードゲーム</div>
     <h2>QUORIDOR</h2>
     <p class="tagline">2 PLAYER DUEL</p>
+    <div class="name-inputs">
+      <input type="text" class="name-input" id="name-p1" placeholder="Player 1" maxlength="10">
+      <input type="text" class="name-input" id="name-p2" placeholder="Player 2" maxlength="10">
+    </div>
     <div id="mode-select" style="display:flex;flex-direction:column;align-items:center;gap:8px;">
       <button onclick="startGame()">ローカル対戦</button>
       <button onclick="showOnlineMenu()">オンライン対戦</button>
@@ -351,7 +370,7 @@ canvas#board.guest-flip { transform: rotate(180deg); }
     </div>
     <div id="waiting-room" style="display:none">
       <p style="font-size:14px;letter-spacing:2px;color:var(--text-dim)">ルームコード</p>
-      <p id="display-room-code" style="font-size:32px;font-weight:900;letter-spacing:8px;margin:8px 0;color:var(--title-color);text-shadow:0 0 20px var(--title-glow)"></p>
+      <p id="display-room-code" style="font-size:32px;font-weight:900;letter-spacing:8px;margin:8px 0;color:var(--text);font-family:'Clash Display',sans-serif"></p>
       <p style="font-size:11px;color:var(--text-dim);letter-spacing:1px">相手の参加を待っています...</p>
       <div style="margin-top:12px"><button onclick="cancelRoom()">キャンセル</button></div>
     </div>
@@ -386,7 +405,6 @@ canvas#board.guest-flip { transform: rotate(180deg); }
   <div id="message"></div>
 
   <div class="center-controls">
-    <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="BGM ON/OFF">&#9835;</button>
     <button id="undo-btn" onclick="undo()" disabled>UNDO</button>
     <button id="reset-btn" onclick="resetGame()">RESET</button>
   </div>
@@ -423,7 +441,7 @@ canvas#board.guest-flip { transform: rotate(180deg); }
     </div>
     <div id="winner-btns-online" style="display:none">
       <button onclick="requestRematch()">もう一度</button>
-      <button onclick="exitOnlineGame()" style="margin-top:8px;background:linear-gradient(135deg,rgba(150,0,0,0.4),rgba(200,0,0,0.3));color:#ff8888;border-color:rgba(255,100,100,0.3)">退出</button>
+      <button onclick="exitOnlineGame()" style="margin-top:8px;background:var(--color-red);color:#fff;">退出</button>
       <p id="rematch-status" style="font-size:11px;color:var(--text-dim);margin-top:10px;letter-spacing:1px"></p>
     </div>
   </div>
@@ -453,353 +471,22 @@ var stateListener = null;
 var presenceListener = null;
 var myUid = null;
 
-// ============ THEME SYSTEM ============
-var THEMES = [
-  { // Sunday - EVANGELION
-    name: 'EVANGELION', subtitle: '\u4f7f\u5f92\u3001\u8972\u6765', p1name: '\u521d\u53f7\u6a5f', p2name: '\u5f10\u53f7\u6a5f', winMsg: '\u30d1\u30bf\u30fc\u30f3\u9752\uff01\u5168\u54e1\u64a4\u9000\uff01',
-    font: "'Orbitron', 'Inter', sans-serif",
-    bg: '#050008', star1: 'rgba(180,0,255,0.8)', star2: 'rgba(0,255,100,0.7)', star3: 'rgba(255,100,0,0.6)',
-    nebula1: 'rgba(100,0,200,0.06)', nebula2: 'rgba(0,200,50,0.04)',
-    p1: '#7b2d8e', p1Light: '#c466ff', p2: '#cc3300', p2Light: '#ff6644',
-    wallColor: [0,255,100], boardBg1: '#0a0014', boardBg2: '#0c0020', boardBg3: '#06000e',
-    cellFill: 'rgba(40,0,60,0.3)', cellStroke: 'rgba(100,0,200,0.1)',
-    moveColor: 'rgba(0,255,150,', validDot: 'rgba(0,255,150,0.5)',
-    title: '#00ff88', confetti: ['#7b2d8e','#c466ff','#cc3300','#ff6644','#00ff88','#ff00ff','#ffcc00','#ffffff'],
-    bgm: {
-      melody: [
-        // A section
-        {n:'A3',d:1},{n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:1},{n:'B3',d:0.5},{n:'C4',d:0.5},
-        {n:'A3',d:1.5},{n:'A3',d:0.5},{n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:0.5},{n:'B3',d:0.5},
-        {n:'A3',d:0.75},{n:'G3',d:0.75},{n:'A3',d:1.5},
-        // B section
-        {n:'E4',d:1},{n:'F4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:1},{n:'C4',d:0.5},{n:'D4',d:0.5},
-        {n:'E4',d:1.5},{n:'E4',d:0.5},{n:'A4',d:0.5},{n:'G4',d:0.5},{n:'F4',d:0.5},{n:'E4',d:0.5},
-        {n:'D4',d:0.75},{n:'C4',d:0.75},{n:'D4',d:1.5},
-        // A' section (variation)
-        {n:'A3',d:1},{n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:0.75},{n:'D4',d:0.25},{n:'B3',d:0.5},{n:'C4',d:0.5},
-        {n:'A3',d:1},{n:'E4',d:0.5},{n:'F4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:0.5},{n:'B3',d:0.5},
-        {n:'A3',d:1},{n:'G3',d:0.5},{n:'A3',d:1.5},
-        // C section (climax)
-        {n:'A4',d:1},{n:'G4',d:0.5},{n:'F4',d:0.5},{n:'E4',d:1},{n:'D4',d:0.5},{n:'E4',d:0.5},
-        {n:'C4',d:1},{n:'B3',d:0.5},{n:'A3',d:0.5},{n:'G3',d:0.5},{n:'A3',d:0.5},{n:'B3',d:0.5},{n:'C4',d:0.5},
-        {n:'A3',d:2}
-      ],
-      bass: [
-        {n:'A2',d:2},{n:'C3',d:2},{n:'A2',d:2},{n:'A2',d:2},{n:'C3',d:1},{n:'D3',d:1},{n:'A2',d:2},
-        {n:'E2',d:2},{n:'F2',d:2},{n:'E2',d:2},{n:'A2',d:2},{n:'D3',d:1},{n:'C3',d:1},{n:'D3',d:2},
-        {n:'A2',d:2},{n:'C3',d:2},{n:'A2',d:2},{n:'E2',d:2},{n:'A2',d:1},{n:'G2',d:1},{n:'A2',d:2},
-        {n:'A2',d:2},{n:'F2',d:2},{n:'E2',d:2},{n:'A2',d:1},{n:'G2',d:1},{n:'A2',d:2}
-      ],
-      tempo: 0.42, type: 'sawtooth'
-    }
-  },
-  { // Monday - DORAEMON
-    name: 'DORAEMON', subtitle: '\u3072\u307f\u3064\u9053\u5177\u3067\u52dd\u8ca0\uff01', p1name: '\u30c9\u30e9\u3048\u3082\u3093', p2name: '\u306e\u3073\u592a', winMsg: '\u672a\u6765\u304b\u3089\u6765\u305f\u52dd\u5229\uff01',
-    font: "'Zen Maru Gothic', 'Inter', sans-serif",
-    bg: '#001428', star1: 'rgba(100,180,255,0.7)', star2: 'rgba(255,255,150,0.6)', star3: 'rgba(200,200,255,0.5)',
-    nebula1: 'rgba(0,80,200,0.06)', nebula2: 'rgba(0,150,255,0.04)',
-    p1: '#0066cc', p1Light: '#44aaff', p2: '#cc2200', p2Light: '#ff5533',
-    wallColor: [255,220,0], boardBg1: '#001830', boardBg2: '#002040', boardBg3: '#001020',
-    cellFill: 'rgba(0,30,80,0.3)', cellStroke: 'rgba(0,80,200,0.1)',
-    moveColor: 'rgba(255,220,50,', validDot: 'rgba(255,220,50,0.5)',
-    title: '#44aaff', confetti: ['#0066cc','#44aaff','#cc2200','#ff5533','#ffdd00','#ffffff','#ff8800','#88ddff'],
-    bgm: {
-      melody: [
-        // A section
-        {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.75},{n:'E4',d:0.25},
-        {n:'F4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:1},
-        {n:'C4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:0.75},{n:'G4',d:0.25},
-        {n:'F4',d:0.5},{n:'E4',d:0.5},{n:'C4',d:1},
-        // B section
-        {n:'G4',d:0.5},{n:'A4',d:0.5},{n:'G4',d:0.5},{n:'E4',d:0.75},{n:'D4',d:0.25},
-        {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:1},
-        {n:'F4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:0.75},{n:'D4',d:0.25},
-        {n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:1},
-        // A' section
-        {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.5},
-        {n:'A4',d:0.5},{n:'G4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:0.5},
-        {n:'C4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:0.5},
-        {n:'G4',d:0.5},{n:'F4',d:0.5},{n:'E4',d:0.5},{n:'C4',d:0.5},
-        // C section
-        {n:'A4',d:0.75},{n:'G4',d:0.25},{n:'E4',d:0.5},{n:'D4',d:0.5},
-        {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.5},
-        {n:'A4',d:0.75},{n:'G4',d:0.75},{n:'E4',d:0.5},
-        {n:'D4',d:0.5},{n:'C4',d:1.5}
-      ],
-      bass: [
-        {n:'C3',d:2},{n:'F3',d:2},{n:'C3',d:2},{n:'G2',d:1},{n:'C3',d:1},
-        {n:'E3',d:2},{n:'A2',d:2},{n:'F3',d:2},{n:'G2',d:1},{n:'C3',d:1},
-        {n:'C3',d:2},{n:'F3',d:2},{n:'C3',d:2},{n:'G2',d:1},{n:'C3',d:1},
-        {n:'A2',d:2},{n:'F3',d:2},{n:'G2',d:2},{n:'C3',d:2}
-      ],
-      tempo: 0.38, type: 'triangle'
-    }
-  },
-  { // Tuesday - ANPANMAN
-    name: 'ANPANMAN', subtitle: '\u52c7\u6c17\u3068\u3084\u3055\u3057\u3055\u306e\u6226\u3044', p1name: '\u30a2\u30f3\u30d1\u30f3\u30de\u30f3', p2name: '\u30d0\u30a4\u30ad\u30f3\u30de\u30f3', winMsg: '\u611b\u3068\u52c7\u6c17\u306e\u52dd\u5229\uff01',
-    font: "'Zen Maru Gothic', 'Inter', sans-serif",
-    bg: '#1a0800', star1: 'rgba(255,200,100,0.8)', star2: 'rgba(255,150,50,0.7)', star3: 'rgba(255,220,180,0.6)',
-    nebula1: 'rgba(255,80,0,0.05)', nebula2: 'rgba(200,100,0,0.04)',
-    p1: '#cc4400', p1Light: '#ff7733', p2: '#6622aa', p2Light: '#9955dd',
-    wallColor: [255,180,60], boardBg1: '#1a0c04', boardBg2: '#201008', boardBg3: '#140a02',
-    cellFill: 'rgba(60,30,10,0.3)', cellStroke: 'rgba(150,60,20,0.1)',
-    moveColor: 'rgba(255,200,100,', validDot: 'rgba(255,200,100,0.5)',
-    title: '#ff8833', confetti: ['#cc4400','#ff7733','#6622aa','#9955dd','#ffcc00','#ffffff','#ff4400','#88ff44'],
-    bgm: {
-      melody: [
-        // A section
-        {n:'F4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:1},{n:'G4',d:0.5},{n:'F4',d:0.5},
-        {n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:1},
-        {n:'D4',d:0.5},{n:'E4',d:0.5},{n:'F4',d:0.75},{n:'E4',d:0.25},{n:'D4',d:0.5},{n:'E4',d:0.5},
-        {n:'C4',d:1.5},
-        // B section
-        {n:'A4',d:0.5},{n:'G4',d:0.5},{n:'F4',d:0.5},{n:'E4',d:0.5},
-        {n:'D4',d:0.5},{n:'E4',d:0.5},{n:'F4',d:1},
-        {n:'G4',d:0.5},{n:'A4',d:0.5},{n:'G4',d:0.75},{n:'F4',d:0.25},{n:'E4',d:0.5},{n:'D4',d:0.5},
-        {n:'C4',d:1.5},
-        // A' section
-        {n:'F4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:0.75},{n:'G4',d:0.25},{n:'F4',d:0.5},{n:'E4',d:0.5},
-        {n:'D4',d:0.5},{n:'C4',d:0.5},{n:'D4',d:1},
-        {n:'E4',d:0.5},{n:'F4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:0.5},{n:'G4',d:0.5},{n:'F4',d:0.5},
-        {n:'E4',d:0.5},{n:'C4',d:1.5},
-        // C section (climax)
-        {n:'A4',d:1},{n:'G4',d:0.5},{n:'A4',d:0.5},{n:'F4',d:1},
-        {n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'F4',d:0.5},
-        {n:'E4',d:0.5},{n:'D4',d:0.5},{n:'C4',d:2}
-      ],
-      bass: [
-        {n:'F2',d:2},{n:'C3',d:2},{n:'D3',d:2},{n:'C3',d:2},
-        {n:'A2',d:2},{n:'D3',d:2},{n:'G2',d:2},{n:'C3',d:2},
-        {n:'F2',d:2},{n:'C3',d:2},{n:'D3',d:2},{n:'E3',d:1},{n:'C3',d:1},
-        {n:'F2',d:2},{n:'G2',d:2},{n:'C3',d:2},{n:'C3',d:2}
-      ],
-      tempo: 0.35, type: 'triangle'
-    }
-  },
-  { // Wednesday - STAR WARS
-    name: 'GALACTIC EMPIRE', subtitle: 'A GALACTIC STRATEGY GAME', p1name: 'SITH', p2name: 'JEDI', winMsg: 'THE FORCE IS STRONG',
-    font: "'Orbitron', 'Inter', sans-serif",
-    bg: '#020810', star1: 'rgba(150,180,255,0.8)', star2: 'rgba(255,200,150,0.7)', star3: 'rgba(200,150,255,0.6)',
-    nebula1: 'rgba(255,0,0,0.04)', nebula2: 'rgba(0,100,255,0.04)',
-    p1: '#cc0000', p1Light: '#ff4444', p2: '#0044cc', p2Light: '#44aaff',
-    wallColor: [255,200,0], boardBg1: '#080c18', boardBg2: '#0a1020', boardBg3: '#060a14',
-    cellFill: 'rgba(30,50,80,0.25)', cellStroke: 'rgba(60,100,180,0.08)',
-    moveColor: 'rgba(0,255,100,', validDot: 'rgba(0,255,100,0.4)',
-    title: '#ffcc00', confetti: ['#ff0000','#ff4444','#0066ff','#44aaff','#ffcc00','#ffffff','#ff6600','#00ff88'],
-    bgm: {
-      melody: [
-        // A section (Imperial March theme)
-        {n:'G3',d:0.75},{n:'G3',d:0.75},{n:'G3',d:0.75},
-        {n:'Eb3',d:0.5},{n:'Bb3',d:0.25},
-        {n:'G3',d:0.75},{n:'Eb3',d:0.5},{n:'Bb3',d:0.25},
-        {n:'G3',d:1.5},
-        {n:'D4',d:0.75},{n:'D4',d:0.75},{n:'D4',d:0.75},
-        {n:'Eb4',d:0.5},{n:'Bb3',d:0.25},
-        {n:'F#3',d:0.75},{n:'Eb3',d:0.5},{n:'Bb3',d:0.25},
-        {n:'G3',d:1.5},
-        // B section
-        {n:'G4',d:0.75},{n:'G3',d:0.5},{n:'G3',d:0.25},
-        {n:'G4',d:0.75},{n:'F#4',d:0.5},{n:'F4',d:0.25},
-        {n:'E4',d:0.25},{n:'Eb4',d:0.25},{n:'E4',d:0.5},
-        {n:'A3',d:0.5},{n:'D4',d:0.75},
-        {n:'C4',d:0.5},{n:'B3',d:0.25},
-        {n:'Bb3',d:0.25},{n:'A3',d:0.25},{n:'Bb3',d:0.5},
-        {n:'Eb3',d:0.5},{n:'F#3',d:0.75},
-        {n:'Eb3',d:0.5},{n:'Bb3',d:0.25},{n:'G3',d:1.5},
-        // A' section (reprise)
-        {n:'G3',d:0.75},{n:'G3',d:0.75},{n:'G3',d:0.75},
-        {n:'Eb3',d:0.5},{n:'Bb3',d:0.25},
-        {n:'G3',d:0.75},{n:'Eb3',d:0.5},{n:'Bb3',d:0.25},
-        {n:'G3',d:1.5}
-      ],
-      bass: [
-        {n:'G2',d:3},{n:'Eb2',d:1.5},{n:'G2',d:1.5},
-        {n:'G2',d:3},
-        {n:'D3',d:3},{n:'Eb3',d:1.5},{n:'Bb2',d:1.5},
-        {n:'G2',d:3},
-        {n:'G2',d:1.5},{n:'G2',d:1.5},{n:'G2',d:1.5},{n:'A2',d:1.5},
-        {n:'D3',d:1.5},{n:'Eb3',d:1.5},{n:'Bb2',d:1.5},{n:'G2',d:1.5},
-        {n:'G2',d:3},{n:'Eb2',d:1.5},{n:'G2',d:1.5},
-        {n:'G2',d:3}
-      ],
-      tempo: 0.45, type: 'sawtooth'
-    }
-  },
-  { // Thursday - DRAGON BALL
-    name: 'DRAGON BALL', subtitle: '\u30aa\u30e9\u306b\u5143\u6c17\u3092\u308f\u3051\u3066\u304f\u308c\uff01', p1name: '\u609f\u7a7a', p2name: '\u30d9\u30b8\u30fc\u30bf', winMsg: '\u30ab\u30e1\u30cf\u30e1\u6ce2\uff01\uff01\uff01',
-    font: "'Orbitron', 'Inter', sans-serif",
-    bg: '#0a0400', star1: 'rgba(255,200,50,0.8)', star2: 'rgba(100,200,255,0.7)', star3: 'rgba(255,150,0,0.6)',
-    nebula1: 'rgba(255,150,0,0.05)', nebula2: 'rgba(0,100,255,0.04)',
-    p1: '#dd8800', p1Light: '#ffbb33', p2: '#0055bb', p2Light: '#3399ee',
-    wallColor: [255,100,0], boardBg1: '#100800', boardBg2: '#180c04', boardBg3: '#0c0600',
-    cellFill: 'rgba(60,30,0,0.3)', cellStroke: 'rgba(150,80,0,0.1)',
-    moveColor: 'rgba(255,220,50,', validDot: 'rgba(255,220,50,0.5)',
-    title: '#ffaa00', confetti: ['#dd8800','#ffbb33','#0055bb','#3399ee','#ff4400','#ffff00','#ff6600','#ffffff'],
-    bgm: {
-      melody: [
-        // A section
-        {n:'E4',d:0.5},{n:'E4',d:0.25},{n:'E4',d:0.25},{n:'G4',d:0.5},{n:'E4',d:0.5},
-        {n:'D4',d:0.5},{n:'C4',d:0.5},{n:'D4',d:1},
-        {n:'E4',d:0.5},{n:'G4',d:0.5},{n:'A4',d:0.5},{n:'G4',d:0.25},{n:'E4',d:0.25},
-        {n:'D4',d:0.5},{n:'E4',d:0.5},{n:'C4',d:1},
-        // B section
-        {n:'G4',d:0.5},{n:'G4',d:0.25},{n:'A4',d:0.25},{n:'G4',d:0.5},{n:'E4',d:0.5},
-        {n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:1},
-        {n:'A4',d:0.5},{n:'G4',d:0.25},{n:'E4',d:0.25},{n:'D4',d:0.5},{n:'C4',d:0.5},
-        {n:'D4',d:0.5},{n:'E4',d:0.5},{n:'C4',d:1},
-        // A' section
-        {n:'E4',d:0.5},{n:'E4',d:0.25},{n:'E4',d:0.25},{n:'G4',d:0.5},{n:'A4',d:0.5},
-        {n:'G4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:1},
-        {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.25},{n:'E4',d:0.25},
-        {n:'D4',d:0.5},{n:'C4',d:0.5},{n:'D4',d:1},
-        // C section (power-up)
-        {n:'A4',d:0.5},{n:'A4',d:0.25},{n:'G4',d:0.25},{n:'A4',d:0.5},{n:'G4',d:0.5},
-        {n:'E4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.5},
-        {n:'A4',d:0.5},{n:'G4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:0.5},
-        {n:'C4',d:1},{n:'C4',d:1}
-      ],
-      bass: [
-        {n:'C3',d:1},{n:'C3',d:1},{n:'G2',d:2},{n:'C3',d:1},{n:'E3',d:1},{n:'G2',d:1},{n:'C3',d:1},
-        {n:'E3',d:1},{n:'E3',d:1},{n:'C3',d:2},{n:'A2',d:1},{n:'C3',d:1},{n:'G2',d:1},{n:'C3',d:1},
-        {n:'C3',d:1},{n:'C3',d:1},{n:'G2',d:2},{n:'C3',d:1},{n:'E3',d:1},{n:'G2',d:1},{n:'C3',d:1},
-        {n:'A2',d:2},{n:'C3',d:1},{n:'E3',d:1},{n:'G2',d:2},{n:'C3',d:2}
-      ],
-      tempo: 0.32, type: 'sawtooth'
-    }
-  },
-  { // Friday - MARIO
-    name: 'SUPER MARIO', subtitle: "IT'S-A ME, QUORIDOR!", p1name: 'MARIO', p2name: 'LUIGI', winMsg: 'HERE WE GO!!',
-    font: "'DotGothic16', 'Inter', sans-serif",
-    bg: '#000820', star1: 'rgba(255,200,50,0.8)', star2: 'rgba(100,255,100,0.7)', star3: 'rgba(255,100,100,0.6)',
-    nebula1: 'rgba(200,0,0,0.05)', nebula2: 'rgba(0,150,0,0.04)',
-    p1: '#cc0000', p1Light: '#ff4444', p2: '#008800', p2Light: '#44cc44',
-    wallColor: [255,200,0], boardBg1: '#001030', boardBg2: '#001840', boardBg3: '#000820',
-    cellFill: 'rgba(0,20,60,0.3)', cellStroke: 'rgba(50,100,200,0.1)',
-    moveColor: 'rgba(255,255,0,', validDot: 'rgba(255,255,0,0.5)',
-    title: '#ff4444', confetti: ['#cc0000','#ff4444','#008800','#44cc44','#ffcc00','#ffffff','#ff8800','#00aaff'],
-    bgm: {
-      melody: [
-        // A section (overworld)
-        {n:'E5',d:0.25},{n:'E5',d:0.25},{n:'E5',d:0.5},{n:'C5',d:0.25},{n:'E5',d:0.25},
-        {n:'G5',d:0.5},{n:'G4',d:0.5},
-        {n:'C5',d:0.5},{n:'G4',d:0.5},{n:'E4',d:0.5},
-        {n:'A4',d:0.5},{n:'B4',d:0.5},{n:'Bb4',d:0.25},{n:'A4',d:0.75},
-        {n:'G4',d:0.33},{n:'E5',d:0.33},{n:'G5',d:0.34},{n:'A5',d:0.5},{n:'F5',d:0.25},{n:'G5',d:0.25},
-        {n:'E5',d:0.5},{n:'C5',d:0.25},{n:'D5',d:0.25},{n:'B4',d:0.5},
-        // B section
-        {n:'C5',d:0.5},{n:'G4',d:0.5},{n:'E4',d:0.5},
-        {n:'A4',d:0.5},{n:'B4',d:0.5},{n:'Bb4',d:0.25},{n:'A4',d:0.75},
-        {n:'G4',d:0.33},{n:'E5',d:0.33},{n:'G5',d:0.34},{n:'A5',d:0.5},{n:'F5',d:0.25},{n:'G5',d:0.25},
-        {n:'E5',d:0.5},{n:'C5',d:0.25},{n:'D5',d:0.25},{n:'B4',d:0.5},
-        // C section (underground riff)
-        {n:'C4',d:0.25},{n:'C4',d:0.25},{n:'C4',d:0.25},{n:'C4',d:0.25},{n:'D4',d:0.25},{n:'E4',d:0.25},{n:'C4',d:0.25},{n:'A3',d:0.25},
-        {n:'G3',d:0.5},{n:'G4',d:0.5},{n:'A4',d:0.5},{n:'F4',d:0.25},{n:'G4',d:0.25},
-        {n:'E4',d:0.5},{n:'C4',d:0.5},{n:'D4',d:0.25},{n:'B3',d:0.25},{n:'C4',d:0.5},
-        // A' section (reprise)
-        {n:'E5',d:0.25},{n:'E5',d:0.25},{n:'E5',d:0.5},{n:'C5',d:0.25},{n:'E5',d:0.25},
-        {n:'G5',d:0.5},{n:'G4',d:0.5},
-        {n:'C5',d:0.5},{n:'G4',d:0.5},{n:'E4',d:0.5},
-        {n:'A4',d:0.5},{n:'B4',d:0.5},{n:'A4',d:0.5},{n:'G4',d:0.5},
-        {n:'C5',d:1}
-      ],
-      bass: [
-        {n:'C3',d:1},{n:'G3',d:0.5},{n:'E3',d:0.5},{n:'C3',d:1},{n:'G2',d:1},
-        {n:'C3',d:1},{n:'F3',d:1},{n:'G3',d:1},{n:'C3',d:1},
-        {n:'C3',d:1},{n:'F3',d:1},{n:'G3',d:1},{n:'C3',d:1},
-        {n:'C3',d:1},{n:'G3',d:0.5},{n:'E3',d:0.5},{n:'C3',d:1},{n:'G2',d:1},
-        {n:'A2',d:1},{n:'E3',d:1},{n:'G3',d:1},{n:'C3',d:1},
-        {n:'F2',d:1},{n:'C3',d:1},{n:'G2',d:1},{n:'C3',d:1},
-        {n:'C3',d:1},{n:'G3',d:0.5},{n:'E3',d:0.5},{n:'C3',d:1},{n:'G2',d:1},
-        {n:'F2',d:1},{n:'G2',d:1},{n:'C3',d:2}
-      ],
-      tempo: 0.28, type: 'square'
-    }
-  },
-  { // Saturday - JUJUTSU KAISEN
-    name: 'JUJUTSU KAISEN', subtitle: '\u9818\u57df\u5c55\u958b', p1name: '\u864e\u6756', p2name: '\u5bbf\u5102', winMsg: '\u7121\u91cf\u7a7a\u51e6\uff01\uff01',
-    font: "'Orbitron', 'Inter', sans-serif",
-    bg: '#080010', star1: 'rgba(200,100,255,0.8)', star2: 'rgba(255,50,100,0.7)', star3: 'rgba(100,50,200,0.6)',
-    nebula1: 'rgba(100,0,200,0.06)', nebula2: 'rgba(200,0,50,0.04)',
-    p1: '#1a1aff', p1Light: '#6666ff', p2: '#cc0044', p2Light: '#ff4477',
-    wallColor: [180,80,255], boardBg1: '#0a0018', boardBg2: '#0e0024', boardBg3: '#060010',
-    cellFill: 'rgba(30,0,50,0.3)', cellStroke: 'rgba(80,0,150,0.1)',
-    moveColor: 'rgba(180,100,255,', validDot: 'rgba(180,100,255,0.5)',
-    title: '#bb66ff', confetti: ['#1a1aff','#6666ff','#cc0044','#ff4477','#bb66ff','#ffffff','#ff0066','#00ccff'],
-    bgm: {
-      melody: [
-        // A section (dark, tense)
-        {n:'E3',d:0.5},{n:'G3',d:0.25},{n:'A3',d:0.25},{n:'B3',d:0.5},{n:'D4',d:0.5},
-        {n:'C4',d:0.5},{n:'B3',d:0.25},{n:'A3',d:0.25},{n:'G3',d:1},
-        {n:'A3',d:0.5},{n:'B3',d:0.5},{n:'C4',d:0.5},{n:'E4',d:0.5},
-        {n:'D4',d:0.5},{n:'C4',d:0.25},{n:'B3',d:0.25},{n:'A3',d:0.5},{n:'E3',d:0.5},
-        // B section (domain expansion)
-        {n:'E4',d:0.5},{n:'D4',d:0.25},{n:'E4',d:0.25},{n:'G4',d:0.5},{n:'E4',d:0.5},
-        {n:'D4',d:0.5},{n:'C4',d:0.5},{n:'B3',d:1},
-        {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'G4',d:0.5},
-        {n:'A4',d:0.5},{n:'G4',d:0.25},{n:'E4',d:0.25},{n:'D4',d:0.5},{n:'E4',d:0.5},
-        // A' section (variation)
-        {n:'E3',d:0.5},{n:'G3',d:0.25},{n:'A3',d:0.25},{n:'B3',d:0.5},{n:'D4',d:0.5},
-        {n:'E4',d:0.5},{n:'D4',d:0.25},{n:'C4',d:0.25},{n:'B3',d:1},
-        {n:'A3',d:0.5},{n:'B3',d:0.5},{n:'C4',d:0.5},{n:'D4',d:0.5},
-        {n:'E4',d:0.5},{n:'D4',d:0.25},{n:'C4',d:0.25},{n:'B3',d:0.5},{n:'A3',d:0.5},
-        // C section (cursed energy)
-        {n:'G4',d:0.5},{n:'E4',d:0.25},{n:'D4',d:0.25},{n:'E4',d:0.5},{n:'B3',d:0.5},
-        {n:'C4',d:0.5},{n:'D4',d:0.5},{n:'E4',d:0.5},{n:'D4',d:0.5},
-        {n:'C4',d:0.5},{n:'B3',d:0.5},{n:'A3',d:0.5},{n:'G3',d:0.5},
-        {n:'A3',d:0.5},{n:'E3',d:0.5},{n:'E3',d:1}
-      ],
-      bass: [
-        {n:'E2',d:2},{n:'A2',d:2},{n:'E2',d:1},{n:'G2',d:1},{n:'A2',d:1},{n:'E2',d:1},
-        {n:'C3',d:2},{n:'G2',d:2},{n:'A2',d:2},{n:'E2',d:1},{n:'A2',d:1},
-        {n:'E2',d:2},{n:'A2',d:2},{n:'E2',d:1},{n:'G2',d:1},{n:'A2',d:1},{n:'E2',d:1},
-        {n:'E2',d:2},{n:'A2',d:1},{n:'G2',d:1},{n:'E2',d:2},{n:'E2',d:2}
-      ],
-      tempo: 0.38, type: 'sawtooth'
-    }
-  }
-];
+// ============ DESIGN ============
+var T = {
+  p1name: 'Player 1', p2name: 'Player 2',
+  winMsg: 'WELL PLAYED',
+  p1: '#2d6a4f', p1Light: '#40916c',
+  p2: '#c1272d', p2Light: '#d64045',
+  wallColor: [11,11,13],
+  boardBg: '#f0ebe3',
+  cellFill: 'rgba(11,11,13,0.03)', cellStroke: 'rgba(11,11,13,0.06)',
+  moveColor: 'rgba(45,106,79,', validDot: 'rgba(45,106,79,0.4)',
+  confetti: ['#2d6a4f','#40916c','#c1272d','#d64045','#f0ebe3','#0b0b0d','#e8c547','#4a90d9']
+};
 
-var T; // current theme object
 function applyTheme() {
-  var day = new Date().getDay(); // 0=Sun ... 6=Sat
-  T = THEMES[day];
-  var s = document.documentElement.style;
-  s.setProperty('--bg', T.bg);
-  s.setProperty('--font', T.font);
-  s.setProperty('--text', '#c0d0e8');
-  s.setProperty('--text-dim', '#556688');
-  s.setProperty('--panel-bg', 'rgba(10,20,40,0.7)');
-  s.setProperty('--panel-border', 'rgba(100,150,255,0.1)');
-  s.setProperty('--p1', T.p1); s.setProperty('--p1-light', T.p1Light);
-  s.setProperty('--p1-dim', T.p1 + '4d'); s.setProperty('--p1-glow', T.p1 + '14');
-  s.setProperty('--p2', T.p2); s.setProperty('--p2-light', T.p2Light);
-  s.setProperty('--p2-dim', T.p2 + '4d'); s.setProperty('--p2-glow', T.p2 + '14');
-  s.setProperty('--move-color', T.moveColor + '1)'); s.setProperty('--move-bg', T.moveColor + '0.06)'); s.setProperty('--move-glow', T.moveColor + '0.08)');
-  var wc = T.wallColor;
-  s.setProperty('--wall-ui-color', 'rgb('+wc[0]+','+wc[1]+','+wc[2]+')');
-  s.setProperty('--wall-ui-bg', 'rgba('+wc[0]+','+wc[1]+','+wc[2]+',0.06)');
-  s.setProperty('--wall-ui-glow', 'rgba('+wc[0]+','+wc[1]+','+wc[2]+',0.08)');
-  s.setProperty('--msg-color', '#ff6644');
-  s.setProperty('--board-glow', 'rgba(0,50,150,0.06)');
-  // winner-box and btn backgrounds are hardcoded in CSS (gradients in variables can fail in some browsers)
-  s.setProperty('--title-color', T.title);
-  s.setProperty('--title-glow', T.title + '33');
-  s.setProperty('--start-btn-bg', 'linear-gradient(135deg, ' + T.title + '26, ' + T.title + '1a)');
-  s.setProperty('--radius-sm', '8px');
-  s.setProperty('--radius-md', '12px');
-  s.setProperty('--radius-lg', '16px');
-  s.setProperty('--radius-xl', '24px');
-  s.setProperty('--radius-2xl', '32px');
-  s.setProperty('--transition-smooth', '0.4s cubic-bezier(0.25,0.46,0.45,0.94)');
-  s.setProperty('--transition-snappy', '0.2s cubic-bezier(0.17,0.67,0.83,0.67)');
-  s.setProperty('--star1', T.star1); s.setProperty('--star2', T.star2); s.setProperty('--star3', T.star3);
-  s.setProperty('--nebula1', T.nebula1); s.setProperty('--nebula2', T.nebula2);
-  document.getElementById('theme-name').textContent = T.name;
-  document.getElementById('start-subtitle').textContent = T.subtitle;
   document.getElementById('p1-name').textContent = T.p1name;
   document.getElementById('p2-name').textContent = T.p2name;
-  document.getElementById('winner-msg').textContent = T.winMsg;
-  document.body.style.fontFamily = T.font;
 }
 applyTheme();
 
@@ -858,64 +545,17 @@ function resizeBoard() {
   draw();
 }
 
-// ============ AUDIO ENGINE ============
-var audioCtx = null, bgmPlaying = false, bgmMuted = false, bgmGain = null, bgmTimeout = null;
+// ============ AUDIO ENGINE (SFX only) ============
+var audioCtx = null;
 
 function initAudio() {
   try {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    bgmGain = audioCtx.createGain();
-    bgmGain.gain.value = 0.18;
-    bgmGain.connect(audioCtx.destination);
   } catch (e) { audioCtx = null; }
 }
 
 function ensureAudioResumed() { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }
-
-function playNote(freq, startTime, duration, gain, dest, type) {
-  if (!audioCtx) return;
-  var osc = audioCtx.createOscillator();
-  var env = audioCtx.createGain();
-  osc.type = type || 'sine';
-  osc.frequency.value = freq;
-  env.gain.setValueAtTime(0, startTime);
-  env.gain.linearRampToValueAtTime(gain, startTime + 0.04);
-  env.gain.exponentialRampToValueAtTime(0.001, startTime + duration - 0.02);
-  env.gain.setValueAtTime(0, startTime + duration);
-  osc.connect(env); env.connect(dest);
-  osc.start(startTime); osc.stop(startTime + duration);
-}
-
-var NF = {
-  'C2':65.41,'D2':73.42,'Eb2':77.78,'E2':82.41,'F2':87.31,'F#2':92.50,'G2':98.00,'A2':110.0,'Bb2':116.54,'B2':123.5,
-  'C3':130.8,'D3':146.8,'Eb3':155.56,'E3':164.8,'F3':174.6,'F#3':185.0,'G3':196.0,'A3':220.0,'Bb3':233.08,'B3':246.9,
-  'C4':261.6,'D4':293.7,'Eb4':311.13,'E4':329.6,'F4':349.2,'F#4':370.0,'G4':392.0,'A4':440.0,'Bb4':466.16,'B4':493.9,
-  'C5':523.3,'D5':587.3,'Eb5':622.25,'E5':659.3,'F5':698.5,'G5':784.0,'A5':880.0,'B5':987.8
-};
-
-function scheduleBGMLoop() {
-  if (!audioCtx || bgmMuted || !T || !T.bgm) return;
-  var bgm = T.bgm, tempo = bgm.tempo, oscType = bgm.type || 'sawtooth';
-  var now = audioCtx.currentTime + 0.1, t = now;
-  for (var i = 0; i < bgm.melody.length; i++) {
-    var dur = bgm.melody[i].d * tempo;
-    playNote(NF[bgm.melody[i].n], t, dur * 0.9, 0.10, bgmGain, oscType);
-    playNote(NF[bgm.melody[i].n] * 2, t, dur * 0.6, 0.02, bgmGain, 'sine');
-    t += dur;
-  }
-  var melodyLen = t - now, tb = now;
-  for (var j = 0; j < bgm.bass.length; j++) {
-    var bd = bgm.bass[j].d * tempo;
-    if (tb < now + melodyLen) playNote(NF[bgm.bass[j].n], tb, bd * 0.85, 0.08, bgmGain, 'sine');
-    tb += bd;
-  }
-  bgmTimeout = setTimeout(function() { if (bgmPlaying && !bgmMuted) scheduleBGMLoop(); }, melodyLen * 1000 - 100);
-}
-function startBGM() { if (!audioCtx) return; bgmPlaying = true; bgmMuted = false; bgmGain.gain.value = 0.18; scheduleBGMLoop(); updateSoundBtn(); }
-function stopBGM() { bgmPlaying = false; if (bgmTimeout) clearTimeout(bgmTimeout); updateSoundBtn(); }
-function toggleSound() { if (!audioCtx) return; ensureAudioResumed(); bgmMuted = !bgmMuted; if (bgmMuted) { bgmGain.gain.value = 0; if (bgmTimeout) clearTimeout(bgmTimeout); } else { bgmGain.gain.value = 0.18; if (bgmPlaying) scheduleBGMLoop(); } updateSoundBtn(); }
-function updateSoundBtn() { var btn = document.getElementById('sound-btn'); btn.classList.toggle('muted', bgmMuted); btn.innerHTML = bgmMuted ? '&#9834;<span style="font-size:10px;position:absolute;color:#ff2222">&#10005;</span>' : '&#9835;'; }
 
 function createNoiseBuffer(dur) { if (!audioCtx) return null; var len = audioCtx.sampleRate * dur; var buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate); var d = buf.getChannelData(0); for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1; return buf; }
 
@@ -1062,11 +702,9 @@ function getValidMoves(p) {
 // ============ DRAWING ============
 function draw() {
   ctx.clearRect(0, 0, BOARD_PX, BOARD_PX);
-  var bg = ctx.createLinearGradient(0, 0, BOARD_PX, BOARD_PX);
-  bg.addColorStop(0, T.boardBg1); bg.addColorStop(0.5, T.boardBg2); bg.addColorStop(1, T.boardBg3);
-  ctx.fillStyle = bg; ctx.beginPath(); ctx.roundRect(0, 0, BOARD_PX, BOARD_PX, 8); ctx.fill();
-
-  ctx.strokeStyle = 'rgba(60,100,180,0.12)'; ctx.lineWidth = 1;
+  // Flat board background
+  ctx.fillStyle = T.boardBg; ctx.beginPath(); ctx.roundRect(0, 0, BOARD_PX, BOARD_PX, 8); ctx.fill();
+  ctx.strokeStyle = 'rgba(11,11,13,0.06)'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.roundRect(0.5, 0.5, BOARD_PX - 1, BOARD_PX - 1, 8); ctx.stroke();
 
   var cr = Math.max(2, CELL * 0.08);
@@ -1076,32 +714,28 @@ function draw() {
     ctx.strokeStyle = T.cellStroke; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.roundRect(x, y, CELL, CELL, cr); ctx.stroke();
   }
 
-  // Goal rows
+  // Goal rows (flat tint)
   for (var gc = 0; gc < GRID; gc++) {
-    var g1 = ctx.createLinearGradient(0, cellY(0), 0, cellY(0) + CELL);
-    g1.addColorStop(0, T.p1 + '1f'); g1.addColorStop(1, T.p1 + '08');
-    ctx.fillStyle = g1; ctx.beginPath(); ctx.roundRect(cellX(gc), cellY(0), CELL, CELL, cr); ctx.fill();
-    var g2 = ctx.createLinearGradient(0, cellY(8), 0, cellY(8) + CELL);
-    g2.addColorStop(0, T.p2 + '08'); g2.addColorStop(1, T.p2 + '1f');
-    ctx.fillStyle = g2; ctx.beginPath(); ctx.roundRect(cellX(gc), cellY(8), CELL, CELL, cr); ctx.fill();
+    ctx.fillStyle = T.p1 + '12'; ctx.beginPath(); ctx.roundRect(cellX(gc), cellY(0), CELL, CELL, cr); ctx.fill();
+    ctx.fillStyle = T.p2 + '12'; ctx.beginPath(); ctx.roundRect(cellX(gc), cellY(8), CELL, CELL, cr); ctx.fill();
   }
 
-  // Valid moves
+  // Valid moves (solid border, no dashes)
   if (!gameOver && mode === 'move') {
     var moves = getValidMoves(currentPlayer);
     for (var mi = 0; mi < moves.length; mi++) {
       var mx = cellX(moves[mi].col), my = cellY(moves[mi].row);
-      ctx.fillStyle = T.moveColor + '0.08)'; ctx.beginPath(); ctx.roundRect(mx, my, CELL, CELL, cr); ctx.fill();
-      ctx.strokeStyle = T.moveColor + '0.35)'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 3]);
-      ctx.beginPath(); ctx.roundRect(mx + 1, my + 1, CELL - 2, CELL - 2, cr); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = T.moveColor + '0.06)'; ctx.beginPath(); ctx.roundRect(mx, my, CELL, CELL, cr); ctx.fill();
+      ctx.strokeStyle = T.moveColor + '0.3)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(mx + 1, my + 1, CELL - 2, CELL - 2, cr); ctx.stroke();
       ctx.fillStyle = T.validDot; ctx.beginPath(); ctx.arc(mx + CELL / 2, my + CELL / 2, Math.max(2, CELL * 0.06), 0, Math.PI * 2); ctx.fill();
     }
   }
 
-  // Show intersection guide dots when in wall mode
+  // Intersection guide dots (wall mode)
   if (!gameOver && mode === 'wall') {
     ctx.save();
-    ctx.fillStyle = 'rgba(' + T.wallColor[0] + ',' + T.wallColor[1] + ',' + T.wallColor[2] + ',0.2)';
+    ctx.fillStyle = 'rgba(' + T.wallColor[0] + ',' + T.wallColor[1] + ',' + T.wallColor[2] + ',0.15)';
     for (var ir = 0; ir < GRID - 1; ir++) {
       for (var ic = 0; ic < GRID - 1; ic++) {
         var ix = cellX(ic) + CELL + GAP / 2;
@@ -1119,28 +753,23 @@ function draw() {
 
 function drawWall(r, c, orient) {
   ctx.save(); var wr = Math.max(2, GAP * 0.3); var wc = T.wallColor;
+  var wallFill = 'rgba('+wc[0]+','+wc[1]+','+wc[2]+',0.75)';
   if (orient === 'h') {
     var x = cellX(c), y = cellY(r) + CELL, w = CELL * 2 + GAP, h = GAP;
-    var grad = ctx.createLinearGradient(x, y, x + w, y);
-    grad.addColorStop(0, 'rgba('+wc[0]+','+wc[1]+','+wc[2]+',0.3)'); grad.addColorStop(0.5, 'rgba('+wc[0]+','+wc[1]+','+wc[2]+',0.8)'); grad.addColorStop(1, 'rgba('+wc[0]+','+wc[1]+','+wc[2]+',0.3)');
-    ctx.fillStyle = grad; ctx.shadowColor = 'rgba('+wc[0]+','+wc[1]+','+wc[2]+',0.5)'; ctx.shadowBlur = 12;
-    ctx.beginPath(); ctx.roundRect(x, y, w, h, wr); ctx.fill();
-    ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.beginPath(); ctx.roundRect(x + w*0.1, y + h*0.25, w*0.8, h*0.5, 1); ctx.fill();
+    ctx.fillStyle = wallFill; ctx.beginPath(); ctx.roundRect(x, y, w, h, wr); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.beginPath(); ctx.roundRect(x + w*0.1, y + 1, w*0.8, 1, 1); ctx.fill();
   } else {
     var vx = cellX(c) + CELL, vy = cellY(r), vw = GAP, vh = CELL * 2 + GAP;
-    var vgrad = ctx.createLinearGradient(vx, vy, vx, vy + vh);
-    vgrad.addColorStop(0, 'rgba('+wc[0]+','+wc[1]+','+wc[2]+',0.3)'); vgrad.addColorStop(0.5, 'rgba('+wc[0]+','+wc[1]+','+wc[2]+',0.8)'); vgrad.addColorStop(1, 'rgba('+wc[0]+','+wc[1]+','+wc[2]+',0.3)');
-    ctx.fillStyle = vgrad; ctx.shadowColor = 'rgba('+wc[0]+','+wc[1]+','+wc[2]+',0.5)'; ctx.shadowBlur = 12;
-    ctx.beginPath(); ctx.roundRect(vx, vy, vw, vh, wr); ctx.fill();
-    ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.beginPath(); ctx.roundRect(vx + vw*0.25, vy + vh*0.1, vw*0.5, vh*0.8, 1); ctx.fill();
+    ctx.fillStyle = wallFill; ctx.beginPath(); ctx.roundRect(vx, vy, vw, vh, wr); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.beginPath(); ctx.roundRect(vx + 1, vy + vh*0.1, 1, vh*0.8, 1); ctx.fill();
   }
   ctx.restore();
 }
 
 function drawWallPreview(r, c, orient, valid) {
-  ctx.save(); ctx.globalAlpha = 0.6;
-  var color = valid ? T.moveColor + '0.7)' : 'rgba(255,0,0,0.7)';
-  ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 14;
+  ctx.save(); ctx.globalAlpha = 0.5;
+  var color = valid ? T.moveColor + '0.6)' : 'rgba(255,0,0,0.6)';
+  ctx.fillStyle = color;
   var wr = Math.max(2, GAP * 0.3);
   if (orient === 'h') { ctx.beginPath(); ctx.roundRect(cellX(c), cellY(r) + CELL, CELL * 2 + GAP, GAP, wr); ctx.fill(); }
   else { ctx.beginPath(); ctx.roundRect(cellX(c) + CELL, cellY(r), GAP, CELL * 2 + GAP, wr); ctx.fill(); }
@@ -1151,23 +780,16 @@ function drawPlayer(p, idx) {
   var cx = cellX(p.col) + CELL / 2, cy = cellY(p.row) + CELL / 2;
   var isActive = currentPlayer === idx && !gameOver;
   var pr = CELL * 0.34;
-  var colors = idx === 0
-    ? { core: T.p1, light: T.p1Light, glow: T.p1, saber: T.p1 }
-    : { core: T.p2, light: T.p2Light, glow: T.p2, saber: T.p2 };
+  var color = idx === 0 ? T.p1 : T.p2;
   ctx.save();
-  if (isActive) {
-    var gg = ctx.createRadialGradient(cx, cy, pr * 0.3, cx, cy, pr * 2.2);
-    gg.addColorStop(0, colors.glow + '33'); gg.addColorStop(0.5, colors.glow + '0d'); gg.addColorStop(1, colors.glow + '00');
-    ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(cx, cy, pr * 2.2, 0, Math.PI * 2); ctx.fill();
-  }
-  ctx.shadowColor = colors.saber; ctx.shadowBlur = isActive ? pr * 1.2 : pr * 0.5;
-  var grad = ctx.createRadialGradient(cx - pr * 0.2, cy - pr * 0.2, pr * 0.05, cx, cy, pr);
-  grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.3, colors.light); grad.addColorStop(1, colors.core);
-  ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(cx, cy, pr, 0, Math.PI * 2); ctx.fill();
-  ctx.shadowColor = 'transparent'; ctx.fillStyle = 'rgba(255,255,255,0.3)';
-  ctx.beginPath(); ctx.arc(cx - pr * 0.2, cy - pr * 0.2, pr * 0.35, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.arc(cx, cy, pr, 0, Math.PI * 2); ctx.stroke();
+  // Subtle active shadow
+  if (isActive) { ctx.shadowColor = color; ctx.shadowBlur = 8; }
+  // Flat circle
+  ctx.fillStyle = color; ctx.beginPath(); ctx.arc(cx, cy, pr, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
+  // Small specular highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.beginPath(); ctx.arc(cx - pr * 0.2, cy - pr * 0.25, pr * 0.3, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 }
 
@@ -1251,13 +873,13 @@ function setMode(m) {
 function showMsg(text) { document.getElementById('message').textContent = text; }
 
 function showWinner(p) {
-  gameOver = true; clearInterval(timerInterval); stopBGM(); playWinSFX();
+  gameOver = true; clearInterval(timerInterval); playWinSFX();
   var overlay = document.getElementById('winner-overlay');
   var text = document.getElementById('winner-text');
   var playerLabel = document.getElementById('winner-player');
   text.className = p === 0 ? 'win-p1' : 'win-p2'; text.textContent = 'VICTORY';
   playerLabel.className = 'win-label';
-  playerLabel.textContent = p === 0 ? T.p1name : T.p2name;
+  playerLabel.textContent = document.getElementById(p === 0 ? 'p1-name' : 'p2-name').textContent;
   playerLabel.style.color = p === 0 ? T.p1Light : T.p2Light;
   // オンライン/ローカルでボタンを切替
   document.getElementById('winner-btns-local').style.display = gameMode === 'online' ? 'none' : '';
@@ -1283,11 +905,14 @@ function spawnConfetti(container) {
 function startGame() {
   gameMode = 'local';
   aiMode = false;
+  var n1 = document.getElementById('name-p1').value.trim() || 'Player 1';
+  var n2 = document.getElementById('name-p2').value.trim() || 'Player 2';
   document.getElementById('start-overlay').classList.add('hidden');
   canvas.classList.remove('guest-flip');
   initAudio(); initState(); gameStarted = true;
-  document.getElementById('p2-name').textContent = T.p2name;
-  resizeBoard(); showMsg(''); updateUI(); draw(); startBGM(); startTurnTimer();
+  document.getElementById('p1-name').textContent = n1;
+  document.getElementById('p2-name').textContent = n2;
+  resizeBoard(); showMsg(''); updateUI(); draw(); startTurnTimer();
 }
 
 function resetGame() {
@@ -1295,7 +920,7 @@ function resetGame() {
     leaveRoom();
     var overlay2 = document.getElementById('winner-overlay'); overlay2.classList.remove('show');
     var cf2 = overlay2.querySelectorAll('.confetti'); for (var k = 0; k < cf2.length; k++) cf2[k].remove();
-    clearInterval(timerInterval); if (bgmTimeout) clearTimeout(bgmTimeout); bgmPlaying = false;
+    clearInterval(timerInterval);
     if (audioCtx) { audioCtx.close().catch(function(){}); audioCtx = null; }
     canvas.classList.remove('guest-flip');
     initState();
@@ -1306,7 +931,7 @@ function resetGame() {
   }
   var overlay = document.getElementById('winner-overlay'); overlay.classList.remove('show');
   var confetti = overlay.querySelectorAll('.confetti'); for (var i = 0; i < confetti.length; i++) confetti[i].remove();
-  clearInterval(timerInterval); if (bgmTimeout) clearTimeout(bgmTimeout); bgmPlaying = false;
+  clearInterval(timerInterval);
   if (audioCtx) { audioCtx.close().catch(function(){}); audioCtx = null; }
   var wasAI = aiMode;
   initState(); gameStarted = true;
@@ -1314,7 +939,7 @@ function resetGame() {
     aiMode = true;
     document.getElementById('p2-name').textContent = 'AI';
   }
-  showMsg(''); updateUI(); draw(); initAudio(); startBGM(); startTurnTimer();
+  showMsg(''); updateUI(); draw(); initAudio(); startTurnTimer();
 }
 
 // ============ ONLINE ROOM MANAGEMENT ============
@@ -1458,15 +1083,18 @@ function startOnlineGame(playerIndex) {
   gameMode = 'online';
   myPlayerIndex = playerIndex;
   roomRef = db.ref('rooms/' + roomCode);
+  var n1 = document.getElementById('name-p1').value.trim() || 'Player 1';
   document.getElementById('start-overlay').classList.add('hidden');
   initAudio(); initState(); gameStarted = true;
+  document.getElementById('p1-name').textContent = n1;
+  document.getElementById('p2-name').textContent = 'Online';
   // Guest sees the board flipped
   if (myPlayerIndex === 1) {
     canvas.classList.add('guest-flip');
   } else {
     canvas.classList.remove('guest-flip');
   }
-  resizeBoard(); showMsg(''); updateUI(); draw(); startBGM();
+  resizeBoard(); showMsg(''); updateUI(); draw();
   // Host writes initial state, then both listen
   if (myPlayerIndex === 0) {
     syncStateToFirebase();
@@ -1582,7 +1210,6 @@ function startRematch() {
     syncStateToFirebase();
   }
   startTurnTimer();
-  if (!bgmPlaying) { initAudio(); startBGM(); }
 }
 
 function exitOnlineGame() {
@@ -1593,7 +1220,7 @@ function exitOnlineGame() {
   if (rematchListener && roomRef) { roomRef.child('rematch').off('value', rematchListener); rematchListener = null; }
   // Leave room
   leaveRoom();
-  clearInterval(timerInterval); if (bgmTimeout) clearTimeout(bgmTimeout); bgmPlaying = false;
+  clearInterval(timerInterval);
   if (audioCtx) { audioCtx.close().catch(function(){}); audioCtx = null; }
   canvas.classList.remove('guest-flip');
   initState();
@@ -1627,12 +1254,14 @@ function startAIGame() {
   gameMode = 'local';
   aiMode = true;
   aiPlayer = 1;
+  var n1 = document.getElementById('name-p1').value.trim() || 'Player 1';
   document.getElementById('start-overlay').classList.add('hidden');
   canvas.classList.remove('guest-flip');
   initAudio(); initState(); gameStarted = true;
   aiMode = true; // re-set after initState
+  document.getElementById('p1-name').textContent = n1;
   document.getElementById('p2-name').textContent = 'AI';
-  resizeBoard(); showMsg(''); updateUI(); draw(); startBGM(); startTurnTimer();
+  resizeBoard(); showMsg(''); updateUI(); draw(); startTurnTimer();
 }
 
 // BFS shortest path for a given player with a given wall list
@@ -2030,7 +1659,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v33';
+  var CURRENT = 'quoridor-v34';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
@@ -2047,7 +1676,7 @@ initState(); resizeBoard(); updateUI(); draw();
     });
   }
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=33').then(function(reg) {
+    navigator.serviceWorker.register('sw.js?v=34').then(function(reg) {
       reg.addEventListener('updatefound', function() {
         var newWorker = reg.installing;
         if (newWorker) {
@@ -2063,6 +1692,5 @@ initState(); resizeBoard(); updateUI(); draw();
   }
 })();
 </script>
-<div id="grain-overlay"></div>
 </body>
 </html>
