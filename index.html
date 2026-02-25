@@ -326,7 +326,8 @@ canvas#board.guest-flip { transform: rotate(180deg); }
   <div class="player-zone p2-zone">
     <div class="controls inactive" id="controls-p2">
       <button class="ctrl-btn active-move" id="btn-move-p2" onclick="setMode('move')">MOVE</button>
-      <button class="ctrl-btn" id="btn-wall-p2" onclick="setMode('wall')">WALL</button>
+      <button class="ctrl-btn" id="btn-wall-h-p2" onclick="setMode('wall-h')">横</button>
+      <button class="ctrl-btn" id="btn-wall-v-p2" onclick="setMode('wall-v')">縦</button>
     </div>
     <div class="player-panel p2" id="p2-panel">
       <div class="panel-row">
@@ -366,7 +367,8 @@ canvas#board.guest-flip { transform: rotate(180deg); }
     </div>
     <div class="controls" id="controls-p1">
       <button class="ctrl-btn active-move" id="btn-move-p1" onclick="setMode('move')">MOVE</button>
-      <button class="ctrl-btn" id="btn-wall-p1" onclick="setMode('wall')">WALL</button>
+      <button class="ctrl-btn" id="btn-wall-h-p1" onclick="setMode('wall-h')">横</button>
+      <button class="ctrl-btn" id="btn-wall-v-p1" onclick="setMode('wall-v')">縦</button>
     </div>
   </div>
 </div>
@@ -1152,18 +1154,22 @@ function updateUI() {
     document.getElementById('controls-p1').classList.toggle('inactive', !isMyTurn);
     document.getElementById('controls-p2').classList.toggle('inactive', true);
     document.getElementById('btn-move-p1').className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
-    document.getElementById('btn-wall-p1').className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
+    document.getElementById('btn-wall-h-p1').className = 'ctrl-btn' + (mode === 'wall' && orientation === 'h' ? ' active-wall' : '');
+    document.getElementById('btn-wall-v-p1').className = 'ctrl-btn' + (mode === 'wall' && orientation === 'v' ? ' active-wall' : '');
     document.getElementById('btn-move-p2').className = 'ctrl-btn';
-    document.getElementById('btn-wall-p2').className = 'ctrl-btn';
+    document.getElementById('btn-wall-h-p2').className = 'ctrl-btn';
+    document.getElementById('btn-wall-v-p2').className = 'ctrl-btn';
   } else if (aiMode) {
     // AI対戦: P1(人間)のみ操作可能、P2(AI)は常にinactive
     var isHumanTurn = currentPlayer !== aiPlayer;
     document.getElementById('controls-p1').classList.toggle('inactive', !isHumanTurn || aiThinking);
     document.getElementById('controls-p2').classList.toggle('inactive', true);
     document.getElementById('btn-move-p1').className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
-    document.getElementById('btn-wall-p1').className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
+    document.getElementById('btn-wall-h-p1').className = 'ctrl-btn' + (mode === 'wall' && orientation === 'h' ? ' active-wall' : '');
+    document.getElementById('btn-wall-v-p1').className = 'ctrl-btn' + (mode === 'wall' && orientation === 'v' ? ' active-wall' : '');
     document.getElementById('btn-move-p2').className = 'ctrl-btn';
-    document.getElementById('btn-wall-p2').className = 'ctrl-btn';
+    document.getElementById('btn-wall-h-p2').className = 'ctrl-btn';
+    document.getElementById('btn-wall-v-p2').className = 'ctrl-btn';
   } else {
     // ローカル: 従来通り
     for (var pIdx = 0; pIdx < 2; pIdx++) {
@@ -1171,7 +1177,8 @@ function updateUI() {
       var isActive = currentPlayer === pIdx;
       document.getElementById('controls' + sfx).classList.toggle('inactive', !isActive);
       document.getElementById('btn-move' + sfx).className = 'ctrl-btn' + (mode === 'move' ? ' active-move' : '');
-      document.getElementById('btn-wall' + sfx).className = 'ctrl-btn' + (mode === 'wall' ? ' active-wall' : '');
+      document.getElementById('btn-wall-h' + sfx).className = 'ctrl-btn' + (mode === 'wall' && orientation === 'h' ? ' active-wall' : '');
+      document.getElementById('btn-wall-v' + sfx).className = 'ctrl-btn' + (mode === 'wall' && orientation === 'v' ? ' active-wall' : '');
     }
   }
   // UNDOボタンの状態
@@ -1188,8 +1195,11 @@ function setMode(m) {
   if (gameOver) return;
   if (gameMode === 'online' && currentPlayer !== myPlayerIndex) return;
   if (aiMode && (currentPlayer === aiPlayer || aiThinking)) return;
-  mode = m; hoverWall = null;
-  showMsg(m === 'wall' ? '交差点の近くをタップ：左右→横壁、上下→縦壁' : '');
+  if (m === 'wall-h') { mode = 'wall'; orientation = 'h'; }
+  else if (m === 'wall-v') { mode = 'wall'; orientation = 'v'; }
+  else { mode = 'move'; }
+  hoverWall = null;
+  showMsg(mode === 'wall' ? (orientation === 'h' ? '横壁モード：交差点をタップ' : '縦壁モード：交差点をタップ') : '');
   updateUI(); draw();
 }
 function showMsg(text) { document.getElementById('message').textContent = text; }
@@ -1909,16 +1919,10 @@ function handleBoardAction(px, py) {
   } else {
     var slot = pixelToWallSlot(px, py); if (!slot) { showMsg('交差点の近くをタップ'); return; }
     if (wallCounts[currentPlayer] <= 0) { showMsg('NO WALLS LEFT'); return; }
-    // Auto-detect orientation from tap position
-    var autoOrient = autoDetectOrientation(px, py, slot);
+    // Use pre-selected orientation
+    var autoOrient = orientation;
     if (!canPlaceWall(slot.row, slot.col, autoOrient)) {
-      // Try the other orientation as fallback
-      var altOrient = autoOrient === 'h' ? 'v' : 'h';
-      if (canPlaceWall(slot.row, slot.col, altOrient)) {
-        autoOrient = altOrient;
-      } else {
-        showMsg('CANNOT PLACE'); return;
-      }
+      showMsg('CANNOT PLACE'); return;
     }
     saveSnapshot();
     walls.push({ row: slot.row, col: slot.col, orient: autoOrient }); wallCounts[currentPlayer]--;
@@ -1930,17 +1934,17 @@ function handleBoardAction(px, py) {
 }
 
 canvas.addEventListener('click', function(e) { var pos = getCanvasPos(e); handleBoardAction(pos.px, pos.py); });
-canvas.addEventListener('mousemove', function(e) { if (gameOver || mode !== 'wall') { if (hoverWall) { hoverWall = null; draw(); } return; } var pos = getCanvasPos(e); var slot = pixelToWallSlot(pos.px, pos.py); if (slot) { hoverWall = { row: slot.row, col: slot.col, orient: autoDetectOrientation(pos.px, pos.py, slot) }; } else { hoverWall = null; } draw(); });
+canvas.addEventListener('mousemove', function(e) { if (gameOver || mode !== 'wall') { if (hoverWall) { hoverWall = null; draw(); } return; } var pos = getCanvasPos(e); var slot = pixelToWallSlot(pos.px, pos.py); if (slot) { hoverWall = { row: slot.row, col: slot.col, orient: orientation }; } else { hoverWall = null; } draw(); });
 canvas.addEventListener('mouseleave', function() { hoverWall = null; draw(); });
 
 var touchStartPos = null;
 canvas.addEventListener('touchstart', function(e) { e.preventDefault(); touchStartPos = getCanvasPos(e); }, { passive: false });
-canvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (mode === 'wall' && !gameOver) { var pos = getCanvasPos(e); var slot = pixelToWallSlot(pos.px, pos.py); if (slot) { hoverWall = { row: slot.row, col: slot.col, orient: autoDetectOrientation(pos.px, pos.py, slot) }; } else { hoverWall = null; } draw(); } }, { passive: false });
+canvas.addEventListener('touchmove', function(e) { e.preventDefault(); if (mode === 'wall' && !gameOver) { var pos = getCanvasPos(e); var slot = pixelToWallSlot(pos.px, pos.py); if (slot) { hoverWall = { row: slot.row, col: slot.col, orient: orientation }; } else { hoverWall = null; } draw(); } }, { passive: false });
 canvas.addEventListener('touchend', function(e) { e.preventDefault(); if (!touchStartPos) return; var endPos = getCanvasPos(e); var dx = endPos.px - touchStartPos.px; var dy = endPos.py - touchStartPos.py; if (Math.abs(dx) < CELL * 1.5 && Math.abs(dy) < CELL * 1.5) { handleBoardAction(endPos.px, endPos.py); } hoverWall = null; touchStartPos = null; draw(); }, { passive: false });
 canvas.addEventListener('touchcancel', function() { hoverWall = null; touchStartPos = null; draw(); });
 document.addEventListener('touchmove', function(e) { if (e.target === canvas || canvas.contains(e.target)) e.preventDefault(); }, { passive: false });
 
-document.addEventListener('keydown', function(e) { if (!gameStarted) return; if (e.key === 'm' || e.key === 'M') setMode('move'); if (e.key === 'w' || e.key === 'W') setMode('wall'); if (e.key === 'r' || e.key === 'R') resetGame(); if (e.key === 'u' || e.key === 'U') undo(); });
+document.addEventListener('keydown', function(e) { if (!gameStarted) return; if (e.key === 'm' || e.key === 'M') setMode('move'); if (e.key === 'h' || e.key === 'H') setMode('wall-h'); if (e.key === 'v' || e.key === 'V') setMode('wall-v'); if (e.key === 'r' || e.key === 'R') resetGame(); if (e.key === 'u' || e.key === 'U') undo(); });
 
 var resizeTimer;
 window.addEventListener('resize', function() { clearTimeout(resizeTimer); resizeTimer = setTimeout(function() { if (gameStarted) resizeBoard(); }, 150); });
@@ -1962,7 +1966,7 @@ initState(); resizeBoard(); updateUI(); draw();
 // ============ CACHE CLEANUP & SERVICE WORKER ============
 // Force-clean old caches (v1-v8) so stale cache-first SWs can't block updates
 (function() {
-  var CURRENT = 'quoridor-v31';
+  var CURRENT = 'quoridor-v32';
   if ('caches' in window) {
     caches.keys().then(function(keys) {
       var old = keys.filter(function(k) { return k !== CURRENT; });
@@ -1979,7 +1983,7 @@ initState(); resizeBoard(); updateUI(); draw();
     });
   }
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js?v=31').then(function(reg) {
+    navigator.serviceWorker.register('sw.js?v=32').then(function(reg) {
       reg.addEventListener('updatefound', function() {
         var newWorker = reg.installing;
         if (newWorker) {
