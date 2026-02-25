@@ -1,13 +1,12 @@
 // Service Worker for コリドール PWA
-const CACHE_NAME = 'quoridor-v34';
+const CACHE_NAME = 'quoridor-v35';
 const ASSETS = [
   '/nanasi/',
   '/nanasi/index.html',
   '/nanasi/manifest.json',
   '/nanasi/icon-192.png',
   '/nanasi/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&display=swap',
-  'https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700&f[]=satoshi@400,500,700&display=swap'
+  'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap'
 ];
 
 // Install: cache all assets
@@ -45,8 +44,7 @@ self.addEventListener('fetch', function(event) {
   if (url.indexOf('/bp/') !== -1 || url.indexOf('/docs/') !== -1
       || url.indexOf('firebaseio.com') !== -1
       || url.indexOf('googleapis.com') !== -1
-      || url.indexOf('gstatic.com/firebasejs') !== -1
-      || url.indexOf('fontshare.com') !== -1) {
+      || url.indexOf('gstatic.com/firebasejs') !== -1) {
     return;
   }
   event.respondWith(
